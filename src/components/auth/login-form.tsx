@@ -25,19 +25,6 @@ export default function LoginForm() {
       <form action={formAction} className="space-y-6">
         {/* Hidden redirectTo field */}
         <input type="hidden" name="redirectTo" value={callbackUrl} />
-
-        {/* Error Message */}
-        {errorMessage && (
-          <div
-            className="flex h-8 items-end space-x-1"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-            <p className="text-sm text-red-500">{errorMessage}</p>
-          </div>
-        )}
-
         {/* Campo Usuario */}
         <div className="space-y-2">
           <Label htmlFor="email" className="text-sm font-medium text-gray-700">
@@ -94,7 +81,17 @@ export default function LoginForm() {
             </button>
           </div>
         </div>
-
+         {/* Error Message */}
+        {errorMessage && (
+          <div
+            className="mt-4 p-3 rounded-md text-sm bg-red-50 text-red-800 border border-red-200"
+            role="alert"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {errorMessage}
+          </div>
+        )}
         {/* Recordar sesión */}
         <div className="flex items-center justify-between">
           <div className="flex items-center">

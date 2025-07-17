@@ -16,9 +16,9 @@ export async function authenticate(
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
-          return 'Credenciales invalidas.';
+          return 'Correo electrónico o contraseña incorrectos.';
         default:
-          return 'Algo salió mal.';
+          return 'Algo salió mal... Intenta denuevo.';
       }
     }
     throw error;

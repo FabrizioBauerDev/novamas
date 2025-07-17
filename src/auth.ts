@@ -10,9 +10,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Contraseña", type: "password" },
       },
       async authorize(credentials) {
-        console.log(process.env.emailTest);
-        const email = process.env.emailTest;
-        const password = process.env.passwordTest;
+
+        const email = process.env.EMAIL_TEST;
+        const password = process.env.PASSWORD_TEST;
 
         if (!credentials || credentials.email !== email || credentials.password !== password) {
           // throw new Error("Credenciales inválidas");
