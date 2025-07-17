@@ -27,7 +27,7 @@ export default function LoginPage() {
 
             <div className="mt-6">
               <a
-                href="/login/restore"
+                href="/restore"
                 className="w-full inline-flex justify-center py-2 px-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
               >
                 ¿Olvidaste tu contraseña?
