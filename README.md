@@ -108,7 +108,7 @@ npm run lint    # Linting del código
 ```
 
 ---
-
+<!-- 
 ## 📁 Estructura del Proyecto
 
 ```
@@ -133,7 +133,7 @@ novamas/
 ├── tailwind.config.js       # Configuración de Tailwind
 ├── tsconfig.json           # Configuración de TypeScript
 └── next.config.ts          # Configuración de Next.js
-```
+``` -->
 
 ---
 
