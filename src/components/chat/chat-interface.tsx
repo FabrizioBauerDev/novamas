@@ -95,7 +95,7 @@ export default function ChatInterface() {
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  a: ({ node, ...props }) => {
+                  a: ({ ...props }) => {
                     const href = typeof props.href === "string" ? props.href : "/";
                     return (
                       <Link
@@ -108,11 +108,11 @@ export default function ChatInterface() {
                       </Link>
                     );
                   },
-                  ul: ({ node, ...props }) => <ul className="list-disc list-inside" {...props} />,
-                  ol: ({ node, ...props }) => <ol className="list-decimal list-inside" {...props} />,
-                  strong: ({ node, ...props }) => <strong className="font-semibold" {...props} />,
-                  em: ({ node, ...props }) => <em className="italic" {...props} />,
-                  p: ({ node, ...props }) => <p className="mb-1 last:mb-0" {...props} />,
+                  ul: ({ ...props }) => <ul className="list-disc list-inside" {...props} />,
+                  ol: ({ ...props }) => <ol className="list-decimal list-inside" {...props} />,
+                  strong: ({ ...props }) => <strong className="font-semibold" {...props} />,
+                  em: ({ ...props }) => <em className="italic" {...props} />,
+                  p: ({ ...props }) => <p className="mb-1 last:mb-0" {...props} />,
                 }}
               >
                 {message.text}

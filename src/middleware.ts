@@ -1,8 +1,9 @@
 import { auth } from "@/auth"
+import { Session } from "next-auth"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-export default auth((req: NextRequest & { auth: any }) => {
+export default auth((req: NextRequest & { auth: Session | null }) => {
   const { pathname } = req.nextUrl
   
   // Rutas protegidas que requieren autenticación
