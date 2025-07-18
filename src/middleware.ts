@@ -21,8 +21,9 @@ export default auth((req: NextRequest & { auth: Session | null }) => {
     return NextResponse.redirect(loginUrl)
   }
   
-  // Si está logueado y trata de acceder al login, redirigir al dashboard
-  if (pathname === '/login' && req.auth) {
+  // Rutas a las que no debe acceder si está autenticado
+  const restrictedForAuth = ['/login', '/restore']
+  if (restrictedForAuth.includes(pathname) && req.auth) {
     return NextResponse.redirect(new URL('/dashboard', req.url))
   }
   
