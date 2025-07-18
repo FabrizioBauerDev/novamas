@@ -4,7 +4,6 @@ import { redirect } from "next/navigation"
 export default async function DashboardPage() {
   const session = await auth()
   
-  // Esta verificación adicional por si acaso el middleware falla
   if (!session) {
     redirect('/login')
   }
@@ -20,7 +19,7 @@ export default async function DashboardPage() {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">
-                Bienvenido, <span className="font-medium">{session.user?.email}</span>
+                Bienvenido, <span className="font-medium">{session.user?.name}</span>
               </span>
               <form
                 action={async () => {

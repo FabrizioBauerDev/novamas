@@ -1,7 +1,17 @@
-import NextAuth from "next-auth"
-import Credentials  from "next-auth/providers/credentials"
+import NextAuth from "next-auth";
+import Credentials  from "next-auth/providers/credentials";
+// import { PrismaAdapter } from "@auth/prisma-adapter"
+import { signInSchema } from "./schema/zodSchemas";
+import { prisma } from "@/lib/db";
+import { compare } from "bcrypt";
  
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  // adapter: PrismaAdapter(prisma), // No necesario para JWT strategy con Credentials
+  session: {
+    strategy: "jwt",
+    // maxAge: 30 * 24 * 60 * 60, // 30 días
+    maxAge: 10 * 60, // 10 minutos
+  },
   providers: [
     Credentials({
       name: "Credentials",
@@ -11,16 +21,44 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
 
-        const email = process.env.EMAIL_TEST;
-        const password = process.env.PASSWORD_TEST;
+        const validatedFields = signInSchema.safeParse(credentials)
 
-        if (!credentials || credentials.email !== email || credentials.password !== password) {
-          // throw new Error("Credenciales inválidas");
-          return null; // No se encontró el usuario
+        if (!validatedFields.success) {
+          console.log('Auth.ts | Invalid credentials');
+          return null
         }
 
-        return { email, password };
+        const user = await prisma.user.findUnique({
+          where: {
+            email: validatedFields.data.email,
+          },
+        })
+
+        if (!user || !user.password) return null;
+
+        const isValid = await compare(validatedFields.data.password, user.password);
+        if (!isValid) return null;
+
+        return user;
       },
     }),
   ],
+  callbacks: {
+    jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+      }
+      return token;
+    },
+    session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string;
+        session.user.name = token.name;
+        session.user.email = token.email as string;
+      }
+      return session;
+    },
+  },
 })
