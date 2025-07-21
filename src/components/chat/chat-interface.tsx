@@ -2,92 +2,42 @@
 
 import type React from "react"
 
-import { useState, useRef, useEffect } from "react"
+import { useChat } from '@ai-sdk/react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Send, Bot, User } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm" // Para soporte de tablas, tareas, etc.
-import Link from "next/link" // Import Link component for handling markdown links
-
-interface Message {
-  id: string
-  text: string
-  sender: "user" | "bot"
-}
+import Link from "next/link" 
 
 export default function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: "¡Hola! Soy NoVa+, tu asistente virtual. ¿En qué puedo ayudarte hoy?",
-      sender: "bot",
-    },
-    {
-      id: "2",
-      text: "Hola NoVa+, me gustaría saber más sobre la adicción al juego. ¿Puedes darme algunos **recursos**?",
-      sender: "user",
-    },
-    {
-      id: "3",
-      text: "Claro, la adicción al juego es un problema serio. Aquí tienes algunos recursos útiles:\n\n*   **Líneas de ayuda**: Puedes encontrar números de emergencia en nuestro [sitio web](/emergencia).\n*   **Artículos**: Tenemos una sección de [recursos](/recursos) con información detallada.\n*   **Grupos de apoyo**: Buscar grupos como Jugadores Anónimos puede ser muy beneficioso.\n\nRecuerda que no estás solo en esto. Si necesitas hablar con un especialista, puedes contactarnos.",
-      sender: "bot",
-    },
-  ])
-  const [inputMessage, setInputMessage] = useState("")
-  const [isLoading, setIsLoading] = useState(false) // Declare isLoading state
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (inputMessage.trim()) {
-      const newMessage: Message = {
-        id: Date.now().toString(),
-        text: inputMessage.trim(),
-        sender: "user",
-      }
-      setMessages((prevMessages) => [...prevMessages, newMessage])
-      setInputMessage("")
-      setIsLoading(true) // Set loading state to true
-
-      // Simular respuesta del bot
-      setTimeout(() => {
-        const botResponse: Message = {
-          id: Date.now().toString() + "-bot",
-          text: `Has dicho: "${newMessage.text}". Estoy procesando tu solicitud.`,
-          sender: "bot",
-        }
-        setMessages((prevMessages) => [...prevMessages, botResponse])
-        setIsLoading(false) // Set loading state to false after response
-      }, 1000)
-    }
-  }
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+    initialMessages: [
+      {
+        id: "1",
+        role: "assistant",
+        content: "¡Hola! Soy NoVa+, tu asistente virtual. ¿En qué puedo ayudarte hoy?",
+      },
+    ],
+  })
 
   return (
     <div className="flex flex-col flex-1 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
       {/* Área de mensajes */}
-      <div className="flex-1 p-6 overflow-y-auto space-y-4 custom-scrollbar">
+      <div className="flex-1 p-6 overflow-y-auto space-y-4">
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`flex items-start ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex items-start ${message.role === "user" ? "justify-end" : "justify-start"}`}
           >
-            {message.sender === "bot" && (
+            {message.role === "assistant" && (
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
                 <Bot className="w-5 h-5 text-gray-600" />
               </div>
             )}
             <div
               className={`max-w-[75%] p-3 rounded-lg ${
-                message.sender === "user"
+                message.role === "user"
                   ? "bg-gray-900 text-white rounded-br-none"
                   : "bg-gray-100 text-gray-800 rounded-bl-none"
               }`}
@@ -115,26 +65,25 @@ export default function ChatInterface() {
                   p: ({ ...props }) => <p className="mb-1 last:mb-0" {...props} />,
                 }}
               >
-                {message.text}
+                {message.content}
               </ReactMarkdown>
             </div>
-            {message.sender === "user" && (
+            {message.role === "user" && (
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center ml-3">
                 <User className="w-5 h-5 text-white" />
               </div>
             )}
           </div>
         ))}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Área de entrada de mensaje */}
-      <form onSubmit={handleSendMessage} className="border-t border-gray-200 p-4 bg-white flex items-center gap-2">
+      <form onSubmit={handleSubmit} className="border-t border-gray-200 p-4 bg-white flex items-center gap-2">
         <Input
           type="text"
           placeholder="Escribe tu mensaje..."
-          value={inputMessage}
-          onChange={(e) => setInputMessage(e.target.value)}
+          value={input}
+          onChange={handleInputChange}
           className="flex-1 rounded-full px-4 py-2 border border-gray-300 focus:ring-gray-500 focus:border-gray-500"
           disabled={isLoading} // Deshabilitar input si hay una respuesta pendiente
         />
@@ -142,7 +91,7 @@ export default function ChatInterface() {
           type="submit"
           size="icon"
           className="rounded-full bg-gray-900 hover:bg-gray-800"
-          disabled={isLoading || !inputMessage.trim()}
+          disabled={isLoading || !input.trim()}
         >
           <Send className="w-5 h-5" />
           <span className="sr-only">Enviar mensaje</span>
