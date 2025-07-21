@@ -1,12 +1,12 @@
 import NextAuth from "next-auth";
 import Credentials  from "next-auth/providers/credentials";
-// import { PrismaAdapter } from "@auth/prisma-adapter"
+import { PrismaAdapter } from "@auth/prisma-adapter"
 import { signInSchema } from "./schema/zodSchemas";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/prisma/db";
 import { compare } from "bcrypt";
  
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  // adapter: PrismaAdapter(prisma), // No necesario para JWT strategy con Credentials
+  adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
     // maxAge: 30 * 24 * 60 * 60, // 30 días
