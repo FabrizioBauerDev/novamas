@@ -1,7 +1,17 @@
 import LoginForm from '@/components/auth/login-form';
+import Link from 'next/link';
 import { Suspense } from 'react';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
 
-export default function LoginPage() {
+export default async function LoginPage() {
+    const session = await auth();
+    
+    // Si el usuario ya está autenticado, redirigir al dashboard
+    if (session) {
+      redirect('/dashboard');
+    }
+    
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -33,12 +43,12 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-6">
-              <a
+              <Link
                 href="/restore"
                 className="w-full inline-flex justify-center py-2 px-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
               >
                 ¿Olvidaste tu contraseña?
-              </a>
+              </Link>
             </div>
 
             <div className="mt-4 text-center">

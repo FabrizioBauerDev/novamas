@@ -23,8 +23,6 @@ export default function LoginForm() {
   return (
     <div className="w-full max-w-md mx-auto">
       <form action={formAction} className="space-y-6">
-        {/* Hidden redirectTo field */}
-        <input type="hidden" name="redirectTo" value={callbackUrl} />
         {/* Campo Usuario */}
         <div className="space-y-2">
           <Label htmlFor="email" className="text-sm font-medium text-gray-700">
@@ -92,27 +90,6 @@ export default function LoginForm() {
             {errorMessage}
           </div>
         )}
-        {/* Recordar sesión */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <input
-              id="remember-me"
-              name="remember-me"
-              type="checkbox"
-              disabled={isPending}
-              className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded disabled:opacity-50"
-            />
-            <Label htmlFor="remember-me" className="ml-2 text-sm text-gray-700">
-              Recordar sesión
-            </Label>
-          </div>
-          <a
-            href="#"
-            className="text-sm text-gray-600 hover:text-gray-800 transition-colors"
-          >
-            ¿Olvidaste tu contraseña?
-          </a>
-        </div>
 
         {/* Botón de envío */}
         <Button

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     // min-h-screen si quier que ocupe toda la pantalla
@@ -12,18 +14,18 @@ export default function Home() {
               Estamos aquí para ayudarte en cada paso.
             </p>
             <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
-              <a
+              <Link
                 href="/chatNova"
                 className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 transition-colors"
               >
                 Comenzar Chat con NoVa+
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/recursos"
                 className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
               >
                 Ver Recursos
-              </a>
+              </Link>
             </div>
           </div>
         </div>

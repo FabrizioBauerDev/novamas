@@ -10,7 +10,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     strategy: "jwt",
     // maxAge: 30 * 24 * 60 * 60, // 30 días
-    maxAge: 12 * 60 * 60, // 12 horas
+    maxAge: 60 * 60, // 1 hora
   },
   providers: [
     Credentials({
@@ -60,5 +60,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
+  },
+  pages: {
+    signIn: '/login',
+    error: '/login', // Error de autenticación
   },
 })
