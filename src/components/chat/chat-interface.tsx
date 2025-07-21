@@ -11,7 +11,7 @@ import remarkGfm from "remark-gfm" // Para soporte de tablas, tareas, etc.
 import Link from "next/link" 
 
 export default function ChatInterface() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, status } = useChat({
     initialMessages: [
       {
         id: "1",
@@ -20,6 +20,9 @@ export default function ChatInterface() {
       },
     ],
   })
+
+  // Determinar si está cargando basado en el status
+  const isLoading = status === 'submitted' || status === 'streaming'
 
   return (
     <div className="flex flex-col flex-1 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
@@ -75,6 +78,25 @@ export default function ChatInterface() {
             )}
           </div>
         ))}
+        
+        {/* Indicador de carga cuando el asistente está escribiendo */}
+        {status === 'streaming' && (
+          <div className="flex items-start justify-start">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+              <Bot className="w-5 h-5 text-gray-600" />
+            </div>
+            <div className="max-w-[75%] p-3 rounded-lg bg-gray-100 text-gray-800 rounded-bl-none">
+              <div className="flex items-center space-x-1">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                </div>
+                <span className="text-sm text-gray-500 ml-2">NoVa+ está escribiendo...</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Área de entrada de mensaje */}
