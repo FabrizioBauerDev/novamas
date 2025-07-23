@@ -2,6 +2,7 @@ import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
+import { env } from 'process';
 
 // Permite respuestas de streaming hasta 30 segundos
 export const maxDuration = 30;
@@ -19,8 +20,13 @@ export async function POST(req: Request) {
   }
 
   try {
+    const system = env.SYSTEM_PROMPT;
     const { messages } = await req.json();
-
+    // Unir el system prompt con los mensajes
+    messages.unshift({ role: 'user', content: system });
+    // Se puede pasar system como una variable de streamText
+    // pero Gemma no lo soporta directamente, así que se maneja en la API
+    // y se une al mensaje del usuario antes de enviarlo a la IA
     const result = streamText({
       model: google('gemma-3-27b-it'),
       messages
