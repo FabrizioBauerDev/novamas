@@ -39,6 +39,12 @@ export async function POST(req: Request) {
       //     }),
       //   });
       // },
+      onFinish: ({ usage }) => {
+      const { promptTokens } = usage;
+      // Guardar en algún lado los prompt tokens
+      console.log('Prompt tokens:', promptTokens);
+    },
+
       // Temperatura, top_p y no se si top_k se pueden pasar aquí
     });
 

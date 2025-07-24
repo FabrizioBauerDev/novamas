@@ -17,7 +17,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       name: "Credentials",
       credentials: {
         email: { label: "Correo electrónico", type: "email", placeholder: "tu@email.com" },
-        password: { label: "Contraseña", type: "password" },
+        password: { label: "Contraseña", type: "password", placeholder: "Contraseña" },
       },
       async authorize(credentials) {
         const validatedFields = signInSchema.safeParse(credentials)

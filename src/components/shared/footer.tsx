@@ -1,6 +1,18 @@
-import Link from "next/link"
+"use client";
+
+import { newChatNova } from "@/lib/utils";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Footer() {
+
+  const router = useRouter();
+
+  const handleChatNavigation = () => {
+    const chatId = newChatNova();
+    router.push(`/chatNova/${chatId}`);
+  };
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -37,9 +49,9 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/chatNova" className="text-gray-300 hover:text-white transition-colors">
+                <a href="#" onClick={handleChatNavigation} className="text-gray-300 hover:text-white transition-colors">
                   Chat con NoVa+
-                </Link>
+                </a>
               </li>
               <li>
                 <Link href="/recursos" className="text-gray-300 hover:text-white transition-colors">

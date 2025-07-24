@@ -3,6 +3,7 @@ import { roboto } from '@/components/fonts';
 import "./globals.css";
 import Footer from '@/components/shared/footer';
 import Navbar from '@/components/shared/navbar';
+import { auth } from "@/auth";
 
 export const metadata: Metadata = {
   title: {
@@ -13,17 +14,19 @@ export const metadata: Metadata = {
   // metadataBase: new URL('https://next-tuto-dashboard.vercel.app/'),
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+  
   return (
     <html lang="es">
       <body
         className={`${roboto.className}`}
       >
-        <Navbar/>
+        <Navbar user={session?.user}/>
         {children}
         <Footer/>
       </body>
