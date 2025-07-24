@@ -19,15 +19,16 @@ export default function ChatInterface() {
         content: "¡Hola! Soy NoVa+, tu asistente virtual. ¿En qué puedo ayudarte hoy?",
       },
     ],
+    sendExtraMessageFields: true // Añade id y createdAt
   })
 
   // Determinar si está cargando basado en el status
   const isLoading = status === 'submitted' || status === 'streaming'
 
   return (
-    <div className="flex flex-col flex-1 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
       {/* Área de mensajes */}
-      <div className="flex-1 p-6 overflow-y-auto space-y-4">
+      <div className="flex-1 p-6 overflow-y-auto space-y-4 max-h-[calc(100vh-200px)]">
         {messages.map((message) => (
           <div
             key={message.id}

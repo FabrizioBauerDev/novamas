@@ -2,12 +2,32 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Menu, MessageCircle, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "@/components/ui/sheet"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
+
+  const generateChatId = () => {
+    // Generar un ID random similar al de la página
+    const timestamp = Date.now().toString(36)
+    const randomStr = Math.random().toString(36).substring(2, 15)
+    return `${timestamp}-${randomStr}`
+  }
+
+  const handleChatNavigation = () => {
+    const chatId = generateChatId()
+    router.push(`/chatNova/${chatId}`)
+  }
+
+  const handleChatNavigationMobile = () => {
+    setIsOpen(false)
+    const chatId = generateChatId()
+    router.push(`/chatNova/${chatId}`)
+  }
 
   const navigationLinks = [
     { href: "/", label: "Inicio" },
@@ -43,15 +63,14 @@ export default function Navbar() {
 
           {/* Botones de acción - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link href="/chatNova">
-              <Button
-                variant="outline"
-                className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>Chatea con NoVa+</span>
-              </Button>
-            </Link>
+            <Button
+              onClick={handleChatNavigation}
+              variant="outline"
+              className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>Chatea con NoVa+</span>
+            </Button>
 
             <Link href="/login">
               <Button
@@ -100,12 +119,13 @@ export default function Navbar() {
 
                   {/* Botones de acción móvil */}
                   <div className="pt-4 border-t border-gray-200 space-y-3">
-                    <Link href="/chatNova" onClick={() => setIsOpen(false)}>
-                      <Button className="w-full flex items-center justify-center space-x-2 bg-gray-900 hover:bg-gray-800">
-                        <MessageCircle className="w-4 h-4" />
-                        <span>Chatea con NoVa+</span>
-                      </Button>
-                    </Link>
+                    <Button 
+                      onClick={handleChatNavigationMobile}
+                      className="w-full flex items-center justify-center space-x-2 bg-gray-900 hover:bg-gray-800"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      <span>Chatea con NoVa+</span>
+                    </Button>
 
                     <Link href="/login" onClick={() => setIsOpen(false)}>
                       <Button

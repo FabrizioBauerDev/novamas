@@ -29,7 +29,17 @@ export async function POST(req: Request) {
     // y se une al mensaje del usuario antes de enviarlo a la IA
     const result = streamText({
       model: google('gemma-3-27b-it'),
-      messages
+      messages,
+      // async onFinish({ response }) {
+      //   await saveChat({
+      //     id,
+      //     messages: appendResponseMessages({
+      //       messages,
+      //       responseMessages: response.messages,
+      //     }),
+      //   });
+      // },
+      // Temperatura, top_p y no se si top_k se pueden pasar aquí
     });
 
     return result.toDataStreamResponse();
