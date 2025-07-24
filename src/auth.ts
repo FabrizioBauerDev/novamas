@@ -1,16 +1,16 @@
 import NextAuth from "next-auth";
-import Credentials  from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter"
+import Credentials from "next-auth/providers/credentials";
+import { authConfig } from "./auth.config";
 import { signInSchema } from "./schema/zodSchemas";
 import { prisma } from "@/prisma/db";
 import { compare } from "bcrypt";
  
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  ...authConfig,
   session: {
     strategy: "jwt",
-    // maxAge: 30 * 24 * 60 * 60, // 30 días
     maxAge: 60 * 60, // 1 hora
+    updateAge: 30 * 60, // Renueva cada 30 minutos si está activo
   },
   providers: [
     Credentials({
@@ -20,7 +20,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Contraseña", type: "password" },
       },
       async authorize(credentials) {
-
         const validatedFields = signInSchema.safeParse(credentials)
 
         if (!validatedFields.success) {
@@ -61,8 +60,4 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
-  pages: {
-    signIn: '/login',
-    error: '/login', // Error de autenticación
-  },
-})
+});
