@@ -11,9 +11,11 @@ export const authConfig = {
       const pathname = nextUrl.pathname;
       
       // Rutas protegidas que requieren autenticación
-      const isOnDashboard = pathname.startsWith('/dashboard');
-      const isOnChatNova = pathname.startsWith('/chatNova');
-      const isProtectedRoute = isOnDashboard || isOnChatNova;
+      // (pueden ser exactas o prefijos)
+      const protectedRoutes = ['/dashboard', '/chatNova', '/register'];
+      const isProtectedRoute = protectedRoutes.some(route =>
+        route.endsWith('/') ? pathname.startsWith(route) : pathname === route || pathname.startsWith(route + '/')
+      );
       
       // Rutas a las que no debe acceder si está autenticado
       const isOnLogin = pathname === '/login';

@@ -33,14 +33,14 @@ export default function DropboxUser({ handleChatNavigation }: DropboxUserProps) 
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="start">
           <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
-          <DropdownMenuItem className={menuItemClass}><Link href="/perfil">Perfil</Link></DropdownMenuItem>
+          <Link href="/perfil"><DropdownMenuItem className={menuItemClass}>Perfil</DropdownMenuItem></Link>
           <DropdownMenuSeparator />
           <DropdownMenuLabel>Acciones rápidas</DropdownMenuLabel>
           <DropdownMenuGroup>
-            <DropdownMenuItem className={menuItemClass}><Link href="/dashboard">Dashboard</Link></DropdownMenuItem>
-            <DropdownMenuItem className={menuItemClass}><Link href="/estadisticas">Estadísticas</Link></DropdownMenuItem>
-            <DropdownMenuItem className={menuItemClass}><Link href="/sesion-grupal">Sesión Grupal</Link></DropdownMenuItem>
-            <DropdownMenuItem className={menuItemClass}><Link href="/configuracion">Configuración</Link></DropdownMenuItem>
+            <Link href="/dashboard"><DropdownMenuItem className={menuItemClass}>Dashboard</DropdownMenuItem></Link>
+            <Link href="/estadisticas"><DropdownMenuItem className={menuItemClass}>Estadísticas</DropdownMenuItem></Link>
+            <Link href="/sesion-grupal"><DropdownMenuItem className={menuItemClass}>Sesión Grupal</DropdownMenuItem></Link>
+            <Link href="/configuracion"><DropdownMenuItem className={menuItemClass}>Configuración</DropdownMenuItem></Link>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuLabel>ChatNova+</DropdownMenuLabel>
