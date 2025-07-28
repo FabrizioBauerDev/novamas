@@ -112,7 +112,7 @@ export default function Navbar({ user }: NavbarProps) {
                   <span className="sr-only">Abrir menú</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-full h-full">
+              <SheetContent side="right" className="w-full h-full overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle className="text-left">
                     Menú de navegación

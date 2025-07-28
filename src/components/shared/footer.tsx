@@ -1,17 +1,7 @@
-"use client";
-
-import { newChatNova } from "@/lib/utils";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import ChatButton from "@/components/shared/chat-button";
 
 export default function Footer() {
-
-  const router = useRouter();
-
-  const handleChatNavigation = () => {
-    const chatId = newChatNova();
-    router.push(`/chatNova/${chatId}`);
-  };
 
   return (
     <footer className="bg-gray-900 text-white">
@@ -42,16 +32,16 @@ export default function Footer() {
           {/* Quick Links */}
           <div>
             <h4 className="text-lg font-semibold mb-4">Enlaces Rápidos</h4>
-            <ul className="space-y-2">
+              <ul className="space-y-2">
               <li>
                 <Link href="/" className="text-gray-300 hover:text-white transition-colors">
                   Inicio
                 </Link>
               </li>
               <li>
-                <a href="#" onClick={handleChatNavigation} className="text-gray-300 hover:text-white transition-colors">
+                <ChatButton className="text-gray-300 hover:text-white transition-colors">
                   Chat con NoVa+
-                </a>
+                </ChatButton>
               </li>
               <li>
                 <Link href="/recursos" className="text-gray-300 hover:text-white transition-colors">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { newChatNova } from "@/lib/utils";
 
 interface ChatButtonProps {
@@ -20,7 +19,7 @@ export default function ChatButton({ className, children }: ChatButtonProps) {
   return (
     <button
       onClick={handleChatNavigation}
-      className={className}
+      className={`${className ?? ""} cursor-pointer`}
     >
       {children}
     </button>
