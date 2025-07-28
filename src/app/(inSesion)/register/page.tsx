@@ -257,9 +257,8 @@ export default function RegistroPage() {
                 Iniciar Sesión
               </Link>
             </div>
-
             {/* Texto informativo */}
-            <p className="mt-6 text-center text-sm text-gray-500">Solo especialistas autorizados pueden registrarse.</p>
+            {/* <p className="mt-6 text-center text-sm text-gray-500">Solo especialistas autorizados pueden registrarse.</p> */}
           </CardContent>
         </Card>
       </div>

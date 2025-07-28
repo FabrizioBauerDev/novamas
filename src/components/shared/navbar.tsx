@@ -13,6 +13,7 @@ import {
   SheetHeader,
 } from "@/components/ui/sheet";
 import DropBoxUser from "@/components/shared/dropboxuser";
+import { handleSignOut } from "@/lib/actions";
 import { newChatNova } from "@/lib/utils";
 
 interface NavbarProps {
@@ -117,13 +118,19 @@ export default function Navbar({ user }: NavbarProps) {
                     Menú de navegación
                   </SheetTitle>
                 </SheetHeader>
-                <div className="flex flex-col space-y-4 mt-6">
+                <div className="flex flex-col space-y-4">
                   {/* Logo en móvil */}
-                  <div className="pb-4 border-b border-gray-200">
+                  <div className="pb-4 border-b border-gray-200 flex justify-center">
                     <span className="text-xl font-bold text-gray-900">
-                      No va más
+                      NoVa+
                     </span>
                   </div>
+                  {/* Bienvenida móvil */}
+                  {user && (
+                    <div className="text-center text-md text-gray-700 mt-2">
+                      Bienvenida/o, <span className="font-medium">{user.name}</span>
+                    </div>
+                  )}
 
                   {/* Enlaces de navegación móvil */}
                   <div className="flex flex-col space-y-2">
@@ -140,44 +147,50 @@ export default function Navbar({ user }: NavbarProps) {
                   </div>
 
                   {/* Botones de acción móvil */}
-                  <div className="pt-4 border-t border-gray-200 space-y-3">
-                    <Button
-                      onClick={handleChatNavigationMobile}
-                      className="w-full flex items-center justify-center space-x-2 bg-gray-900 hover:bg-gray-800"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      <span>Chatea con NoVa+</span>
-                    </Button>
-
-                    <Link href="/login" onClick={() => setIsOpen(false)}>
-                      <Button
-                        variant="outline"
-                        className="w-full flex items-center justify-center space-x-2 border-gray-300 bg-transparent"
-                      >
-                        <User className="w-4 h-4" />
-                        <span>Iniciar Sesión</span>
-                      </Button>
-                    </Link>
-                  </div>
-
-                  {/* Banner de emergencia móvil */}
-                  <div className="pt-4 border-t border-gray-200">
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                      <p className="text-red-800 font-semibold text-sm">
-                        ¿Necesitas ayuda inmediata?
-                      </p>
-                      <p className="text-red-600 text-xs mt-1">
-                        Línea Nacional Gratuita:{" "}
-                        <a href="tel:141" className="underline font-semibold">
-                          141
-                        </a>
-                        • Disponible 24/7 (orientación en adicciones).
-                        <br />
-                        En San Luis podés consultar en el Programa de Prevención
-                        y Asistencia del Juego Patológico (Ministerio de Salud).
-                      </p>
+                  {user ? (
+                    <div className="pt-4 border-t border-gray-200 space-y-2 px-3">
+                      <Link href="/perfil" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
+                        Perfil
+                      </Link>
+                      <Link href="/dashboard" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
+                        Dashboard
+                      </Link>
+                      <Link href="/estadisticas" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
+                        Estadísticas
+                      </Link>
+                      <Link href="/sesion-grupal" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
+                        Sesión Grupal
+                      </Link>
+                      <Link href="/configuracion" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
+                        Configuración
+                      </Link>
+                      <button onClick={() => { setIsOpen(false); handleChatNavigationMobile(); }} className="w-full text-left text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
+                        Nuevo chat
+                      </button>
+                      <button onClick={() => { setIsOpen(false); handleSignOut(); }} className="w-full text-left text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
+                        Cerrar sesión
+                      </button>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="pt-4 border-t border-gray-200 space-y-3">
+                      <Button
+                        onClick={handleChatNavigationMobile}
+                        className="w-full flex items-center justify-center space-x-2 bg-gray-900 hover:bg-gray-800"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        <span>Chatea con NoVa+</span>
+                      </Button>
+                      <Link href="/login" onClick={() => setIsOpen(false)}>
+                        <Button
+                          variant="outline"
+                          className="w-full flex items-center justify-center space-x-2 border-gray-300 bg-transparent"
+                        >
+                          <User className="w-4 h-4" />
+                          <span>Iniciar Sesión</span>
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>

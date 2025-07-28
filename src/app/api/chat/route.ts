@@ -22,14 +22,18 @@ export async function POST(req: Request) {
   try {
     const system = env.SYSTEM_PROMPT;
     const { messages } = await req.json();
+    // +++++ CON GEMMA +++++
     // Unir el system prompt con los mensajes
-    messages.unshift({ role: 'user', content: system });
-    // Se puede pasar system como una variable de streamText
-    // pero Gemma no lo soporta directamente, así que se maneja en la API
-    // y se une al mensaje del usuario antes de enviarlo a la IA
+    // messages.unshift({ role: 'user', content: system });
+
+    // +++++ CON GEMINI 2.0 FLASH +++++
+    // Pasamos el system prompt como un parametro
+    // adicionaly no lo unimos a los mensajes
+
     const result = streamText({
-      model: google('gemma-3-27b-it'),
+      model: google('gemini-2.0-flash'),
       messages,
+      system,
       // async onFinish({ response }) {
       //   await saveChat({
       //     id,
@@ -41,10 +45,9 @@ export async function POST(req: Request) {
       // },
       onFinish: ({ usage }) => {
       const { promptTokens } = usage;
-      // Guardar en algún lado los prompt tokens
+      // Guardar en algún lado los prompt tokens?
       console.log('Prompt tokens:', promptTokens);
     },
-
       // Temperatura, top_p y no se si top_k se pueden pasar aquí
     });
 
