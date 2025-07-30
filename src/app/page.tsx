@@ -3,7 +3,7 @@ import ChatButton from "@/components/shared/chat-button";
 
 export default function Home() {
   return (
-    // min-h-screen si quier que ocupe toda la pantalla
+    // min-h-[calc(100vh-4rem)] para que tenga en cuenta la altura del navbar (64px = 4rem)
     <div className="flex flex-col">
       {/* Contenido principal */}
       <div className="flex-1 bg-gray-50">

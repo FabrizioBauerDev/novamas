@@ -5,15 +5,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, User, Lock, AlertCircle, Loader2 } from "lucide-react";
+import { Eye, EyeOff, User, Lock, Loader2 } from "lucide-react";
 import { useActionState } from "react";
 import { authenticate } from "@/lib/actions";
-import { useSearchParams } from "next/navigation";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
   const [errorMessage, formAction, isPending] = useActionState(
     authenticate,

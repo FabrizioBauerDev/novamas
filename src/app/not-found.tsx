@@ -5,7 +5,7 @@ import Link from "next/link"
 
 export default function PerfilPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
       <div className="container mx-auto px-4 py-4">
         {/* Header con botón de regreso */}
         <div className="mb-4">
