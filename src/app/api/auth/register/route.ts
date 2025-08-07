@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcrypt";
-import { prisma } from "@/prisma/db";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { signUpSchema } from "@/schema/zodSchemas";
 
 export async function POST(request: NextRequest) {
@@ -20,12 +22,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, email, password } = validatedFields.data;
+    const { name, email, password, role } = validatedFields.data;
 
     // Verificar si el usuario ya existe
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    });
+    const existingUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1)
+      .then(result => result[0]);
 
     if (existingUser) {
       return NextResponse.json(
@@ -38,19 +43,24 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await hash(password, 12);
 
     // Crear el usuario
-    const user = await prisma.user.create({
-      data: {
+    const [user] = await db
+      .insert(users)
+      .values({
         name,
         email,
         password: hashedPassword,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        createdAt: true,
-      }
-    });
+        role,
+        // status tiene valor por defecto 'ACTIVO' en el esquema
+        // emailVerified será null hasta que se verifique
+      })
+      .returning({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        status: users.status,
+        createdAt: users.createdAt,
+      });
 
     return NextResponse.json(
       { 

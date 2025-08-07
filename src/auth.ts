@@ -2,7 +2,9 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
 import { signInSchema } from "./schema/zodSchemas";
-import { prisma } from "@/prisma/db";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { compare } from "bcrypt";
  
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -27,13 +29,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: validatedFields.data.email,
-          },
-        })
+        const user = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, validatedFields.data.email))
+          .limit(1)
+          .then(result => result[0]);
 
         if (!user || !user.password) return null;
+
+        // Verificar que el usuario esté activo
+        if (user.status !== "ACTIVO") {
+          console.log('Auth.ts | User account is deactivated');
+          return null;
+        }
 
         const isValid = await compare(validatedFields.data.password, user.password);
         if (!isValid) return null;
@@ -48,6 +57,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
+        token.role = user.role;
       }
       return token;
     },
@@ -56,6 +66,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id as string;
         session.user.name = token.name;
         session.user.email = token.email as string;
+        session.user.role = token.role as string;
       }
       return session;
     },
