@@ -102,7 +102,7 @@ export default function Footer() {
                   Línea Nacional Gratuita:{" "}
                   <a href="tel:141" className="underline font-semibold">
                     141
-                  </a>
+                  </a><br />
                   • Disponible 24/7 (orientación en adicciones).
                   <br/>En San Luis podés consultar en el Programa de Prevención y Asistencia del Juego Patológico (Ministerio de Salud).
                 </p>
