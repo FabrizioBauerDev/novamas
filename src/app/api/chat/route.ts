@@ -1,5 +1,5 @@
 import { google } from "@ai-sdk/google";
-import { streamText } from "ai";
+import { streamText, convertToModelMessages } from "ai";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { env } from "process";
@@ -10,7 +10,6 @@ export const maxDuration = 30;
 export async function POST(req: Request) {
   // Verificar autenticación
   const session = await auth();
-
   if (!session || !session.user) {
     console.error("Error en API chatNova - No autorizado");
     return NextResponse.json(
@@ -22,25 +21,30 @@ export async function POST(req: Request) {
   try {
     const system = env.SYSTEM_PROMPT;
     const { messages } = await req.json();
+    
     const result = streamText({
       model: google("gemini-2.0-flash"),
-      messages,
+      messages: convertToModelMessages(messages), // Convert UIMessages to ModelMessages
       system,
-      // maxTokens, podemos definir el máximo de tokens
+      // maxOutputTokens: 4096, // Renamed from maxTokens
       onFinish: ({ usage }) => {
-        const { promptTokens, completionTokens, totalTokens } = usage;
-        /* promptTokens --> Son los tokens que corresponden a tu entrada (input)
-        Incluye el mensaje del usuario + el prompt del sistema + el historial de conversación*/
-        console.log("Prompt tokens:", promptTokens);
-        /*Completion Tokens --> Son los tokens que corresponde a la respuesta generada por el modelo. 
-        Todo el texto que el modelo produce como salida*/
-        console.log("Completion tokens:", completionTokens);
-        /* Total Tokens --> Son todos los tokens utilizados en la conversación, incluyendo tanto la entrada como la salida */
+        const { inputTokens, outputTokens, totalTokens } = usage; // Property names changed
+        
+        /* inputTokens --> Son los tokens que corresponden a tu entrada (input)
+           Incluye el mensaje del usuario + el prompt del sistema + el historial de conversación */
+        console.log("Input tokens:", inputTokens); // Renamed from promptTokens
+        
+        /* outputTokens --> Son los tokens que corresponde a la respuesta generada por el modelo.
+           Todo el texto que el modelo produce como salida */
+        console.log("Output tokens:", outputTokens); // Renamed from completionTokens
+        
+        /* totalTokens --> Son todos los tokens utilizados en la conversación, incluyendo tanto la entrada como la salida */
         console.log("Total tokens:", totalTokens);
       },
       // Temperatura, top_p y no se si top_k se pueden pasar aquí
     });
-    return result.toDataStreamResponse();
+    
+    return result.toUIMessageStreamResponse(); // Renamed from toDataStreamResponse
   } catch (error) {
     console.error("Error en API chat:", error);
     return NextResponse.json(
