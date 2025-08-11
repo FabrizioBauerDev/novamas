@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useRef, useEffect } from "react"
 
 import { useChat } from '@ai-sdk/react'
 import { Button } from "@/components/ui/button"
@@ -11,6 +12,8 @@ import remarkGfm from "remark-gfm" // Para soporte de tablas, tareas, etc.
 import Link from "next/link" 
 
 export default function ChatInterface() {
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  
   const { messages, input, handleInputChange, handleSubmit, status } = useChat({
     initialMessages: [
       {
@@ -25,10 +28,25 @@ export default function ChatInterface() {
   // Determinar si está cargando basado en el status
   const isLoading = status === 'submitted' || status === 'streaming'
 
+  // Función para hacer scroll automático al final del contenedor de mensajes
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
+    }
+  }
+
+  // Hacer scroll automático cuando cambien los mensajes o el estado
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages, status])
+
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
       {/* Área de mensajes */}
-      <div className="flex-1 p-6 overflow-y-auto space-y-4 max-h-[calc(100vh-200px)]">
+      <div 
+        ref={messagesContainerRef}
+        className="flex-1 p-6 overflow-y-auto space-y-4 max-h-[calc(100vh-200px)]"
+      >
         {messages.map((message) => (
           <div
             key={message.id}
@@ -80,8 +98,8 @@ export default function ChatInterface() {
           </div>
         ))}
         
-        {/* Indicador de carga cuando el asistente está escribiendo */}
-        {status === 'streaming' && (
+        {/* Indicador de carga cuando el asistente está escribiendo o pensando */}
+        {isLoading && (
           <div className="flex items-start justify-start">
             <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
               <Bot className="w-5 h-5 text-gray-600" />
@@ -93,7 +111,9 @@ export default function ChatInterface() {
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
-                <span className="text-sm text-gray-500 ml-2">NoVa+ está escribiendo...</span>
+                <span className="text-sm text-gray-500 ml-2">
+                  {status === 'streaming' ? 'NoVa+ está escribiendo...' : 'NoVa+ está pensando...'}
+                </span>
               </div>
             </div>
           </div>
