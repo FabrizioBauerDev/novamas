@@ -97,7 +97,7 @@ export default function ChatInterface() {
         ref={messagesContainerRef}
         className="flex-1 p-6 overflow-y-auto space-y-4 max-h-[calc(100vh-200px)]"
       >
-        {messages.map((message) => (
+        {messages.map((message: UIMessage) => (
           <div
             key={message.id}
             className={`flex items-start ${message.role === "user" ? "justify-end" : "justify-start"}`}
@@ -155,6 +155,7 @@ export default function ChatInterface() {
           onChange={(e) => setInput(e.target.value)}
           className="flex-1 rounded-full px-4 py-2 border border-gray-300 focus:ring-gray-500 focus:border-gray-500"
           disabled={status === 'submitted' || status === 'streaming'}
+          maxLength={280}
         />
         <Button
           type="submit"

@@ -85,9 +85,6 @@ export default function RegistroPage() {
       setPasswordErrors(errors)
       return
     }
-
-    // Aquí iría la lógica de registro
-    console.log("Datos de registro:", formData)
   }
 
   return (

@@ -19,6 +19,7 @@ export async function POST(req: Request) {
   }
 
   try {
+    const logString = "APP | API | CHAT | ROUTE - ";
     const system = env.SYSTEM_PROMPT;
     const { messages } = await req.json();
     
@@ -32,14 +33,14 @@ export async function POST(req: Request) {
         
         /* inputTokens --> Son los tokens que corresponden a tu entrada (input)
            Incluye el mensaje del usuario + el prompt del sistema + el historial de conversación */
-        console.log("Input tokens:", inputTokens); // Renamed from promptTokens
+        console.log(logString + "Input tokens:", inputTokens); // Renamed from promptTokens
         
         /* outputTokens --> Son los tokens que corresponde a la respuesta generada por el modelo.
            Todo el texto que el modelo produce como salida */
-        console.log("Output tokens:", outputTokens); // Renamed from completionTokens
+        console.log(logString + "Output tokens:", outputTokens); // Renamed from completionTokens
         
         /* totalTokens --> Son todos los tokens utilizados en la conversación, incluyendo tanto la entrada como la salida */
-        console.log("Total tokens:", totalTokens);
+        console.log(logString + "Total tokens:", totalTokens);
       },
       // Temperatura, top_p y no se si top_k se pueden pasar aquí
     });

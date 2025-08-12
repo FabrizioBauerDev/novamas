@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { compare } from "bcrypt";
- 
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   session: {
@@ -18,15 +18,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Credentials({
       name: "Credentials",
       credentials: {
-        email: { label: "Correo electrónico", type: "email", placeholder: "tu@email.com" },
-        password: { label: "Contraseña", type: "password", placeholder: "Contraseña" },
+        email: {
+          label: "Correo electrónico",
+          type: "email",
+          placeholder: "tu@email.com",
+        },
+        password: {
+          label: "Contraseña",
+          type: "password",
+          placeholder: "Contraseña",
+        },
       },
       async authorize(credentials) {
-        const validatedFields = signInSchema.safeParse(credentials)
+        const logString = "Auth.ts | "
+        const validatedFields = signInSchema.safeParse(credentials);
 
         if (!validatedFields.success) {
-          console.log('Auth.ts | Invalid credentials');
-          return null
+          console.log(logString + "Credenciales invalidas");
+          return null;
         }
 
         const user = await db
@@ -34,17 +43,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           .from(users)
           .where(eq(users.email, validatedFields.data.email))
           .limit(1)
-          .then(result => result[0]);
+          .then((result) => result[0]);
 
         if (!user || !user.password) return null;
 
         // Verificar que el usuario esté activo
         if (user.status !== "ACTIVO") {
-          console.log('Auth.ts | User account is deactivated');
+          console.log(logString + "Cuenta de usuario desactivada");
           return null;
         }
 
-        const isValid = await compare(validatedFields.data.password, user.password);
+        const isValid = await compare(
+          validatedFields.data.password,
+          user.password
+        );
         if (!isValid) return null;
 
         return user;
