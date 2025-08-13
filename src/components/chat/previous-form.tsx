@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { FormularioEvaluacionData } from "@/types/types"
 
-function calcularPuntaje(formData: any) {
+function calcularPuntaje(formData: FormularioEvaluacionData) {
     let puntaje = 0;
     if(formData.noPodiaDejarlo === "si") {
         puntaje += 2;
@@ -31,8 +32,8 @@ interface FormularioEvaluacionProps {
 }
 
 export default function FormularioEvaluacion({ onFormComplete }: FormularioEvaluacionProps) {
-  const [currentStep, setCurrentStep] = useState(1)
-  const [formData, setFormData] = useState({
+  const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState<FormularioEvaluacionData>({
     genero: "",
     edad: "",
     juegoOnline: "",
@@ -40,7 +41,7 @@ export default function FormularioEvaluacion({ onFormComplete }: FormularioEvalu
     problemasPersonales: "",
     intentoDejar: "",
     puntaje: 0
-  })
+  });
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
