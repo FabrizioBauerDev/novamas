@@ -8,7 +8,6 @@ import {
 } from '@/components/ai-elements/conversation';
 import { Message, MessageContent } from '@/components/ai-elements/message';
 import {
-  PromptInput,
   PromptInputTextarea,
   PromptInputSubmit,
 } from '@/components/ai-elements/prompt-input';
@@ -41,14 +40,6 @@ const ConversationDemo = () => {
       sendMessage({ text: input });
       setInput('');
     }
-  };
-
-  // Función para formatear timestamp
-  const formatTime = (timestamp: Date) => {
-    return timestamp.toLocaleTimeString('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
   };
 
   return (

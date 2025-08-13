@@ -8,6 +8,6 @@ export function cn(...inputs: ClassValue[]) {
 
 export function newChatNova() {
   // Lógica para crear un nuevo chat en ChatNova
-  const id = generateId(32);
+  const id = generateId();
   return id;
 }

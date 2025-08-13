@@ -316,3 +316,5 @@ export const Response = memo(
   },
   (prevProps, nextProps) => prevProps.children === nextProps.children,
 );
+
+Response.displayName = 'Response'; // Agregado para cumplir con la regla react/display-name
