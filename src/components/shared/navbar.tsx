@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Menu, MessageCircle, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +13,6 @@ import {
 } from "@/components/ui/sheet";
 import DropBoxUser from "@/components/shared/dropboxuser";
 import { handleSignOut } from "@/lib/actions";
-import { newChatNova } from "@/lib/utils";
 
 interface NavbarProps {
   user?: {
@@ -25,18 +23,6 @@ interface NavbarProps {
 
 export default function Navbar({ user }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
-
-  const handleChatNavigation = () => {
-    const chatId = newChatNova();
-    router.push(`/chatNova/${chatId}`);
-  };
-
-  const handleChatNavigationMobile = () => {
-    setIsOpen(false);
-    const chatId = newChatNova();
-    router.push(`/chatNova/${chatId}`);
-  };
 
   const navigationLinks = [
     { href: "/", label: "Inicio" },
@@ -77,18 +63,19 @@ export default function Navbar({ user }: NavbarProps) {
                 <span className="text-md text-gray-700">
                   Bienvenida/o, <span className="font-medium">{user.name}</span>
                 </span>
-                <DropBoxUser handleChatNavigation={handleChatNavigation} />
+                <DropBoxUser />
               </>
             ) : (
               <>
-                <Button
-                  onClick={handleChatNavigation}
-                  variant="outline"
-                  className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Chatea con NoVa+</span>
-                </Button>
+                <Link href="/chatNova">
+                  <Button
+                    variant="outline"
+                    className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent cursor-pointer"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>Chatea con NoVa+</span>
+                  </Button>
+                </Link>
                 <Link href="/login">
                   <Button
                     variant="ghost"
@@ -164,22 +151,21 @@ export default function Navbar({ user }: NavbarProps) {
                       <Link href="/configuracion" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
                         Configuración
                       </Link>
-                      <button onClick={() => { setIsOpen(false); handleChatNavigationMobile(); }} className="w-full text-left text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
+                      <Link href="/chatNova" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
                         Nuevo chat
-                      </button>
+                      </Link>
                       <button onClick={() => { setIsOpen(false); handleSignOut(); }} className="w-full text-left text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
                         Cerrar sesión
                       </button>
                     </div>
                   ) : (
                     <div className="pt-4 border-t border-gray-200 space-y-3">
-                      <Button
-                        onClick={handleChatNavigationMobile}
-                        className="w-full flex items-center justify-center space-x-2 bg-gray-900 hover:bg-gray-800"
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                        <span>Chatea con NoVa+</span>
-                      </Button>
+                      <Link href="/chatNova" onClick={() => setIsOpen(false)}>
+                        <Button className="w-full flex items-center justify-center space-x-2 bg-gray-900 hover:bg-gray-800 cursor-pointer">
+                          <MessageCircle className="w-4 h-4" />
+                          <span>Chatea con NoVa+</span>
+                        </Button>
+                      </Link>
                       <Link href="/login" onClick={() => setIsOpen(false)}>
                         <Button
                           variant="outline"
