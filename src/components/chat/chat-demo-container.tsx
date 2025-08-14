@@ -4,7 +4,11 @@ import { useState } from "react"
 import FormularioEvaluacion from "./previous-form"
 import NewChatInterface from "./new-chat-interface"
 
-export default function ChatDemoContainer() {
+interface ChatDemoContainerProps {
+  slug: string
+}
+
+export default function ChatDemoContainer({ slug }: ChatDemoContainerProps) {
   const [showChat, setShowChat] = useState(false)
   const [chatSessionId, setChatSessionId] = useState<string | null>(null)
 
@@ -19,7 +23,8 @@ export default function ChatDemoContainer() {
       {!showChat ? (
         <FormularioEvaluacion 
           onFormComplete={handleFormComplete} 
-          setChatSessionID={setChatSessionId} 
+          setChatSessionID={setChatSessionId}
+          slug={slug}
         />
       ) : (
         <NewChatInterface chatSessionId={chatSessionId} />

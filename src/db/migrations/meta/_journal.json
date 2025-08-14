@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1754572398970,
-      "tag": "0000_broken_triathlon",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1754572586527,
-      "tag": "0001_hesitant_stephen_strange",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1754576034610,
-      "tag": "0002_sad_wilson_fisk",
+      "when": 1755197993402,
+      "tag": "0000_ancient_ares",
       "breakpoints": true
     }
   ]

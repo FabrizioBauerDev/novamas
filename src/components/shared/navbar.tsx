@@ -12,7 +12,7 @@ import {
   SheetHeader,
 } from "@/components/ui/sheet";
 import DropBoxUser from "@/components/shared/dropboxuser";
-import { handleSignOut } from "@/lib/actions";
+import { handleSignOut } from "@/lib/actions/actions-auth";
 
 interface NavbarProps {
   user?: {

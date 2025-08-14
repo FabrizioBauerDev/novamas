@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { User, LogOut } from "lucide-react";
 import Link from "next/link";
-import { handleSignOut } from "@/lib/actions";
+import { handleSignOut } from "@/lib/actions/actions-auth";
 
 export default function DropboxUser() {
   const menuItemClass = "hover:bg-gray-200 focus:bg-gray-200 data-[highlighted]:bg-gray-200";

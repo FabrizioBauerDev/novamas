@@ -4,10 +4,12 @@ import ChatDemoContainer from '@/components/chat/chat-demo-container';
 // ENTONCES PRIMERO MOSTRARÍAMOS UN CARTEL DE BIENVENIDA CON INGRESO DE CONTRASEÑA
 // Y LUEGO RECIEN EFECTIVAMENTE EL CHAT NORMAL
 
-export default async function Page() {
+  export default async function Page(props: { params: Promise<{ slug: string }> }) {
+  const { slug } = await props.params;
+
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex flex-col">
-      <ChatDemoContainer />
+      <ChatDemoContainer slug={slug} />
     </div>
   )
 }

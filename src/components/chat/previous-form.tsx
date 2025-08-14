@@ -12,9 +12,10 @@ import { EvaluationFormData } from "@/types/types"
 interface FormularioEvaluacionProps {
   onFormComplete?: () => void
   setChatSessionID?: (id: string) => void
+  slug: string
 }
 
-export default function FormularioEvaluacion({ onFormComplete, setChatSessionID }: FormularioEvaluacionProps) {
+export default function FormularioEvaluacion({ onFormComplete, setChatSessionID, slug }: FormularioEvaluacionProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<EvaluationFormData>({
     gender: "",
@@ -33,7 +34,7 @@ export default function FormularioEvaluacion({ onFormComplete, setChatSessionID 
   const handleStep1Submit = () => {
     if (formData.onlineGaming === "no") {
       // Si responde No, mostrar resultado final
-      // ¿PANTALLA DE CARGA?
+      // MOSTRARLE AL USUARIO DE MANERA AMIGABLE QUE ESTA CARGANDO
       // CREAR chatSessions y obtener ID
       // CREAR evaluationForm asociado a chatSession y asignar en chatSession el nivel de riesgo en 0
       // SETEAR setChatSessionID CON EL ID DE LA SESION
@@ -45,7 +46,7 @@ export default function FormularioEvaluacion({ onFormComplete, setChatSessionID 
   }
 
   const handleStep2Submit = () => {
-    // ¿PANTALLA DE CARGA?
+    // MOSTRARLE AL USUARIO DE MANERA AMIGABLE QUE ESTA CARGANDO
     // CREAR chatSessions y obtener ID
     // CREAR evaluationForm asociado a chatSession y asignar en chatSession el nivel de riesgo
     // SETEAR setChatSessionID CON EL ID DE LA SESION
