@@ -6,19 +6,23 @@ import NewChatInterface from "./new-chat-interface"
 
 export default function ChatDemoContainer() {
   const [showChat, setShowChat] = useState(false)
+  const [chatSessionId, setChatSessionId] = useState<string | null>(null)
 
   const handleFormComplete = () => {
-    // Paso 1. Generar un nuevo ChatSession (ingresar el primer mensaje), y obtener la ID.
-    // Paso 2. Setear la ID, pasar mensaje inicial y el nivel de riesgo al estado del componente (newChatInterface)
+    // El ID de sesión ya se estableció en setChatSessionId desde el formulario
+    // Ver donde meter la pantalla de carga
     setShowChat(true)
   }
 
   return (
     <>
       {!showChat ? (
-        <FormularioEvaluacion onFormComplete={handleFormComplete} />
+        <FormularioEvaluacion 
+          onFormComplete={handleFormComplete} 
+          setChatSessionID={setChatSessionId} 
+        />
       ) : (
-        <NewChatInterface/>
+        <NewChatInterface chatSessionId={chatSessionId} />
       )}
     </>
   )

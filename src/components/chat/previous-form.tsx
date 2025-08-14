@@ -7,40 +7,23 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { FormularioEvaluacionData } from "@/types/types"
-
-function calcularPuntaje(formData: FormularioEvaluacionData) {
-    let puntaje = 0;
-    if(formData.noPodiaDejarlo === "si") {
-        puntaje += 2;
-    }
-    if(formData.noPodiaDejarlo === "no-seguro") {
-        puntaje += 1;
-    }
-    if(formData.problemasPersonales === "si") {
-        puntaje += 2;
-    }
-    if(formData.intentoDejar === "si") {
-        puntaje += 2;
-    }
-    return puntaje;
-}
-
+import { EvaluationFormData } from "@/types/types"
 
 interface FormularioEvaluacionProps {
   onFormComplete?: () => void
+  setChatSessionID?: (id: string) => void
 }
 
-export default function FormularioEvaluacion({ onFormComplete }: FormularioEvaluacionProps) {
+export default function FormularioEvaluacion({ onFormComplete, setChatSessionID }: FormularioEvaluacionProps) {
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<FormularioEvaluacionData>({
-    genero: "",
-    edad: "",
-    juegoOnline: "",
-    noPodiaDejarlo: "",
-    problemasPersonales: "",
-    intentoDejar: "",
-    puntaje: 0
+  const [formData, setFormData] = useState<EvaluationFormData>({
+    gender: "",
+    age: "",
+    onlineGaming: "",
+    couldntStop: "",
+    personalIssues: "",
+    triedToQuit: "",
+    score: 0
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -48,10 +31,12 @@ export default function FormularioEvaluacion({ onFormComplete }: FormularioEvalu
   }
 
   const handleStep1Submit = () => {
-    if (formData.juegoOnline === "no") {
-      // Almacenar los datos del formulario y devolver sin exposición
-      // Obtener ID de formulario y estadisticas??
+    if (formData.onlineGaming === "no") {
       // Si responde No, mostrar resultado final
+      // ¿PANTALLA DE CARGA?
+      // CREAR chatSessions y obtener ID
+      // CREAR evaluationForm asociado a chatSession y asignar en chatSession el nivel de riesgo en 0
+      // SETEAR setChatSessionID CON EL ID DE LA SESION
       setCurrentStep(3)
     } else {
       // Si responde Sí, ir al paso 2
@@ -60,9 +45,10 @@ export default function FormularioEvaluacion({ onFormComplete }: FormularioEvalu
   }
 
   const handleStep2Submit = () => {
-    // CALCULAR EL PUNTAJE
-    setFormData((prev) => ({ ...prev, puntaje: calcularPuntaje(formData) }));
-    // Almacenar los datos del formulario y devolver el nivel de riesgo
+    // ¿PANTALLA DE CARGA?
+    // CREAR chatSessions y obtener ID
+    // CREAR evaluationForm asociado a chatSession y asignar en chatSession el nivel de riesgo
+    // SETEAR setChatSessionID CON EL ID DE LA SESION
     setCurrentStep(3)
   }
 
@@ -91,10 +77,10 @@ export default function FormularioEvaluacion({ onFormComplete }: FormularioEvalu
             {currentStep === 1 && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="genero">Género (opcional)</Label>
-                  <Select 
-                    value={formData.genero} 
-                    onValueChange={(value) => handleInputChange("genero", value)}
+                  <Label htmlFor="gender">Género (opcional)</Label>
+                  <Select
+                    value={formData.gender}
+                    onValueChange={(value) => handleInputChange("gender", value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona tu género" />
@@ -113,8 +99,8 @@ export default function FormularioEvaluacion({ onFormComplete }: FormularioEvalu
                     id="edad"
                     type="number"
                     placeholder="Ingresa tu edad"
-                    value={formData.edad}
-                    onChange={(e) => handleInputChange("edad", e.target.value)}
+                    value={formData.age}
+                    onChange={(e) => handleInputChange("age", e.target.value)}
                     min="13"
                     max="100"
                   />
@@ -126,8 +112,8 @@ export default function FormularioEvaluacion({ onFormComplete }: FormularioEvalu
                     deportivas o juegos con recompensas en dinero o ítems)?
                   </Label>
                   <RadioGroup
-                    value={formData.juegoOnline}
-                    onValueChange={(value) => handleInputChange("juegoOnline", value)}
+                    value={formData.onlineGaming}
+                    onValueChange={(value) => handleInputChange("onlineGaming", value)}
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="si" id="si" />
@@ -142,7 +128,7 @@ export default function FormularioEvaluacion({ onFormComplete }: FormularioEvalu
 
                 <Button
                   onClick={handleStep1Submit}
-                  disabled={!formData.juegoOnline}
+                  disabled={!formData.onlineGaming}
                   className="w-full bg-gray-900 hover:bg-gray-800 text-white"
                 >
                   Continuar
@@ -158,8 +144,8 @@ export default function FormularioEvaluacion({ onFormComplete }: FormularioEvalu
                     que pensabas?
                   </Label>
                   <RadioGroup
-                    value={formData.noPodiaDejarlo}
-                    onValueChange={(value) => handleInputChange("noPodiaDejarlo", value)}
+                    value={formData.couldntStop}
+                    onValueChange={(value) => handleInputChange("couldntStop", value)}
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="no" id="no-podia-no" />
@@ -182,8 +168,8 @@ export default function FormularioEvaluacion({ onFormComplete }: FormularioEvalu
                     por el dinero que gastaste?
                   </Label>
                   <RadioGroup
-                    value={formData.problemasPersonales}
-                    onValueChange={(value) => handleInputChange("problemasPersonales", value)}
+                    value={formData.personalIssues}
+                    onValueChange={(value) => handleInputChange("personalIssues", value)}
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="no" id="problemas-no" />
@@ -203,8 +189,8 @@ export default function FormularioEvaluacion({ onFormComplete }: FormularioEvalu
                 <div className="space-y-4">
                   <Label>¿Alguna vez intentaste dejar de jugar o reducir el tiempo y no pudiste?</Label>
                   <RadioGroup
-                    value={formData.intentoDejar}
-                    onValueChange={(value) => handleInputChange("intentoDejar", value)}
+                    value={formData.triedToQuit}
+                    onValueChange={(value) => handleInputChange("triedToQuit", value)}
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="no" id="intento-no" />
@@ -223,7 +209,7 @@ export default function FormularioEvaluacion({ onFormComplete }: FormularioEvalu
                   </Button>
                   <Button
                     onClick={handleStep2Submit}
-                    disabled={!formData.noPodiaDejarlo || !formData.problemasPersonales || !formData.intentoDejar}
+                    disabled={!formData.couldntStop || !formData.personalIssues || !formData.triedToQuit}
                     className="flex-1 bg-gray-900 hover:bg-gray-800 text-white"
                   >
                     Finalizar Evaluación
@@ -236,7 +222,7 @@ export default function FormularioEvaluacion({ onFormComplete }: FormularioEvalu
               <div className="text-center space-y-6">
                 <div className="p-6 bg-blue-50 rounded-lg">
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">Gracias por completar la evaluación</h3>
-                  {formData.juegoOnline === "no" ? (
+                  {formData.onlineGaming === "no" ? (
                     <p className="text-gray-700">
                       Basándose en tus respuestas, no pareces tener hábitos de juego online actualmente. Si en el futuro
                       necesitas apoyo o información, recuerda que estamos aquí para ayudarte.

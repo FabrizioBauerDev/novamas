@@ -13,12 +13,12 @@ export type MessageMetadata = z.infer<typeof messageMetadataSchema>;
 export type MyUIMessage = UIMessage<MessageMetadata>;
 
 // Define a type for the form data used in the evaluation form
-export interface FormularioEvaluacionData {
-  genero: string;
-  edad: string;
-  juegoOnline: string;
-  noPodiaDejarlo: string;
-  problemasPersonales: string;
-  intentoDejar: string;
-  puntaje: number;
+export interface EvaluationFormData {
+  gender: string;
+  age: string;
+  onlineGaming: string;
+  couldntStop: string;
+  personalIssues: string;
+  triedToQuit: string;
+  score: number;
 }

@@ -23,14 +23,18 @@ import { MyUIMessage } from "@/types/types";
 import { DefaultChatTransport } from "ai";
 
 
-const ConversationDemo = () => {
-  const sessionId = "cafb3bc7-f5a0-4bfa-abb8-ab8f5619af1c"; // ID ESTÁTICA DE MOMENTO
+interface NewChatInterfaceProps {
+  chatSessionId: string | null
+}
+
+const ConversationDemo = ({ chatSessionId }: { chatSessionId: string | null }) => {
+  const sessionId = chatSessionId || "default-session-id"; // Fallback si no hay ID
   const [input, setInput] = useState("");
   const { messages, sendMessage, status } = useChat<MyUIMessage>({
     id: sessionId,
     messages: [
       {
-        id: "1", //Generar ID único
+        id: "1", //EL ID SE PISA CUANDO SE ALMACENE
         role: "assistant",
         parts: [
           {
@@ -104,6 +108,20 @@ const ConversationDemo = () => {
                                   return null;
                               }
                             })}
+                            {/* Estados de carga - solo en el último mensaje del asistente */}
+                            {message.role === "assistant" && 
+                             message.id === messages[messages.length - 1]?.id &&
+                             (status === "submitted" || status === "streaming") && (
+                              <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
+                                <Loader />
+                                <span>
+                                  {status === "submitted" 
+                                    ? "NoVa+ está pensando..." 
+                                    : "NoVa+ está escribiendo..."
+                                  }
+                                </span>
+                              </div>
+                            )}
                           </MessageContent>
                           {/* Timestamp debajo del mensaje */}
                           {message.metadata?.createdAt && (
@@ -129,47 +147,6 @@ const ConversationDemo = () => {
                     </Message>
                   </div>
                 ))}
-                {/* Estados de carga */}
-                {status === "submitted" && (
-                  <div className="mb-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex flex-col items-center gap-1">
-                        <MessageAvatar
-                          src="/icon-chat-nova+.jpeg"
-                          name="NoVa+"
-                        />
-                        <div className="text-xs text-gray-600 font-medium">
-                          NoVa+
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Loader />
-                          <span>NoVa+ está pensando...</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {status === "streaming" && (
-                  <div className="mb-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex flex-col items-center gap-1">
-                        <MessageAvatar src="/nova-avatar.png" name="NoVa+" />
-                        <div className="text-xs text-gray-600 font-medium">
-                          NoVa+
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 text-sm text-gray-400">
-                          <Loader />
-                          <span>NoVa+ está escribiendo...</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </ConversationContent>
               <ConversationScrollButton />
             </Conversation>
@@ -204,6 +181,6 @@ const ConversationDemo = () => {
   );
 };
 
-export default function NewChatInterface() {
-  return <ConversationDemo/>
+export default function NewChatInterface({ chatSessionId }: NewChatInterfaceProps) {
+  return <ConversationDemo chatSessionId={chatSessionId} />
 }
