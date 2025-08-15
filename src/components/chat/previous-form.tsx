@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { EvaluationFormData } from "@/types/types"
 import { createFormChatSessionAction } from "@/lib/actions/actions-chat"
+import Geolocalizacion from "./geolocalizacion"
 
 interface FormularioEvaluacionProps {
   onFormComplete?: () => void
@@ -19,6 +20,7 @@ interface FormularioEvaluacionProps {
 export default function FormularioEvaluacion({ onFormComplete, setChatSessionID, slug }: FormularioEvaluacionProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFormCompleted, setIsFormCompleted] = useState(false);
   const [formData, setFormData] = useState<EvaluationFormData>({
     gender: "",
     age: "",
@@ -28,6 +30,7 @@ export default function FormularioEvaluacion({ onFormComplete, setChatSessionID,
     triedToQuit: "",
     score: 0
   });
+  const [location, setLocation] = useState<{ latitude: number; longitude: number; accuracy?: number } | null>(null)
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -36,15 +39,18 @@ export default function FormularioEvaluacion({ onFormComplete, setChatSessionID,
   const handleStep1Submit = async () => {
     if (formData.onlineGaming === "no") {
       // Si responde No, mostrar resultado final
-      // MOSTRARLE AL USUARIO DE MANERA AMIGABLE QUE ESTA CARGANDO
       setIsLoading(true);
       try {
-        // CREAR chatSessions y obtener ID
-        const result = await createFormChatSessionAction({ formData, slug });
+        // Incluir ubicación en formData si está disponible
+        const dataToSend = {
+          ...formData,
+          ...(location && { location })
+        };
+        
+        const result = await createFormChatSessionAction({ formData: dataToSend, slug });
         
         if (result.success && result.chatSessionId) {
-          // CREAR evaluationForm asociado a chatSession y asignar en chatSession el nivel de riesgo en 0
-          // SETEAR setChatSessionID CON EL ID DE LA SESION
+          setIsFormCompleted(true); // Detener geolocalización
           setChatSessionID?.(result.chatSessionId);
           setCurrentStep(3);
         } else {
@@ -62,15 +68,18 @@ export default function FormularioEvaluacion({ onFormComplete, setChatSessionID,
   }
 
   const handleStep2Submit = async () => {
-    // MOSTRARLE AL USUARIO DE MANERA AMIGABLE QUE ESTA CARGANDO
     setIsLoading(true);
     try {
-      // CREAR chatSessions y obtener ID
-      const result = await createFormChatSessionAction({ formData, slug });
+      // Incluir ubicación en formData si está disponible
+      const dataToSend = {
+        ...formData,
+        ...(location && { location })
+      };
+      
+      const result = await createFormChatSessionAction({ formData: dataToSend, slug });
       
       if (result.success && result.chatSessionId) {
-        // CREAR evaluationForm asociado a chatSession y asignar en chatSession el nivel de riesgo
-        // SETEAR setChatSessionID CON EL ID DE LA SESION
+        setIsFormCompleted(true); // Detener geolocalización
         setChatSessionID?.(result.chatSessionId);
         setCurrentStep(3);
       } else {
@@ -105,13 +114,20 @@ export default function FormularioEvaluacion({ onFormComplete, setChatSessionID,
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Geolocalización: se ejecuta continuamente hasta completar el formulario */}
+            <Geolocalizacion
+              isActive={!isFormCompleted}
+              onLocation={(coords) => setLocation(coords)}
+              onError={(err) => console.warn("Geolocalizacion error:", err)}
+            />
             {currentStep === 1 && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="gender">Género (opcional)</Label>
+                  <Label htmlFor="gender">Género</Label>
                   <Select
                     value={formData.gender}
                     onValueChange={(value) => handleInputChange("gender", value)}
+                    required
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona tu género" />
@@ -125,7 +141,7 @@ export default function FormularioEvaluacion({ onFormComplete, setChatSessionID,
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="edad">Edad (opcional)</Label>
+                  <Label htmlFor="edad">Edad</Label>
                   <Input
                     id="edad"
                     type="number"
@@ -134,6 +150,7 @@ export default function FormularioEvaluacion({ onFormComplete, setChatSessionID,
                     onChange={(e) => handleInputChange("age", e.target.value)}
                     min="13"
                     max="100"
+                    required
                   />
                 </div>
 
@@ -159,7 +176,12 @@ export default function FormularioEvaluacion({ onFormComplete, setChatSessionID,
 
                 <Button
                   onClick={handleStep1Submit}
-                  disabled={!formData.onlineGaming || isLoading}
+                  disabled={
+                    !formData.gender ||
+                    !formData.age ||
+                    !formData.onlineGaming ||
+                    isLoading
+                  }
                   className="w-full bg-gray-900 hover:bg-gray-800 text-white"
                 >
                   {isLoading ? "Cargando..." : "Continuar"}

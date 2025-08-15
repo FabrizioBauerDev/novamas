@@ -21,4 +21,9 @@ export interface EvaluationFormData {
   personalIssues: string;
   triedToQuit: string;
   score: number;
+  location?: {
+    latitude: number;
+    longitude: number;
+    accuracy?: number;
+  };
 }
