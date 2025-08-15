@@ -4,6 +4,13 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { env } from "process";
 import { MyUIMessage } from "@/types/types";
+import {
+  checkChatGroupById,
+  getChat,
+  getChatSessionById,
+  saveChat,
+} from "@/lib/db";
+import { createWelcomeMessage } from "@/lib/chat-utils";
 
 // Permite respuestas de streaming hasta 30 segundos
 export const maxDuration = 30;
@@ -22,10 +29,53 @@ export async function POST(req: Request) {
   try {
     const logString = "APP | API | CHAT | ROUTE - ";
     const system = env.SYSTEM_PROMPT;
-    const { messages }: { messages: MyUIMessage[] } = await req.json();
+
+    // Siguiendo la guía AI SDK: recibir solo el último mensaje cuando se optimiza
+    const { message, id }: { message: MyUIMessage; id: string } =
+      await req.json();
+
+    // Obtener la sesion de chat para comprobar si tiene asociado un grupo de chat
+    const chatSession = await getChatSessionById(id);
+    if (!chatSession.success) {
+      console.error(
+        "Error en API chatNova - Sesión de chat no válida:",
+        chatSession.error
+      );
+      return NextResponse.json(
+        { error: "Sesión de chat no válida." },
+        { status: 400 }
+      );
+    }
+
+    // Chequear el grupo de chat por ID
+    if (chatSession.data?.chatGroupId) {
+      const chatGroup = await checkChatGroupById(chatSession.data.chatGroupId);
+      if (!chatGroup.success) {
+        console.error(
+          "Error en API chatNova - Grupo de chat no válido:",
+          chatGroup.error
+        );
+        return NextResponse.json({ error: chatGroup.error }, { status: 400 });
+      }
+    }
+
+    // Cargar mensajes previos de la BD (equivalente a loadChat de la guía)
+    const previousMessages = await getChat(id);
+
+    let allMessages: MyUIMessage[];
+    let welcomeMessage: MyUIMessage | undefined;
+    if (previousMessages.length === 0) {
+      welcomeMessage = createWelcomeMessage() as MyUIMessage;
+      allMessages = [welcomeMessage, message];
+    } else {
+      allMessages = [...(previousMessages as MyUIMessage[]), message];
+    }
+    message.metadata = message.metadata ?? {};
+    message.metadata.createdAt = Date.now();
+
     const result = streamText({
       model: google("gemini-2.5-flash"),
-      messages: convertToModelMessages(messages), // Convert UIMessages to ModelMessages
+      messages: convertToModelMessages(allMessages), // Convertir UIMessages a ModelMessages
       system,
       // maxOutputTokens: 4096, // Renamed from maxTokens
       // onFinish: ({ usage }) => {
@@ -45,8 +95,10 @@ export async function POST(req: Request) {
       // Temperatura, top_p y no se si top_k se pueden pasar aquí
     });
 
+    result.consumeStream();
+
     return result.toUIMessageStreamResponse({
-      originalMessages: messages, // pass this in for type-safe return objects
+      originalMessages: allMessages, // Pasar todos los mensajes para el contexto
       messageMetadata: ({ part }) => {
         // Send metadata when streaming starts
         if (part.type === "start") {
@@ -63,15 +115,25 @@ export async function POST(req: Request) {
           };
         }
       },
-      generateMessageId: createIdGenerator({
-        prefix: 'msg',
-        size: 16,
-      }),
-      onFinish: ({ messages }) => {
-        // almacenar mensaje en la base de datos
+      onFinish: async ({ messages }) => {
+        // Guardar TODA la conversación (siguiendo la guía AI SDK)
+        try {
+          if (welcomeMessage) {
+            await saveChat({
+              chatSessionId: id,
+              messages,
+            });
+          } else {
+            await saveChat({
+              chatSessionId: id,
+              messages: (messages ?? []).slice(-2),
+            });
+          }
+        } catch (error) {
+          console.error(logString + "Error guardando mensajes:", error);
+        }
       },
     });
-    // Si es del usuario hay que ver como hacer para guardar los tokens
   } catch (error) {
     console.error("Error en API chat:", error);
     return NextResponse.json(

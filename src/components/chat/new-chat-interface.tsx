@@ -18,37 +18,32 @@ import { Loader } from "@/components/ai-elements/loader";
 import { useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { Response } from "@/components/ai-elements/response";
-import { Bot, User } from "lucide-react";
 import { MyUIMessage } from "@/types/types";
 import { DefaultChatTransport } from "ai";
-
+import { createWelcomeMessage } from "@/lib/chat-utils";
 
 interface NewChatInterfaceProps {
-  chatSessionId: string | null
+  chatSessionId: string | null;
 }
 
-const ConversationDemo = ({ chatSessionId }: { chatSessionId: string | null }) => {
+const ConversationDemo = ({
+  chatSessionId,
+}: {
+  chatSessionId: string | null;
+}) => {
   const sessionId = chatSessionId || "default-session-id"; // Fallback si no hay ID
   const [input, setInput] = useState("");
   const { messages, sendMessage, status } = useChat<MyUIMessage>({
     id: sessionId,
     messages: [
-      {
-        id: "1", //EL ID SE PISA CUANDO SE ALMACENE
-        role: "assistant",
-        parts: [
-          {
-            type: "text",
-            text: "¡Hola! Soy NoVa+, tu asistente virtual. ¿En qué puedo ayudarte hoy?",
-          },
-        ],
-        metadata: {
-          createdAt: Date.now(),
-        },
-      },
+      createWelcomeMessage() as MyUIMessage, // Usar la función global
     ],
     transport: new DefaultChatTransport({
       api: "/api/chat",
+      // SOLO ENVIAR EL ÚLTIMO MENSAJE AL SERVIDOR (siguiendo guía AI SDK)
+      prepareSendMessagesRequest({ messages, id }) {
+        return { body: { message: messages[messages.length - 1], id } };
+      },
     }),
   });
 
@@ -109,19 +104,16 @@ const ConversationDemo = ({ chatSessionId }: { chatSessionId: string | null }) =
                               }
                             })}
                             {/* Estados de carga - solo en el último mensaje del asistente */}
-                            {message.role === "assistant" && 
-                             message.id === messages[messages.length - 1]?.id &&
-                             (status === "submitted" || status === "streaming") && (
-                              <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
-                                <Loader />
-                                <span>
-                                  {status === "submitted" 
-                                    ? "NoVa+ está pensando..." 
-                                    : "NoVa+ está escribiendo..."
-                                  }
-                                </span>
-                              </div>
-                            )}
+                            {message.role === "assistant" &&
+                              message.id ===
+                                messages[messages.length - 1]?.id &&
+                              (status === "submitted" ||
+                                status === "streaming") && (
+                                <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
+                                  <Loader />
+                                  <span>NoVa+ está pensando...</span>
+                                </div>
+                              )}
                           </MessageContent>
                           {/* Timestamp debajo del mensaje */}
                           {message.metadata?.createdAt && (
@@ -181,6 +173,8 @@ const ConversationDemo = ({ chatSessionId }: { chatSessionId: string | null }) =
   );
 };
 
-export default function NewChatInterface({ chatSessionId }: NewChatInterfaceProps) {
-  return <ConversationDemo chatSessionId={chatSessionId} />
+export default function NewChatInterface({
+  chatSessionId,
+}: NewChatInterfaceProps) {
+  return <ConversationDemo chatSessionId={chatSessionId} />;
 }

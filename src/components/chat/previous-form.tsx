@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { EvaluationFormData } from "@/types/types"
+import { createFormChatSessionAction } from "@/lib/actions/actions-chat"
 
 interface FormularioEvaluacionProps {
   onFormComplete?: () => void
@@ -17,6 +18,7 @@ interface FormularioEvaluacionProps {
 
 export default function FormularioEvaluacion({ onFormComplete, setChatSessionID, slug }: FormularioEvaluacionProps) {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<EvaluationFormData>({
     gender: "",
     age: "",
@@ -31,26 +33,54 @@ export default function FormularioEvaluacion({ onFormComplete, setChatSessionID,
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleStep1Submit = () => {
+  const handleStep1Submit = async () => {
     if (formData.onlineGaming === "no") {
       // Si responde No, mostrar resultado final
       // MOSTRARLE AL USUARIO DE MANERA AMIGABLE QUE ESTA CARGANDO
-      // CREAR chatSessions y obtener ID
-      // CREAR evaluationForm asociado a chatSession y asignar en chatSession el nivel de riesgo en 0
-      // SETEAR setChatSessionID CON EL ID DE LA SESION
-      setCurrentStep(3)
+      setIsLoading(true);
+      try {
+        // CREAR chatSessions y obtener ID
+        const result = await createFormChatSessionAction({ formData, slug });
+        
+        if (result.success && result.chatSessionId) {
+          // CREAR evaluationForm asociado a chatSession y asignar en chatSession el nivel de riesgo en 0
+          // SETEAR setChatSessionID CON EL ID DE LA SESION
+          setChatSessionID?.(result.chatSessionId);
+          setCurrentStep(3);
+        } else {
+          console.error("Error creating chat session:", result.error);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       // Si responde Sí, ir al paso 2
       setCurrentStep(2)
     }
   }
 
-  const handleStep2Submit = () => {
+  const handleStep2Submit = async () => {
     // MOSTRARLE AL USUARIO DE MANERA AMIGABLE QUE ESTA CARGANDO
-    // CREAR chatSessions y obtener ID
-    // CREAR evaluationForm asociado a chatSession y asignar en chatSession el nivel de riesgo
-    // SETEAR setChatSessionID CON EL ID DE LA SESION
-    setCurrentStep(3)
+    setIsLoading(true);
+    try {
+      // CREAR chatSessions y obtener ID
+      const result = await createFormChatSessionAction({ formData, slug });
+      
+      if (result.success && result.chatSessionId) {
+        // CREAR evaluationForm asociado a chatSession y asignar en chatSession el nivel de riesgo
+        // SETEAR setChatSessionID CON EL ID DE LA SESION
+        setChatSessionID?.(result.chatSessionId);
+        setCurrentStep(3);
+      } else {
+        console.error("Error creating chat session:", result.error);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -129,10 +159,10 @@ export default function FormularioEvaluacion({ onFormComplete, setChatSessionID,
 
                 <Button
                   onClick={handleStep1Submit}
-                  disabled={!formData.onlineGaming}
+                  disabled={!formData.onlineGaming || isLoading}
                   className="w-full bg-gray-900 hover:bg-gray-800 text-white"
                 >
-                  Continuar
+                  {isLoading ? "Cargando..." : "Continuar"}
                 </Button>
               </>
             )}
@@ -205,15 +235,20 @@ export default function FormularioEvaluacion({ onFormComplete, setChatSessionID,
                 </div>
 
                 <div className="flex space-x-4">
-                  <Button variant="outline" onClick={() => setCurrentStep(1)} className="flex-1">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setCurrentStep(1)} 
+                    disabled={isLoading}
+                    className="flex-1"
+                  >
                     Volver
                   </Button>
                   <Button
                     onClick={handleStep2Submit}
-                    disabled={!formData.couldntStop || !formData.personalIssues || !formData.triedToQuit}
+                    disabled={!formData.couldntStop || !formData.personalIssues || !formData.triedToQuit || isLoading}
                     className="flex-1 bg-gray-900 hover:bg-gray-800 text-white"
                   >
-                    Finalizar Evaluación
+                    {isLoading ? "Cargando..." : "Finalizar Evaluación"}
                   </Button>
                 </div>
               </>
