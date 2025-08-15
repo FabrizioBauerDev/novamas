@@ -2,7 +2,9 @@ import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { env } from 'process';
+import { config } from 'dotenv';
+import {getRelevantInformation} from "@/lib/pgvector/utils";
+config({ path: '.env.local' });
 
 // Permite respuestas de streaming hasta 30 segundos
 export const maxDuration = 30;
@@ -10,7 +12,7 @@ export const maxDuration = 30;
 export async function POST(req: Request) {
   // Verificar autenticación
   const session = await auth();
-  
+
   if (!session || !session.user) {
     console.error('Error en API chatNova - No autorizado');
     return NextResponse.json(
@@ -20,7 +22,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const system = env.SYSTEM_PROMPT;
+    const system = process.env.SYSTEM_PROMPT;
     const { messages } = await req.json();
     // +++++ CON GEMMA +++++
     // Unir el system prompt con los mensajes
@@ -29,6 +31,10 @@ export async function POST(req: Request) {
     // +++++ CON GEMINI 2.0 FLASH +++++
     // Pasamos el system prompt como un parametro
     // adicionaly no lo unimos a los mensajes
+    const info = await getRelevantInformation(messages[messages.length-1].content);
+    console.log('ragResponse:', info);
+    console.log(messages[messages.length-1].content);
+
 
     const result = streamText({
       model: google('gemini-2.0-flash'),
@@ -44,10 +50,10 @@ export async function POST(req: Request) {
       //   });
       // },
       onFinish: ({ usage }) => {
-      const { promptTokens } = usage;
-      // Guardar en algún lado los prompt tokens?
-      console.log('Prompt tokens:', promptTokens);
-    },
+        const { promptTokens } = usage;
+        // Guardar en algún lado los prompt tokens?
+        console.log('Prompt tokens:', promptTokens);
+      },
       // Temperatura, top_p y no se si top_k se pueden pasar aquí
     });
 
