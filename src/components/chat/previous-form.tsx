@@ -21,6 +21,7 @@ export default function FormularioEvaluacion({ onFormComplete, setChatSessionID,
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isFormCompleted, setIsFormCompleted] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [formData, setFormData] = useState<EvaluationFormData>({
     gender: "",
     age: "",
@@ -173,13 +174,25 @@ export default function FormularioEvaluacion({ onFormComplete, setChatSessionID,
                     </div>
                   </RadioGroup>
                 </div>
-
+                <div className="flex items-start space-x-2">
+                  <input
+                    id="terms"
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-gray-900"
+                  />
+                  <label htmlFor="terms" className="text-sm text-gray-700">
+                    Acepto los <a className="underline" href="/terminos" target="_blank" rel="noopener noreferrer">Términos</a> y la <a className="underline" href="/privacidad" target="_blank" rel="noopener noreferrer">Política de Privacidad</a>.
+                  </label>
+                </div>
                 <Button
                   onClick={handleStep1Submit}
                   disabled={
                     !formData.gender ||
                     !formData.age ||
                     !formData.onlineGaming ||
+                    !termsAccepted ||
                     isLoading
                   }
                   className="w-full bg-gray-900 hover:bg-gray-800 text-white"
