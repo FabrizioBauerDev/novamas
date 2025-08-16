@@ -25,8 +25,7 @@ CREATE TABLE "ChatGroup" (
 	"startDate" timestamp NOT NULL,
 	"endDate" timestamp NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "ChatGroup_slug_unique" UNIQUE("slug")
+	"updatedAt" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "ChatSession" (
@@ -50,8 +49,20 @@ CREATE TABLE "Message" (
 	"createdAt" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "User" ADD COLUMN "role" "UserRole" NOT NULL;--> statement-breakpoint
-ALTER TABLE "User" ADD COLUMN "status" "UserStatus" DEFAULT 'ACTIVO' NOT NULL;--> statement-breakpoint
+CREATE TABLE "User" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" text NOT NULL,
+	"email" text NOT NULL,
+	"password" text NOT NULL,
+	"role" "UserRole" NOT NULL,
+	"status" "UserStatus" DEFAULT 'ACTIVO' NOT NULL,
+	"emailVerified" timestamp,
+	"image" text,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "User_email_unique" UNIQUE("email")
+);
+--> statement-breakpoint
 ALTER TABLE "ChatGroupMember" ADD CONSTRAINT "ChatGroupMember_userId_User_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "ChatGroupMember" ADD CONSTRAINT "ChatGroupMember_chatGroupId_ChatGroup_id_fk" FOREIGN KEY ("chatGroupId") REFERENCES "public"."ChatGroup"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "ChatGroup" ADD CONSTRAINT "ChatGroup_creatorId_User_id_fk" FOREIGN KEY ("creatorId") REFERENCES "public"."User"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

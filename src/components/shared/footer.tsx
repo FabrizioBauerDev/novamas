@@ -1,5 +1,4 @@
 import Link from "next/link";
-import ChatButton from "@/components/shared/chat-button";
 
 export default function Footer() {
 
@@ -39,9 +38,9 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <ChatButton className="text-gray-300 hover:text-white transition-colors">
+                <Link href="/chatNova" className="text-gray-300 hover:text-white transition-colors">
                   Chat con NoVa+
-                </ChatButton>
+                </Link>
               </li>
               <li>
                 <Link href="/recursos" className="text-gray-300 hover:text-white transition-colors">

@@ -10,13 +10,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { User, LogOut } from "lucide-react";
 import Link from "next/link";
-import { handleSignOut } from "@/lib/actions";
+import { handleSignOut } from "@/lib/actions/actions-auth";
 
-interface DropboxUserProps {
-  handleChatNavigation: () => void;
-}
-
-export default function DropboxUser({ handleChatNavigation }: DropboxUserProps) {
+export default function DropboxUser() {
   const menuItemClass = "hover:bg-gray-200 focus:bg-gray-200 data-[highlighted]:bg-gray-200";
   return (
     <>
@@ -44,7 +40,7 @@ export default function DropboxUser({ handleChatNavigation }: DropboxUserProps) 
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuLabel>ChatNova+</DropdownMenuLabel>
-          <DropdownMenuItem className={menuItemClass} onClick={handleChatNavigation}>Nuevo chat</DropdownMenuItem>
+          <Link href="/chatNova"><DropdownMenuItem className={menuItemClass}>Nuevo chat</DropdownMenuItem></Link>
           <DropdownMenuSeparator />
           <DropdownMenuItem className={menuItemClass} onClick={handleSignOut}><LogOut className="w-5 h-5" />Cerrar sesión</DropdownMenuItem>
         </DropdownMenuContent>

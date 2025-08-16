@@ -39,7 +39,7 @@ export const chatGroups = pgTable("ChatGroup", {
   id: uuid("id").primaryKey().defaultRandom(),
   creatorId: uuid("creatorId").notNull().references(() => users.id),
   name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
+  slug: text("slug").notNull(),
   description: text("description"),
   password: text("password").notNull(),
   startDate: timestamp("startDate", { mode: "date" }).notNull(),

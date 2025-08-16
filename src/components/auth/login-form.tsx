@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, User, Lock, Loader2 } from "lucide-react";
 import { useActionState } from "react";
-import { authenticate } from "@/lib/actions";
+import { authenticate } from "@/lib/actions/actions-auth";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);

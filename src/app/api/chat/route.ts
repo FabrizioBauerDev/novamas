@@ -2,9 +2,6 @@ import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import { config } from 'dotenv';
-import {getRelevantInformation} from "@/lib/pgvector/utils";
-config({ path: '.env.local' });
 
 // Permite respuestas de streaming hasta 30 segundos
 export const maxDuration = 30;
@@ -31,9 +28,6 @@ export async function POST(req: Request) {
     // +++++ CON GEMINI 2.0 FLASH +++++
     // Pasamos el system prompt como un parametro
     // adicionaly no lo unimos a los mensajes
-    const info = await getRelevantInformation(messages[messages.length-1].content);
-    console.log('ragResponse:', info);
-    console.log(messages[messages.length-1].content);
 
 
     const result = streamText({

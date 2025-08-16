@@ -3,6 +3,7 @@ import { roboto } from '@/components/fonts';
 import "./globals.css";
 import Footer from '@/components/shared/footer';
 import Navbar from '@/components/shared/navbar';
+import { Analytics } from '@vercel/analytics/next';
 import { auth } from "@/auth";
 
 export const metadata: Metadata = {
@@ -29,6 +30,7 @@ export default async function RootLayout({
         <Navbar user={session?.user}/>
         {children}
         <Footer/>
+        <Analytics />
       </body>
     </html>
   );

@@ -1,6 +1,5 @@
 import { auth } from "@/auth"
 import Link from "next/link"
-import ChatButton from '@/components/shared/chat-button'
 import { redirect } from "next/navigation"
 
 export default async function DashboardPage() {
@@ -84,9 +83,12 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-medium text-gray-900 mb-4">Acciones Rápidas</h2>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex flex-wrap gap-4">
-              <ChatButton className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+              <Link
+                href="/chatNova"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              >
                 🤖 Ir al Chat NoVa+
-              </ChatButton>
+              </Link>
               <Link
                 href="/recursos"
                 className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
