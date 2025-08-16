@@ -1,4 +1,4 @@
-import {pgTable, text, timestamp, integer, uuid} from "drizzle-orm/pg-core";
+import {pgTable, text, timestamp, uuid} from "drizzle-orm/pg-core";
 import { vector } from "drizzle-orm/pg-core";
 
 // Tabla de libros

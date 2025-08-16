@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBibliography, loadMarkdown, deleteMarkdown } from "@/lib/pgvector/utils";
-import PDFToMarkdown from "pdf2md-ts";
 
 export async function GET() {
     try {
@@ -18,6 +17,8 @@ export async function POST(request: NextRequest) {
         const title = formData.get("title") as string;
         const author = formData.get("author") as string;
         const description = formData.get("description") as string;
+
+        const { default: PDFToMarkdown } = await import("pdf2md-ts")
 
         const arrayBuffer = await file.arrayBuffer();
         const markdownArray = await PDFToMarkdown(arrayBuffer);
