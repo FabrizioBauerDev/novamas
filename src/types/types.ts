@@ -1,5 +1,6 @@
 import { UIMessage } from 'ai';
 import { z } from 'zod';
+import { GenderType, CouldntStopType, PersonalIssuesType, BooleanType } from '@/lib/enums';
 
 // Define your metadata schema
 export const messageMetadataSchema = z.object({
@@ -14,12 +15,12 @@ export type MyUIMessage = UIMessage<MessageMetadata>;
 
 // Define a type for the form data used in the evaluation form
 export interface EvaluationFormData {
-  gender: string;
+  gender: GenderType | "";
   age: string;
-  onlineGaming: string;
-  couldntStop: string;
-  personalIssues: string;
-  triedToQuit: string;
+  onlineGaming: BooleanType | "";
+  couldntStop: CouldntStopType | "";
+  personalIssues: PersonalIssuesType | "";
+  triedToQuit: BooleanType | "";
   score: number;
   location?: {
     latitude: number;
