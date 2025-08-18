@@ -31,7 +31,7 @@ export interface EvaluationFormData {
   };
 }
 
-// Tipo para ChatGroup con información del creador
+// Tipo para ChatGroup con información del creador y participantes
 export interface ChatGroupWithCreator {
   id: string
   creatorId: string
@@ -44,4 +44,10 @@ export interface ChatGroupWithCreator {
   createdAt: Date
   updatedAt: Date
   creatorName?: string | null
+  participants?: {
+    id: string
+    name: string | null
+    email: string
+    joinedAt: Date
+  }[]
 }

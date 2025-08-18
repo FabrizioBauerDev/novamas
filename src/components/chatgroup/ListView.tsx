@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import SearchBar from "./SearchBar";
 import ChatGroupList from "./ChatGroupList";
 import Pagination from "./Pagination";
@@ -12,6 +13,7 @@ import {
 import { ChatGroupWithCreator } from "@/types/types";
 
 export default function ListView() {
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("");
   const [chatGroups, setChatGroups] = useState<ChatGroupWithCreator[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -68,8 +70,7 @@ export default function ListView() {
   };
 
   const handleView = (group: ChatGroupWithCreator) => {
-    // TODO: Implementar navegación a vista del grupo
-    console.log("Ver grupo:", group.name);
+    router.push(`/chatgroup/${group.id}`)
   };
 
   const handleDeleteClick = (group: ChatGroupWithCreator) => {

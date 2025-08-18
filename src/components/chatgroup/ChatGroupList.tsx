@@ -15,7 +15,7 @@ export default function ChatGroupList({ groups, searchTerm, onView, onDelete }: 
   return (
     <div className="space-y-2">
       {groups.length === 0 ? (
-        <EmptyState hasSearchTerm={!!searchTerm} searchTerm={searchTerm} />
+        <EmptyState hasSearchTerm={!!searchTerm} />
       ) : (
         groups.map((group) => (
           <ChatGroupCard

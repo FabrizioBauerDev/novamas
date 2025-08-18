@@ -1,5 +1,5 @@
 import { db } from "@/db"
-import { chatGroups, users } from "@/db/schema"
+import { chatGroups, users, chatGroupMembers } from "@/db/schema"
 import { eq, desc } from "drizzle-orm"
 
 // Obtener todos los ChatGroups con información del creador, ordenados por startDate
@@ -30,10 +30,11 @@ export async function getAllChatGroups() {
   }
 }
 
-// Obtener un ChatGroup por ID con información del creador
+// Obtener un ChatGroup por ID con información del creador y participantes
 export async function getChatGroupById(id: string) {
   try {
-    const result = await db
+    // Obtener información básica del grupo
+    const groupResult = await db
       .select({
         id: chatGroups.id,
         creatorId: chatGroups.creatorId,
@@ -52,7 +53,28 @@ export async function getChatGroupById(id: string) {
       .where(eq(chatGroups.id, id))
       .limit(1)
 
-    return result[0] || null
+    const group = groupResult[0]
+    if (!group) {
+      return null
+    }
+
+    // Obtener participantes del grupo
+    const membersResult = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        joinedAt: chatGroupMembers.createdAt,
+      })
+      .from(chatGroupMembers)
+      .innerJoin(users, eq(chatGroupMembers.userId, users.id))
+      .where(eq(chatGroupMembers.chatGroupId, id))
+
+    // Combinar la información del grupo con sus participantes
+    return {
+      ...group,
+      participants: membersResult
+    }
   } catch (error) {
     console.error("Error fetching chat group by ID:", error)
     throw new Error("Failed to fetch chat group")

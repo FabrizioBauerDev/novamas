@@ -106,7 +106,7 @@ export const evaluationForms = pgTable("EvaluationForm", {
 });
 
 // Definición de relaciones
-export const usersRelations = relations(users, ({ many, one }) => ({
+export const usersRelations = relations(users, ({ many }) => ({
   createdChatGroups: many(chatGroups),
   chatGroupMemberships: many(chatGroupMembers),
 }));

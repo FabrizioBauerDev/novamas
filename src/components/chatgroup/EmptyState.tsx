@@ -4,10 +4,9 @@ import { Card, CardContent } from "@/components/ui/card"
 
 interface EmptyStateProps {
   hasSearchTerm: boolean
-  searchTerm?: string
 }
 
-export default function EmptyState({ hasSearchTerm, searchTerm }: EmptyStateProps) {
+export default function EmptyState({ hasSearchTerm }: EmptyStateProps) {
   return (
     <Card className="border-2">
       <CardContent className="p-8 text-center">

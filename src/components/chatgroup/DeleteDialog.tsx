@@ -25,7 +25,7 @@ export default function DeleteDialog({ isOpen, onOpenChange, groupToDelete, onCo
         <DialogHeader>
           <DialogTitle>Confirmar eliminación</DialogTitle>
           <DialogDescription>
-            ¿Estás seguro de que deseas eliminar la sesión grupal "{groupToDelete?.name}"? Esta acción no se puede
+            ¿Estás seguro de que deseas eliminar la sesión grupal &quot;{groupToDelete?.name}&quot;? Esta acción no se puede
             deshacer.
           </DialogDescription>
         </DialogHeader>
