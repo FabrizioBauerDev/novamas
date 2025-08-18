@@ -30,3 +30,18 @@ export interface EvaluationFormData {
     accuracy?: number;
   };
 }
+
+// Tipo para ChatGroup con información del creador
+export interface ChatGroupWithCreator {
+  id: string
+  creatorId: string
+  name: string
+  slug: string
+  description?: string | null
+  password: string
+  startDate: Date
+  endDate: Date
+  createdAt: Date
+  updatedAt: Date
+  creatorName?: string | null
+}
