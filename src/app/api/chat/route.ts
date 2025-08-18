@@ -1,5 +1,5 @@
 import { google } from "@ai-sdk/google";
-import { streamText, convertToModelMessages, createIdGenerator } from "ai";
+import {streamText, convertToModelMessages, createIdGenerator, tool, ToolSet} from "ai";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { env } from "process";
@@ -11,9 +11,27 @@ import {
   saveChat,
 } from "@/lib/db";
 import { createWelcomeMessage } from "@/lib/chat-utils";
+import {getRelevantInformation} from "@/lib/pgvector/utils";
+import {z} from "zod";
 
 // Permite respuestas de streaming hasta 30 segundos
 export const maxDuration = 30;
+
+const tools: ToolSet = {
+  getInformation: tool({
+        description: `Utiliza la información obtenida de una base de conocimiento especializada cuando sea necesario.`,
+        inputSchema: z.object({
+          question: z.string().describe('pregunta del usuario'),
+        }),
+        execute: async ({ question }) => {
+          // Llamás a tu función para obtener información relevante
+          const ragResponse = await getRelevantInformation(question);
+          console.log("\nTOOL CALL CON PREGUNTA: ", question, "\n")
+          console.log("Respuesta RAG: ", ragResponse)
+          return ragResponse;
+        },
+      })
+}
 
 export async function POST(req: Request) {
   // Verificar autenticación
@@ -93,6 +111,7 @@ export async function POST(req: Request) {
       //   console.log(logString + "Total tokens:", totalTokens);
       // },
       // Temperatura, top_p y no se si top_k se pueden pasar aquí
+      tools,
     });
 
     result.consumeStream();
