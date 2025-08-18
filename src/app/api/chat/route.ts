@@ -78,20 +78,6 @@ export async function POST(req: Request) {
       messages: convertToModelMessages(allMessages), // Convertir UIMessages a ModelMessages
       system,
       // maxOutputTokens: 4096, // Renamed from maxTokens
-      // onFinish: ({ usage }) => {
-      //   const { inputTokens, outputTokens, totalTokens } = usage; // Property names changed
-
-      //   /* inputTokens --> Son los tokens que corresponden a tu entrada (input)
-      //      Incluye el mensaje del usuario + el prompt del sistema + el historial de conversación */
-      //   console.log(logString + "Input tokens:", inputTokens); // Renamed from promptTokens
-
-      //   /* outputTokens --> Son los tokens que corresponde a la respuesta generada por el modelo.
-      //      Todo el texto que el modelo produce como salida */
-      //   console.log(logString + "Output tokens:", outputTokens); // Renamed from completionTokens
-
-      //   /* totalTokens --> Son todos los tokens utilizados en la conversación, incluyendo tanto la entrada como la salida */
-      //   console.log(logString + "Total tokens:", totalTokens);
-      // },
       // Temperatura, top_p y no se si top_k se pueden pasar aquí
     });
 
@@ -108,7 +94,6 @@ export async function POST(req: Request) {
         }
         // Send additional metadata when streaming completes
         if (part.type === "finish") {
-          console.log("Streaming finished | ", part);
           return {
             // Para mensajes del asistente, incluir todos los tipos de tokens
             messageTokensIn: part.totalUsage.inputTokens,
