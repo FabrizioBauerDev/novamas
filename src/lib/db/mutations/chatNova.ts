@@ -127,7 +127,9 @@ export async function saveChat({
           chatSessionId: chatSessionId,
           sender: validRole,
           content: textContent,
-          messageTokens: uiMessage.metadata?.messageTokens || null,
+          messageTokensIn: uiMessage.metadata?.messageTokensIn || null,
+          messageTokensOut: uiMessage.metadata?.messageTokensOut || null,
+          messageTokensReasoning: uiMessage.metadata?.messageTokensReasoning || null,
           createdAt: uiMessage.metadata?.createdAt 
             ? new Date(uiMessage.metadata.createdAt) 
             : new Date(),

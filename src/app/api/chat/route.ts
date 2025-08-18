@@ -110,8 +110,10 @@ export async function POST(req: Request) {
         if (part.type === "finish") {
           console.log("Streaming finished | ", part);
           return {
-            // Si es del asistente el outputTokens tiene los tokens del mensaje
-            messageTokens: part.totalUsage.outputTokens,
+            // Para mensajes del asistente, incluir todos los tipos de tokens
+            messageTokensIn: part.totalUsage.inputTokens,
+            messageTokensOut: part.totalUsage.outputTokens,
+            messageTokensReasoning: part.totalUsage.reasoningTokens || 0,
           };
         }
       },

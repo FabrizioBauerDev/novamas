@@ -5,7 +5,9 @@ import { GenderType, CouldntStopType, PersonalIssuesType, BooleanType } from '@/
 // Define your metadata schema
 export const messageMetadataSchema = z.object({
   createdAt: z.number().optional(),
-  messageTokens: z.number().optional(),
+  messageTokensIn: z.number().optional(),
+  messageTokensOut: z.number().optional(),
+  messageTokensReasoning: z.number().optional(),
 });
 
 export type MessageMetadata = z.infer<typeof messageMetadataSchema>;

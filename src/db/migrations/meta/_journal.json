@@ -15,6 +15,13 @@
       "when": 1755447664292,
       "tag": "0001_lying_reaper",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1755524161990,
+      "tag": "0002_volatile_risque",
+      "breakpoints": true
     }
   ]
 }
