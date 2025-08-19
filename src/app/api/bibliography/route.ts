@@ -31,9 +31,9 @@ async function convertPdfToMarkdown(buffer: Buffer<ArrayBuffer>) {
         const resultString: string = response.data;
         console.log(resultString);
         return resultString;
-    } catch (e: any) {
-        console.error(e.response.data);
-        console.error(e);
+    } catch (error) {
+        console.error("Error convirtiendo el archivo PDF a Markdown", error);
+        console.error(error);
         throw new Error(
             "Error converting PDF to Markdown"
         )

@@ -311,7 +311,7 @@ export default function BibliographyPage() {
                                                         <AlertDialogHeader>
                                                             <AlertDialogTitle>Eliminar Documentacion</AlertDialogTitle>
                                                             <AlertDialogDescription>
-                                                                ¿Estas seguro que deseas eliminar "{resource.title}"? Esto va a remover el documento de
+                                                                ¿Estas seguro que deseas eliminar &quot{resource.title}&quot? Esto va a remover el documento de
                                                                 el conocimiento del asistente y la acción no se puede deshacer.
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
