@@ -24,12 +24,12 @@ export default function Pagination({
   const endIndex = startIndex + itemsPerPage
 
   return (
-    <div className="flex items-center justify-between mt-8">
-      <p className="text-sm text-muted-foreground">
+    <div className="flex flex-col md:flex-row items-center justify-between mt-8 gap-4">
+      <p className="text-sm text-muted-foreground w-full md:w-auto text-center md:text-left">
         Mostrando {startIndex + 1} a {Math.min(endIndex, totalItems)} de {totalItems} sesiones
       </p>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 justify-center w-full md:w-auto">
         <Button
           variant="outline"
           size="sm"

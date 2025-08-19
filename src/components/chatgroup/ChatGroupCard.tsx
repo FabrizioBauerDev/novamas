@@ -22,21 +22,21 @@ export default function ChatGroupCard({ group, onView, onDelete }: ChatGroupCard
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <h3 className="text-xl font-semibold text-foreground">{group.name}</h3>
               <span className="text-sm text-muted-foreground">por {group.creatorName}</span>
-              {new Date() >= group.startDate && new Date() <= group.endDate && (
-                <span className="inline-block rounded-full bg-green-500 px-2 py-1 text-xs font-semibold text-white">
+                {new Date() >= group.startDate && new Date() <= group.endDate && (
+                <span className="inline-block rounded-full bg-green-500 px-2 py-1 text-xs font-semibold text-white w-fit">
                   ACTIVO
                 </span>
-              )}
-              {new Date() > group.endDate && (
-                <span className="inline-block rounded-full bg-red-500 px-2 py-1 text-xs font-semibold text-white">
+                )}
+                {new Date() > group.endDate && (
+                <span className="inline-block rounded-full bg-red-500 px-2 py-1 text-xs font-semibold text-white w-fit">
                   FINALIZADO
                 </span>
-              )}
-              {new Date() < group.startDate && (
-                <span className="inline-block rounded-full bg-gray-500 px-2 py-1 text-xs font-semibold text-white">
+                )}
+                {new Date() < group.startDate && (
+                <span className="inline-block rounded-full bg-gray-500 px-2 py-1 text-xs font-semibold text-white w-fit">
                   PENDIENTE
                 </span>
-              )}
+                )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-muted-foreground">

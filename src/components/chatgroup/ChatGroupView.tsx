@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getChatGroupByIdAction } from "@/lib/actions/actions-chatgroup";
 import { ChatGroupWithCreator } from "@/types/types";
-import QrGenerator from "./QrGenerator";
+import QrGenerator from "@/components/shared/QrGenerator";
+import Link from "next/link";
 
 interface ChatGroupDetailPageProps {
   id: string;
@@ -204,10 +205,10 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
           <p className="text-muted-foreground mb-4">
             {error || "El grupo que buscas no existe o ha sido eliminado."}
           </p>
-          <Button onClick={() => router.push("/chatgroup")}>
+          <Link href="/chatgroup">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver a la lista
-          </Button>
+          </Link>
         </div>
       </div>
     );
@@ -415,7 +416,7 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
                       <div>
                         <p className="font-medium text-sm">{participant.name || 'Sin nombre'}</p>
                         <p className="text-xs text-muted-foreground">
-                          Se unió: {participant.joinedAt.toLocaleDateString()}
+                          Añadido/a el: {participant.joinedAt.toLocaleDateString()}
                         </p>
                       </div>
                     </div>
