@@ -51,7 +51,7 @@ export async function deleteMarkdown(id: string) {
 }
 
 // funcion para obtener un arreglo de los contenidos mas relevantes sobre la query dada
-export async function getRelevantInformation(query: string): Promise<string[]> {
+export async function getRelevantInformation(query: string): Promise<string> {
     const queryEmbed = await generateEmbeddingsQuery(query)
 
     // con esto calcula la similitud entre la columna de embedding y la queryEmbed
@@ -64,5 +64,6 @@ export async function getRelevantInformation(query: string): Promise<string[]> {
         .orderBy((t) => desc(t.similarity))
         .limit(3);
     console.log(similarGuides);
-    return similarGuides.map(content => content.content);
+    const result_array = similarGuides.map(content => content.content);
+    return result_array.join("\n");
 }

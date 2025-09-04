@@ -15,5 +15,5 @@ export const chunk = pgTable("chunk", {
     id: uuid("id").primaryKey().defaultRandom(),
     resource_id: uuid("resource_id").notNull().references(() => bibliography.id),
     content: text("content").notNull(),
-    embedding: vector("embedding", { dimensions: 384 }).notNull(), // dimension de los vectores de all-MiniLM-L6-v2
+    embedding: vector("embedding", { dimensions: 768 }).notNull(), // dimension de los vectores de all-MiniLM-L6-v2
 });

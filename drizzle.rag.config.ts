@@ -1,10 +1,10 @@
 import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({
-    schema: "./src/bibliography/schema.ts",
-    out: "./src/bibliography/migrations",
+    schema: "./src/rag/schema.ts",
+    out: "./src/rag/migrations",
     dialect: "postgresql",
     dbCredentials: {
-        url: process.env.RAG_DATABASE_URL!,
+        url: process.env.RAG_DB_URL!,
     },
 });

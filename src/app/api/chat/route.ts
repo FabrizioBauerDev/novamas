@@ -16,7 +16,7 @@ import {z} from "zod";
 
 // Permite respuestas de streaming hasta 30 segundos
 export const maxDuration = 30;
-
+/*
 const tools: ToolSet = {
   getInformation: tool({
         description: `Utiliza la información obtenida de una base de conocimiento especializada cuando sea necesario.`,
@@ -24,15 +24,41 @@ const tools: ToolSet = {
           question: z.string().describe('pregunta del usuario'),
         }),
         execute: async ({ question }) => {
-          // Llamás a tu función para obtener información relevante
-          const ragResponse = await getRelevantInformation(question);
-          console.log("\nTOOL CALL CON PREGUNTA: ", question, "\n")
-          console.log("Respuesta RAG: ", ragResponse)
-          return ragResponse;
+          try{
+            // Llamás a tu función para obtener información relevante
+            console.log("\nENTRO AL RAG")
+            const ragResponse = await getRelevantInformation(question);
+            console.log("\nTOOL CALL CON PREGUNTA: ", question, "\n")
+            const cleanedRagResponse = ragResponse.replace(/[\n\r]+/g, ' ');
+
+            const limitedRag = cleanedRagResponse.split(" ").slice(0, 100).join(" ");
+            console.log("Respuesta RAG: ", limitedRag)
+            return { content: limitedRag };
+          }catch(error){
+            console.error("Error en RAG:", error);
+            return "Error al recuperar información.";
+          }
         },
       })
 }
+*/
 
+async function getInformation(query: string){
+  try{
+    // Llamás a tu función para obtener información relevante
+    console.log("\nENTRO AL RAG")
+    const ragResponse = await getRelevantInformation(query);
+    console.log("\nTOOL CALL CON PREGUNTA: ", query, "\n")
+    const cleanedRagResponse = ragResponse.replace(/[\n\r]+/g, ' ');
+
+    const limitedRag = cleanedRagResponse.split(" ").slice(0, 100).join(" ");
+    console.log("Respuesta RAG: ", limitedRag)
+    return { content: limitedRag };
+  }catch(error){
+    console.error("Error en RAG:", error);
+    return "Error al recuperar información.";
+  }
+}
 export async function POST(req: Request) {
   // Verificar autenticación
   const session = await auth();
@@ -51,6 +77,11 @@ export async function POST(req: Request) {
     // Siguiendo la guía AI SDK: recibir solo el último mensaje cuando se optimiza
     const { message, id }: { message: MyUIMessage; id: string } =
         await req.json();
+
+    const textParts = message.parts.filter(part => part.type === 'text');
+    const messageContent = textParts.map(part => part.text).join('');
+    console.log(logString + "Mensaje recibido:", messageContent);
+    const ragResponse = getInformation(messageContent);
 
     // Obtener la sesion de chat para comprobar si tiene asociado un grupo de chat
     const chatSession = await getChatSessionById(id);
@@ -90,31 +121,22 @@ export async function POST(req: Request) {
     }
     message.metadata = message.metadata ?? {};
     message.metadata.createdAt = Date.now();
+    console.log("Antes del streamText")
+    const newSystemPrompt = system + "\n\n Si existe información en la herramienta RAG, debes usar únicamente esa información. Ignora cualquier conocimiento previo o información interna." + ragResponse;
 
     const result = streamText({
       model: google("gemini-2.5-flash"),
       messages: convertToModelMessages(allMessages), // Convertir UIMessages a ModelMessages
-      system,
+      system: newSystemPrompt,
+      temperature: 0,
       // maxOutputTokens: 4096, // Renamed from maxTokens
-      // onFinish: ({ usage }) => {
-      //   const { inputTokens, outputTokens, totalTokens } = usage; // Property names changed
-
-      //   /* inputTokens --> Son los tokens que corresponden a tu entrada (input)
-      //      Incluye el mensaje del usuario + el prompt del sistema + el historial de conversación */
-      //   console.log(logString + "Input tokens:", inputTokens); // Renamed from promptTokens
-
-      //   /* outputTokens --> Son los tokens que corresponde a la respuesta generada por el modelo.
-      //      Todo el texto que el modelo produce como salida */
-      //   console.log(logString + "Output tokens:", outputTokens); // Renamed from completionTokens
-
-      //   /* totalTokens --> Son todos los tokens utilizados en la conversación, incluyendo tanto la entrada como la salida */
-      //   console.log(logString + "Total tokens:", totalTokens);
-      // },
       // Temperatura, top_p y no se si top_k se pueden pasar aquí
-      tools,
+      onError: (error) => {
+        console.error('Error while streaming:', JSON.stringify(error, null, 2))
+      },
     });
 
-    result.consumeStream();
+    console.log(logString + "Resultado de streamText inicializado correctamente");
 
     return result.toUIMessageStreamResponse({
       originalMessages: allMessages, // Pasar todos los mensajes para el contexto
@@ -127,10 +149,11 @@ export async function POST(req: Request) {
         }
         // Send additional metadata when streaming completes
         if (part.type === "finish") {
-          console.log("Streaming finished | ", part);
           return {
-            // Si es del asistente el outputTokens tiene los tokens del mensaje
-            messageTokens: part.totalUsage.outputTokens,
+            // Para mensajes del asistente, incluir todos los tipos de tokens
+            messageTokensIn: part.totalUsage.inputTokens,
+            messageTokensOut: part.totalUsage.outputTokens,
+            messageTokensReasoning: part.totalUsage.reasoningTokens || 0,
           };
         }
       },

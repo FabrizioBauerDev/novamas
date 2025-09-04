@@ -6,6 +6,7 @@ import {
   pgEnum,
   integer,
   real,
+  boolean,
   primaryKey
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
@@ -14,6 +15,9 @@ import { relations } from "drizzle-orm";
 export const userRoleEnum = pgEnum("UserRole", ["ADMINISTRADOR", "INVESTIGADOR", "ESTUDIANTE"]);
 export const userStatusEnum = pgEnum("UserStatus", ["ACTIVO", "DESACTIVADO"]);
 export const senderTypeEnum = pgEnum("SenderType", ["assistant", "user"]);
+export const genderTypeEnum = pgEnum("GenderType", ["MASCULINO", "FEMENINO", "OTRO"]);
+export const couldntStopTypeEnum = pgEnum("CouldntStopType", ["NO", "NO_ES_SEG", "SI"]);
+export const personalIssuesTypeEnum = pgEnum("PersonalIssuesType", ["NO", "NO_AP", "SI"]);
 
 // Definición de campos de timestamps reutilizables
 const timestamps = {
@@ -80,14 +84,29 @@ export const messages = pgTable("Message", {
   chatSessionId: uuid("chatSessionId").notNull().references(() => chatSessions.id),
   sender: senderTypeEnum("sender").notNull(),
   content: text("content").notNull(),
-  messageTokens: integer("messageTokens"),
+  messageTokensIn: integer("messageTokensIn"),
+  messageTokensOut: integer("messageTokensOut"),
+  messageTokensReasoning: integer("messageTokensReasoning"),
   sentimentScore: real("sentimentScore"),
   sentimentLabel: text("sentimentLabel"),
   createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
 });
 
+// Tabla EvaluationForm
+export const evaluationForms = pgTable("EvaluationForm", {
+  id: uuid("id").primaryKey().references(() => chatSessions.id, { onDelete: "cascade" }),
+  gender: genderTypeEnum("gender").notNull(),
+  age: integer("age").notNull(),
+  onlineGaming: boolean("onlineGaming").notNull(),
+  couldntStop: couldntStopTypeEnum("couldntStop").notNull(),
+  personalIssues: personalIssuesTypeEnum("personalIssues").notNull(),
+  triedToQuit: boolean("triedToQuit").notNull(),
+  score: integer("score").notNull(),
+  ...timestamps,
+});
+
 // Definición de relaciones
-export const usersRelations = relations(users, ({ many, one }) => ({
+export const usersRelations = relations(users, ({ many }) => ({
   createdChatGroups: many(chatGroups),
   chatGroupMemberships: many(chatGroupMembers),
 }));
@@ -122,6 +141,10 @@ export const chatSessionsRelations = relations(chatSessions, ({ one, many }) => 
     references: [chatFeedbacks.id],
   }),
   messages: many(messages),
+  evaluationForm: one(evaluationForms, {
+    fields: [chatSessions.id],
+    references: [evaluationForms.id],
+  }),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({
@@ -135,6 +158,13 @@ export const chatFeedbacksRelations = relations(chatFeedbacks, ({ one }) => ({
   chatSession: one(chatSessions, {
     fields: [chatFeedbacks.id],
     references: [chatSessions.chatFeedBackId],
+  }),
+}));
+
+export const evaluationFormsRelations = relations(evaluationForms, ({ one }) => ({
+  chatSession: one(chatSessions, {
+    fields: [evaluationForms.id],
+    references: [chatSessions.id],
   }),
 }));
 
@@ -156,3 +186,6 @@ export type NewMessage = typeof messages.$inferInsert;
 
 export type ChatFeedback = typeof chatFeedbacks.$inferSelect;
 export type NewChatFeedback = typeof chatFeedbacks.$inferInsert;
+
+export type EvaluationForm = typeof evaluationForms.$inferSelect;
+export type NewEvaluationForm = typeof evaluationForms.$inferInsert;

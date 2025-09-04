@@ -9,11 +9,6 @@ import { compare } from "bcrypt";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
-  session: {
-    strategy: "jwt",
-    maxAge: 60 * 60, // 1 hora
-    updateAge: 30 * 60, // Renueva cada 30 minutos si está activo
-  },
   providers: [
     Credentials({
       name: "Credentials",

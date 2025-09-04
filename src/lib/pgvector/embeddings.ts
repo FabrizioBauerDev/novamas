@@ -1,5 +1,5 @@
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { HuggingFaceTransformersEmbeddings } from "@langchain/community/embeddings/huggingface_transformers";
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 
 // splitter para dividir el texto, prefereblemente en los separadores dados "\n\n" y "."
 const generateChunks = new RecursiveCharacterTextSplitter({
@@ -8,15 +8,17 @@ const generateChunks = new RecursiveCharacterTextSplitter({
     separators: ["\n\n", "."],
 });
 
-const model = new HuggingFaceTransformersEmbeddings({
-    model: "Xenova/all-MiniLM-L6-v2",
+const model = new GoogleGenerativeAIEmbeddings({
+    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+    modelName: "embedding-001",
 });
 
 
 // funcion para generar los embeddings del markdownw dado, genera los chunks y los embeddings para cada uno
 export const generateEmbeddingsMd = async (value: string): Promise<Array<{
     embedding: number[]; content: string }>> => {
-    const chunks = await generateChunks.splitText(value);
+    const cleanedContent = value.replace(/[\n]+/g, ' ');
+    const chunks = await generateChunks.splitText(cleanedContent);
 
     const embeddings = await model.embedDocuments(chunks);
 

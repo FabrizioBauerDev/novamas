@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { chatGroups, chatSessions, messages } from "@/db/schema";
+import { chatSessions, evaluationForms, messages } from "@/db/schema";
 import { EvaluationFormData, MyUIMessage } from "@/types/types";
 import { checkChatGroupBySlug } from "../queries/chatNova";
 
@@ -12,6 +12,27 @@ export interface CreateFormChatSessionResult {
   success: boolean;
   chatSessionId?: string;
   error?: string;
+}
+
+// Función para calcular el score del formulario
+function calcScore(formData: EvaluationFormData): number {
+  let score = 0;
+  
+  // Ajustado a los nuevos valores de enum
+  if (formData.couldntStop === "SI") {
+    score += 2;
+  }
+  if (formData.couldntStop === "NO_ES_SEG") {
+    score += 1;
+  }
+  if (formData.personalIssues === "SI") {
+    score += 2;
+  }
+  if (formData.triedToQuit === "true") {  // boolean como string
+    score += 2;
+  }
+  
+  return score;
 }
 
 export async function createFormChatSession({
@@ -33,6 +54,9 @@ export async function createFormChatSession({
         };
       }
     }
+
+    // Calcular el score
+    const calculatedScore = calcScore(formData);
     
     // Iniciar transacción para crear la sesión de chat
     const result = await db.transaction(async (tx) => {
@@ -45,7 +69,19 @@ export async function createFormChatSession({
         })
         .returning({ id: chatSessions.id });
       
-      //Almacenar formulario con el id de la sesión
+      // Crear formulario de evaluación con el mismo ID (relación 1:1)
+      await tx
+        .insert(evaluationForms)
+        .values({
+          id: newChatSession.id, // PK compartida
+          gender: formData.gender as "MASCULINO" | "FEMENINO" | "OTRO",
+          age: parseInt(formData.age),
+          onlineGaming: formData.onlineGaming === "true",
+          couldntStop: formData.couldntStop as "NO" | "NO_ES_SEG" | "SI",
+          personalIssues: formData.personalIssues as "NO" | "NO_AP" | "SI",
+          triedToQuit: formData.triedToQuit === "true",
+          score: calculatedScore,
+        });
       
       return newChatSession.id;
     });
@@ -56,7 +92,7 @@ export async function createFormChatSession({
     };
     
   } catch (error) {
-    console.error("Error creating chat session:", error);
+    console.error("Error creando la sesión de chat:", error);
     return {
       success: false,
       error: "Error interno del servidor"
@@ -91,7 +127,9 @@ export async function saveChat({
           chatSessionId: chatSessionId,
           sender: validRole,
           content: textContent,
-          messageTokens: uiMessage.metadata?.messageTokens || null,
+          messageTokensIn: uiMessage.metadata?.messageTokensIn || null,
+          messageTokensOut: uiMessage.metadata?.messageTokensOut || null,
+          messageTokensReasoning: uiMessage.metadata?.messageTokensReasoning || null,
           createdAt: uiMessage.metadata?.createdAt 
             ? new Date(uiMessage.metadata.createdAt) 
             : new Date(),

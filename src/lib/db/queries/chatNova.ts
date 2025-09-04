@@ -23,7 +23,9 @@ export async function getChat(chatSessionId: string): Promise<UIMessage[]> {
       ],
       metadata: {
         createdAt: msg.createdAt.getTime(),
-        messageTokens: msg.messageTokens || undefined,
+        messageTokensIn: msg.messageTokensIn || undefined,
+        messageTokensOut: msg.messageTokensOut || undefined,
+        messageTokensReasoning: msg.messageTokensReasoning || undefined,
       },
     }));
 
