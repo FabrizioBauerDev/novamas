@@ -16,7 +16,7 @@ async function convertPdfToMarkdown(buffer: Buffer<ArrayBuffer>) {
             type: "markdown",
         },
     };
-
+    console.log("\nConvirtiendo archivo PDF a Markdown\n");
     formData.append("instructions", JSON.stringify(instructions));
     formData.append("file", buffer);
 
