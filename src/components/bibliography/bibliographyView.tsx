@@ -342,7 +342,7 @@ export default function BibliographyView() {
                                                         <AlertDialogHeader>
                                                             <AlertDialogTitle>Eliminar Documentación</AlertDialogTitle>
                                                             <AlertDialogDescription>
-                                                                ¿Estás seguro que deseas eliminar "{resource.title}"?
+                                                                ¿Estás seguro que deseas eliminar &#34{resource.title}&#34?
                                                                 Esto removerá el documento del asistente y no se puede
                                                                 deshacer.
                                                             </AlertDialogDescription>
