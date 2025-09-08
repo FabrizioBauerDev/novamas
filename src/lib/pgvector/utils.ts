@@ -1,5 +1,5 @@
-import {db} from '@/rag/index'
-import {bibliography, chunk} from '@/rag/schema'
+import {db} from '@/db'
+import {bibliography, chunk} from '@/db/schema'
 import { generateEmbeddingsQuery, generateEmbeddingsMd }from '@/lib/pgvector/embeddings'
 import {cosineDistance, eq, sql, gt, desc} from "drizzle-orm";
 import { BibliographyItem } from "@/types/bibliography";
@@ -12,7 +12,7 @@ export const getBibliography = async () : Promise<BibliographyItem[]> => {
         title: b.title,
         author: b.author,
         description: b.description,
-        createdat: b.createdat
+        createdat: b.createdAt
     }))
 }
 

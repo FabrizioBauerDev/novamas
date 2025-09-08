@@ -7,7 +7,8 @@ import {
   integer,
   real,
   boolean,
-  primaryKey
+  primaryKey,
+  vector
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -189,3 +190,43 @@ export type NewChatFeedback = typeof chatFeedbacks.$inferInsert;
 
 export type EvaluationForm = typeof evaluationForms.$inferSelect;
 export type NewEvaluationForm = typeof evaluationForms.$inferInsert;
+
+// ================================================================================================
+// ========================== ESQUEMA RAG - BIBLIOGRAFÍA Y VECTORES =============================
+// ================================================================================================
+
+// Tabla de libros/bibliografía
+export const bibliography = pgTable("bibliography", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull().unique(),
+  author: text("author"),
+  description: text("description"),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow()
+});
+
+// Tabla de chunks con embeddings vectoriales
+export const chunk = pgTable("chunk", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  resource_id: uuid("resource_id").notNull().references(() => bibliography.id),
+  content: text("content").notNull(),
+  embedding: vector("embedding", { dimensions: 768 }).notNull(), // dimension de los vectores de all-MiniLM-L6-v2
+});
+
+// Relaciones RAG
+export const bibliographyRelations = relations(bibliography, ({ many }) => ({
+  chunks: many(chunk),
+}));
+
+export const chunkRelations = relations(chunk, ({ one }) => ({
+  bibliography: one(bibliography, {
+    fields: [chunk.resource_id],
+    references: [bibliography.id],
+  }),
+}));
+
+// Tipos TypeScript para RAG
+export type Bibliography = typeof bibliography.$inferSelect;
+export type NewBibliography = typeof bibliography.$inferInsert;
+
+export type Chunk = typeof chunk.$inferSelect;
+export type NewChunk = typeof chunk.$inferInsert;
