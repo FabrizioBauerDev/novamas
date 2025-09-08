@@ -1,5 +1,5 @@
 import { google } from "@ai-sdk/google";
-import { streamText, convertToModelMessages, createIdGenerator } from "ai";
+import { streamText, convertToModelMessages, tool, stepCountIs } from "ai";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { env } from "process";
@@ -11,9 +11,51 @@ import {
   saveChat,
 } from "@/lib/db";
 import { createWelcomeMessage } from "@/lib/chat-utils";
+import { getRelevantInformation } from "@/lib/pgvector/utils";
+import { z } from "zod";
 
 // Permite respuestas de streaming hasta 30 segundos
 export const maxDuration = 30;
+
+// Definir la tool para búsqueda RAG
+const ragSearchTool = tool({
+  description: `Busca información relevante en la base de conocimiento especializada. 
+    Usa esta herramienta cuando necesites información específica sobre temas académicos, 
+    documentos o cualquier contenido que pueda estar almacenado en la base de datos de conocimiento.`,
+  inputSchema: z.object({
+    query: z.string().describe('La consulta o pregunta para buscar en la base de conocimiento'),
+  }),
+  execute: async ({ query }) => {
+    try {
+      // Validar que el query no esté vacío
+      if (!query || query.trim() === "") {
+        return "La consulta está vacía. Por favor, proporciona una pregunta específica para buscar en la base de conocimiento.";
+      }
+      
+      const ragResponse = await getRelevantInformation(query);
+      
+      // Verificar si la respuesta está vacía o es null/undefined
+      if (!ragResponse || ragResponse.trim() === "") {
+        return "No se encontró información relevante en la base de conocimiento para tu consulta. Puedo ayudarte con información general si lo deseas.";
+      }
+      
+      // Limpiar la respuesta pero mantener más información
+      const cleanedRagResponse = ragResponse.replace(/[\n\r]+/g, ' ').trim();
+      
+      // Verificar después de limpiar
+      if (!cleanedRagResponse || cleanedRagResponse === "") {
+        return "La información encontrada en la base de conocimiento no pudo ser procesada correctamente.";
+      }
+      
+      // Aumentar el límite de palabras para conservar más contexto
+      const limitedRag = cleanedRagResponse.split(" ").slice(0, 300).join(" ");
+      return `Información encontrada en la base de conocimiento: ${limitedRag}
+      Fuente: Base de conocimiento especializada`;
+    } catch (error) {
+      return `Error al acceder a la base de conocimiento: ${error instanceof Error ? error.message : "Error desconocido"}. Puedo ayudarte con información general si lo deseas.`;
+    }
+  },
+});
 
 export async function POST(req: Request) {
   // Verificar autenticación
@@ -21,8 +63,8 @@ export async function POST(req: Request) {
   if (!session || !session.user) {
     console.error("Error en API chatNova - No autorizado");
     return NextResponse.json(
-      { error: "No autorizado. Debes iniciar sesión para usar el chat." },
-      { status: 401 }
+        { error: "No autorizado. Debes iniciar sesión para usar el chat." },
+        { status: 401 }
     );
   }
 
@@ -32,18 +74,18 @@ export async function POST(req: Request) {
 
     // Siguiendo la guía AI SDK: recibir solo el último mensaje cuando se optimiza
     const { message, id }: { message: MyUIMessage; id: string } =
-      await req.json();
+        await req.json();
 
     // Obtener la sesion de chat para comprobar si tiene asociado un grupo de chat
     const chatSession = await getChatSessionById(id);
     if (!chatSession.success) {
       console.error(
-        "Error en API chatNova - Sesión de chat no válida:",
-        chatSession.error
+          "Error en API chatNova - Sesión de chat no válida:",
+          chatSession.error
       );
       return NextResponse.json(
-        { error: "Sesión de chat no válida." },
-        { status: 400 }
+          { error: "Sesión de chat no válida." },
+          { status: 400 }
       );
     }
 
@@ -52,8 +94,8 @@ export async function POST(req: Request) {
       const chatGroup = await checkChatGroupById(chatSession.data.chatGroupId);
       if (!chatGroup.success) {
         console.error(
-          "Error en API chatNova - Grupo de chat no válido:",
-          chatGroup.error
+            "Error en API chatNova - Grupo de chat no válido:",
+            chatGroup.error
         );
         return NextResponse.json({ error: chatGroup.error }, { status: 400 });
       }
@@ -73,26 +115,60 @@ export async function POST(req: Request) {
     message.metadata = message.metadata ?? {};
     message.metadata.createdAt = Date.now();
 
+    // Sistema mejorado para trabajar con la tool RAG
+    const enhancedSystemPrompt = `${system}
+
+    INSTRUCCIONES CRÍTICAS PARA USO DE HERRAMIENTAS:
+    
+    1. **FLUJO OBLIGATORIO**: Para consultas académicas, técnicas o específicas:
+       - PASO 1: Usa SIEMPRE searchKnowledgeBase primero
+       - PASO 2: Analiza la respuesta de la herramienta
+       - PASO 3: Genera tu respuesta basada en esa información
+    
+    2. **RESPUESTA DESPUÉS DE HERRAMIENTAS**: 
+       - Después de usar searchKnowledgeBase, SIEMPRE proporciona una respuesta de texto
+       - Nunca termines sin responder al usuario
+       - Explica lo que encontraste y cómo responde a su pregunta
+    
+    3. **FORMATO DE RESPUESTA**:
+       - Si encontraste información relevante: Úsala para responder
+       - Si no encontraste información: Usa tu conocimiento general
+       - SIEMPRE termina con texto explicativo para el usuario
+    
+    4. **OBLIGATORIO**: Después de cualquier tool call, debes generar texto de respuesta.
+    
+    EJEMPLO CORRECTO:
+    Usuario: "¿Qué es la adolescencia?"
+    1. [Usa searchKnowledgeBase]
+    2. [Responde]: "Basado en la información de la base de conocimiento..."
+    
+    IMPORTANTE: Nunca dejes una respuesta vacía. Siempre genera texto después de usar herramientas.`;
+
     const result = streamText({
       model: google("gemini-2.5-flash"),
-      messages: convertToModelMessages(allMessages), // Convertir UIMessages a ModelMessages
-      system,
+      messages: convertToModelMessages(allMessages),
+      system: enhancedSystemPrompt,
+      temperature: 0.1,
       // maxOutputTokens: 4096, // Renamed from maxTokens
       // Temperatura, top_p y no se si top_k se pueden pasar aquí
+      tools: {
+        searchKnowledgeBase: ragSearchTool,
+      },
+      stopWhen: stepCountIs(3),
+      maxRetries: 2,
+      onError: (error) => {
+        console.error('❌ Error while streaming:', JSON.stringify(error, null, 2))
+      },
     });
 
-    result.consumeStream();
-
     return result.toUIMessageStreamResponse({
-      originalMessages: allMessages, // Pasar todos los mensajes para el contexto
+      originalMessages: allMessages,
       messageMetadata: ({ part }) => {
-        // Send metadata when streaming starts
         if (part.type === "start") {
           return {
             createdAt: Date.now(),
           };
         }
-        // Send additional metadata when streaming completes
         if (part.type === "finish") {
           return {
             // Para mensajes del asistente, incluir todos los tipos de tokens
@@ -103,7 +179,6 @@ export async function POST(req: Request) {
         }
       },
       onFinish: async ({ messages }) => {
-        // Guardar TODA la conversación (siguiendo la guía AI SDK)
         try {
           if (welcomeMessage) {
             await saveChat({
@@ -124,8 +199,8 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Error en API chat:", error);
     return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
+        { error: "Error interno del servidor" },
+        { status: 500 }
     );
   }
 }

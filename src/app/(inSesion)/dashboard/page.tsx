@@ -60,6 +60,24 @@ export default async function DashboardPage() {
           </div>
         </div>
 
+        {/* Card 4 - Bibliografía */}
+        <Link href="/bibliography">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-md transition-shadow">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">📖</span>
+                </div>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-medium text-gray-900">Bibliografía</h3>
+                <p className="text-sm text-gray-500">Ver todos los libros</p>
+              </div>
+            </div>
+          </div>
+        </Link>
+
+
         {/* Quick Actions */}
         <div className="mt-8">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Acciones Rápidas</h2>
