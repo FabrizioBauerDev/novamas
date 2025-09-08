@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  simple-swizzle: ^0.2.2
+
 importers:
 
   .:
@@ -184,16 +187,16 @@ importers:
         specifier: ^5.0.2
         version: 5.0.2
       '@types/node':
-        specifier: ^20.19.9
+        specifier: ^20.19.13
         version: 20.19.13
       '@types/qrcode':
         specifier: ^1.5.5
         version: 1.5.5
       '@types/react':
-        specifier: ^19.1.8
+        specifier: ^19.1.12
         version: 19.1.12
       '@types/react-dom':
-        specifier: ^19.1.6
+        specifier: ^19.1.9
         version: 19.1.9(@types/react@19.1.12)
       '@types/react-syntax-highlighter':
         specifier: ^15.5.13
