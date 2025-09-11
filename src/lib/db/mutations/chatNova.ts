@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { chatSessions, evaluationForms, messages } from "@/db/schema";
 import { EvaluationFormData, MyUIMessage } from "@/types/types";
 import { checkChatGroupBySlug } from "../queries/chatNova";
+import { safeEncryptMessage } from "@/lib/crypto";
 
 export interface CreateFormChatSessionParams {
   formData: EvaluationFormData;
@@ -126,7 +127,7 @@ export async function saveChat({
         await tx.insert(messages).values({
           chatSessionId: chatSessionId,
           sender: validRole,
-          content: textContent,
+          content: safeEncryptMessage(textContent), // Encriptar el contenido antes de guardar
           messageTokensIn: uiMessage.metadata?.messageTokensIn || null,
           messageTokensOut: uiMessage.metadata?.messageTokensOut || null,
           messageTokensReasoning: uiMessage.metadata?.messageTokensReasoning || null,

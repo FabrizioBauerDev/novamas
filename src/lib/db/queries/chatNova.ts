@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { messages, chatGroups, chatSessions } from "@/db/schema";
 import { eq, and, gte, lte } from "drizzle-orm";
 import type { UIMessage } from "ai";
+import { safeDecryptMessage } from "@/lib/crypto";
 
 // Función para cargar mensajes (equivalente a loadChat de la guía AI SDK)
 export async function getChat(chatSessionId: string): Promise<UIMessage[]> {
@@ -11,14 +12,14 @@ export async function getChat(chatSessionId: string): Promise<UIMessage[]> {
       .from(messages)
       .where(eq(messages.chatSessionId, chatSessionId))
       .orderBy(messages.createdAt);
-    // Convertir mensajes de BD a formato UIMessage
+    // Convertir mensajes de BD a formato UIMessage y desencriptar el contenido
     const uiMessages: UIMessage[] = dbMessages.map((msg) => ({
       id: msg.id,
       role: msg.sender,
       parts: [
         {
           type: "text" as const,
-          text: msg.content,
+          text: safeDecryptMessage(msg.content), // Desencriptar el mensaje automáticamente
         },
       ],
       metadata: {
