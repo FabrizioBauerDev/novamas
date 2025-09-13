@@ -19,26 +19,34 @@ export const getBibliography = async () : Promise<BibliographyItem[]> => {
 // funcion para cargar un markdown en la base de datos vectorial
 export async function loadMarkdown(markdown: string, title: string, author: string, description: string): Promise<BibliographyItem[]> {
     console.log("Ingresando a LoadMarkdown\n");
-    const [resource] = await db
-        .insert(bibliography)
-        .values({
-            title: title,
-            author: author,
-            description: description
+    try{
+        await db.transaction(async (tx) => {
+
+            const [resource] = await db
+                .insert(bibliography)
+                .values({
+                    title: title,
+                    author: author,
+                    description: description
+                })
+                .returning();
+
+            console.log("Generando embeddings");
+            const embeddings = await generateEmbeddingsMd(markdown);
+            console.log("Termina de generar embeddings");
+
+            await db.insert(chunk).values(
+                embeddings.map(embedding => ({
+                    resource_id: resource.id,
+                    ...embedding
+                })),
+            );
+            console.log("Cargo a BD vectorial\n");
         })
-        .returning();
+    }catch (e) {
+        console.log(e);
+    }
 
-    console.log("Generando embeddings");
-    const embeddings = await generateEmbeddingsMd(markdown);
-    console.log("Termina de generar embeddings");
-
-    await db.insert(chunk).values(
-        embeddings.map(embedding => ({
-            resource_id: resource.id,
-            ...embedding
-        })),
-    );
-    console.log("Cargo a BD vectorial\n");
 
     return getBibliography();
 }
