@@ -64,11 +64,6 @@ export default function ListView() {
     setCurrentPage(1);
   };
 
-  const handleCreateNew = () => {
-    // TODO: Implementar navegación a formulario de creación
-    console.log("Crear nuevo grupo");
-  };
-
   const handleView = (group: ChatGroupWithCreator) => {
     router.push(`/chatgroup/${group.id}`)
   };
@@ -175,7 +170,6 @@ export default function ListView() {
             <SearchBar
               searchTerm={searchTerm}
               onSearchChange={handleSearchChange}
-              onCreateNew={handleCreateNew}
             />
 
             <ChatGroupList

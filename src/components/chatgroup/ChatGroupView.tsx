@@ -6,10 +6,11 @@ import { ArrowLeft, Share2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getChatGroupByIdAction } from "@/lib/actions/actions-chatgroup";
+import { getChatGroupByIdAction, decryptChatGroupPasswordAction } from "@/lib/actions/actions-chatgroup";
 import { ChatGroupWithCreator } from "@/types/types";
 import QrGenerator from "@/components/shared/QrGenerator";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface ChatGroupDetailPageProps {
   id: string;
@@ -19,6 +20,8 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
   const router = useRouter();
   const [group, setGroup] = useState<ChatGroupWithCreator | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [decryptedPassword, setDecryptedPassword] = useState<string | null>(null);
+  const [isDecrypting, setIsDecrypting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,6 +56,34 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
   const handleShare = () => {
     // TODO: Implementar funcionalidad de compartir
     console.log("Compartir grupo:", group?.name);
+  };
+
+  const handleTogglePassword = async () => {
+    if (!showPassword && !decryptedPassword && group) {
+      // Primera vez que se muestra la contraseña, desencriptarla
+      setIsDecrypting(true);
+      try {
+        const result = await decryptChatGroupPasswordAction(group.id);
+        if (result.success && result.password) {
+          setDecryptedPassword(result.password);
+          setShowPassword(true);
+        } else {
+          toast.error("Error al mostrar contraseña", {
+            description: result.error || "No se pudo desencriptar la contraseña",
+          });
+        }
+      } catch (error) {
+        console.error("Error al desencriptar contraseña:", error);
+        toast.error("Error inesperado", {
+          description: "Ocurrió un error al intentar mostrar la contraseña",
+        });
+      } finally {
+        setIsDecrypting(false);
+      }
+    } else {
+      // Solo alternar la visibilidad
+      setShowPassword(!showPassword);
+    }
   };
 
   // Obtener participantes del grupo
@@ -299,7 +330,7 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
                   <div className="relative flex-1">
                     <Input
                       type={showPassword ? "text" : "password"}
-                      value={group.password}
+                      value={showPassword && decryptedPassword ? decryptedPassword : "••••••••"}
                       readOnly
                       className="pr-10"
                     />
@@ -307,9 +338,12 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
                       variant="ghost"
                       size="sm"
                       className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={handleTogglePassword}
+                      disabled={isDecrypting}
                     >
-                      {showPassword ? (
+                      {isDecrypting ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                      ) : showPassword ? (
                         <EyeOff className="h-4 w-4" />
                       ) : (
                         <Eye className="h-4 w-4" />
@@ -369,66 +403,69 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
             </Card>
           </div>
 
-          {/* Creator Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Información del creador</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <p className="text-lg font-medium">{group.creatorName}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Creador del grupo
-                  </p>
+          {/* Creator Information and Participants */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Creator Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Información del creador</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-lg font-medium">{group.creatorName}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Creador del grupo
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Creado el</p>
+                    <p className="font-medium">
+                      {group.createdAt.toLocaleDateString()}{" "}
+                      {group.createdAt.toLocaleTimeString()}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Creado el</p>
-                  <p className="font-medium">
-                    {group.createdAt.toLocaleDateString()}{" "}
-                    {group.createdAt.toLocaleTimeString()}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Participants */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                Participantes
-                <span className="text-sm bg-gray-100 px-2 py-1 rounded-md text-gray-600">
-                  {participants.length}
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {participants.length > 0 ? (
-                <div className="flex flex-wrap gap-4">
-                  {participants.map((participant) => (
-                    <div key={participant.id} className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-primary">
-                          {participant.name?.charAt(0).toUpperCase() || '?'}
-                        </span>
+            {/* Participants del relevamiento */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  Participantes del relevamiento
+                  <span className="text-sm bg-gray-100 px-2 py-1 rounded-md text-gray-600">
+                    {participants.length}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {participants.length > 0 ? (
+                  <div className="space-y-3 max-h-48 overflow-y-auto">
+                    {participants.map((participant) => (
+                      <div key={participant.id} className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-medium text-primary">
+                            {participant.name?.charAt(0).toUpperCase() || '?'}
+                          </span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm truncate">{participant.name || 'Sin nombre'}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Añadido/a el: {participant.joinedAt.toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-sm">{participant.name || 'Sin nombre'}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Añadido/a el: {participant.joinedAt.toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-sm">
-                  No hay participantes en este grupo aún.
-                </p>
-              )}
-            </CardContent>
-          </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">
+                    No hay participantes en el relevamiento de este grupo.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </main>
     </div>

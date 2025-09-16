@@ -31,6 +31,18 @@ export interface EvaluationFormData {
   };
 }
 
+// Define a type for the form data used in the chat group creation form
+export interface CreateGroupFormData {
+  name: string;
+  slug: string;
+  description: string;
+  password: string;
+  startDate: string;
+  startTime: string;
+  endDate: string;
+  endTime: string;
+}
+
 // Tipo para ChatGroup con información del creador y participantes
 export interface ChatGroupWithCreator {
   id: string

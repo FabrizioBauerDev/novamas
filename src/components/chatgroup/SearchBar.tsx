@@ -3,14 +3,14 @@
 import { Search, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import Link from "next/link"
 
 interface SearchBarProps {
   searchTerm: string
   onSearchChange: (value: string) => void
-  onCreateNew: () => void
 }
 
-export default function SearchBar({ searchTerm, onSearchChange, onCreateNew }: SearchBarProps) {
+export default function SearchBar({ searchTerm, onSearchChange }: SearchBarProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-8">
       <div className="relative flex-1">
@@ -22,12 +22,11 @@ export default function SearchBar({ searchTerm, onSearchChange, onCreateNew }: S
           className="pl-10"
         />
       </div>
-      <Button 
-        className="bg-green-600 hover:bg-green-700 text-white"
-        onClick={onCreateNew}
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Crear nuevo grupo
+      <Button asChild className="bg-green-600 hover:bg-green-700 text-white">
+        <Link href="/chatgroup/create">
+          <Plus className="h-4 w-4 mr-2" />
+          Crear nuevo grupo
+        </Link>
       </Button>
     </div>
   )

@@ -5,6 +5,7 @@ import Footer from '@/components/shared/footer';
 import Navbar from '@/components/shared/navbar';
 import { Analytics } from '@vercel/analytics/next';
 import { auth } from "@/auth";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: {
@@ -31,6 +32,7 @@ export default async function RootLayout({
         {children}
         <Footer/>
         <Analytics />
+        <Toaster />
       </body>
     </html>
   );

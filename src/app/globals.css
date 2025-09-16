@@ -120,3 +120,32 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Estilos personalizados para Sonner toasts */
+[data-sonner-toast][data-type="error"] {
+  background: #dc2626 !important;
+  border-color: #b91c1c !important;
+  color: #ffffff !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-title] {
+  color: #ffffff !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-description] {
+  color: #ffffff !important;
+}
+
+[data-sonner-toast][data-type="success"] {
+  background: #16a34a !important;
+  border-color: #15803d !important;
+  color: #ffffff !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-title] {
+  color: #ffffff !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-description] {
+  color: #ffffff !important;
+}
