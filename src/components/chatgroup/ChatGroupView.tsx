@@ -6,7 +6,10 @@ import { ArrowLeft, Share2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getChatGroupByIdAction, decryptChatGroupPasswordAction } from "@/lib/actions/actions-chatgroup";
+import {
+  getChatGroupByIdAction,
+  decryptChatGroupPasswordAction,
+} from "@/lib/actions/actions-chatgroup";
 import { ChatGroupWithCreator } from "@/types/types";
 import QrGenerator from "@/components/shared/QrGenerator";
 import Link from "next/link";
@@ -20,7 +23,9 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
   const router = useRouter();
   const [group, setGroup] = useState<ChatGroupWithCreator | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [decryptedPassword, setDecryptedPassword] = useState<string | null>(null);
+  const [decryptedPassword, setDecryptedPassword] = useState<string | null>(
+    null
+  );
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +74,8 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
           setShowPassword(true);
         } else {
           toast.error("Error al mostrar contraseña", {
-            description: result.error || "No se pudo desencriptar la contraseña",
+            description:
+              result.error || "No se pudo desencriptar la contraseña",
           });
         }
       } catch (error) {
@@ -308,9 +314,9 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
                   <CardTitle className="text-center">Código QR</CardTitle>
                 </CardHeader>
                 <CardContent className="flex justify-center">
-                  <QrGenerator 
-                    url={groupUrl} 
-                    size={192} 
+                  <QrGenerator
+                    url={groupUrl}
+                    size={192}
                     className="w-48 h-48"
                   />
                 </CardContent>
@@ -330,7 +336,11 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
                   <div className="relative flex-1">
                     <Input
                       type={showPassword ? "text" : "password"}
-                      value={showPassword && decryptedPassword ? decryptedPassword : "••••••••"}
+                      value={
+                        showPassword && decryptedPassword
+                          ? decryptedPassword
+                          : "••••••••"
+                      }
                       readOnly
                       className="pr-10"
                     />
@@ -384,8 +394,15 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
               </CardHeader>
               <CardContent>
                 <p className="text-lg">
-                  {group.startDate.toLocaleDateString()}{" "}
-                  {group.startDate.toLocaleTimeString()}
+                  {group.startDate.toLocaleString("es-AR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                    timeZone: "America/Argentina/Buenos_Aires",
+                  })}
                 </p>
               </CardContent>
             </Card>
@@ -396,8 +413,15 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
               </CardHeader>
               <CardContent>
                 <p className="text-lg">
-                  {group.endDate.toLocaleDateString()}{" "}
-                  {group.endDate.toLocaleTimeString()}
+                  {group.endDate.toLocaleString("es-AR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                    timeZone: "America/Argentina/Buenos_Aires",
+                  })}
                 </p>
               </CardContent>
             </Card>
@@ -421,8 +445,15 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
                   <div>
                     <p className="text-sm text-muted-foreground">Creado el</p>
                     <p className="font-medium">
-                      {group.createdAt.toLocaleDateString()}{" "}
-                      {group.createdAt.toLocaleTimeString()}
+                      {group.createdAt.toLocaleString("es-AR", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                        timeZone: "America/Argentina/Buenos_Aires",
+                      })}
                     </p>
                   </div>
                 </div>
@@ -443,16 +474,30 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
                 {participants.length > 0 ? (
                   <div className="space-y-3 max-h-48 overflow-y-auto">
                     {participants.map((participant) => (
-                      <div key={participant.id} className="flex items-center gap-2">
+                      <div
+                        key={participant.id}
+                        className="flex items-center gap-2"
+                      >
                         <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
                           <span className="text-sm font-medium text-primary">
-                            {participant.name?.charAt(0).toUpperCase() || '?'}
+                            {participant.name?.charAt(0).toUpperCase() || "?"}
                           </span>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-medium text-sm truncate">{participant.name || 'Sin nombre'}</p>
+                          <p className="font-medium text-sm truncate">
+                            {participant.name || "Sin nombre"}
+                          </p>
                           <p className="text-xs text-muted-foreground">
-                            Añadido/a el: {participant.joinedAt.toLocaleDateString()}
+                            Añadido/a el:{" "}
+                            {participant.joinedAt.toLocaleDateString("es-AR", {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                              timeZone: "America/Argentina/Buenos_Aires",
+                            })}
                           </p>
                         </div>
                       </div>

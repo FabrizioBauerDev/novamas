@@ -48,9 +48,19 @@ export async function createChatGroupAction(formData: CreateGroupFormData) {
 
     const { name, slug, description, password, startDate, startTime, endDate, endTime } = validatedFields.data;
 
-    // Crear las fechas completas
-    const startDateTime = new Date(`${startDate}T${startTime}`);
-    const endDateTime = new Date(`${endDate}T${endTime}`);
+    // Crear las fechas desde las strings ISO o desde date/time separados
+    let startDateTime: Date;
+    let endDateTime: Date;
+    
+    // Si startDate contiene una fecha ISO completa, úsala directamente
+    if (startDate.includes('T') || startDate.includes('Z')) {
+      startDateTime = new Date(startDate);
+      endDateTime = new Date(endDate);
+    } else {
+      // Fallback para el formato anterior
+      startDateTime = new Date(`${startDate}T${startTime}`);
+      endDateTime = new Date(`${endDate}T${endTime}`);
+    }
 
     // Crear el ChatGroup
     const newChatGroup = await createChatGroup({

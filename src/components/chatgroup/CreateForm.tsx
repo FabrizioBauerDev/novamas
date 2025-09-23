@@ -65,7 +65,7 @@ const handleInputChange = (field: keyof CreateGroupFormData, value: string) => {
     if (!formData.endTime) errors.push("La hora de fin es obligatoria")
 
     // Validate dates
-    if (formData.startDate && formData.endDate) {
+    if (formData.startDate && formData.endDate && formData.startTime && formData.endTime) {
       const startDateTime = new Date(`${formData.startDate}T${formData.startTime}`)
       const endDateTime = new Date(`${formData.endDate}T${formData.endTime}`)
 
@@ -83,7 +83,9 @@ const handleInputChange = (field: keyof CreateGroupFormData, value: string) => {
         }
       }
 
-      if (startDateTime < new Date()) {
+      // Comparar con la fecha actual en la zona horaria local
+      const now = new Date()
+      if (startDateTime <= now) {
         errors.push("La fecha de inicio debe ser futura")
       }
     }
@@ -110,16 +112,20 @@ const handleInputChange = (field: keyof CreateGroupFormData, value: string) => {
     setIsSubmitting(true)
 
     try {
-      // Preparar datos para enviar al backend
+      // Crear fechas en la zona horaria local y convertir a UTC para enviar al servidor
+      const startDateTime = new Date(`${formData.startDate}T${formData.startTime}`)
+      const endDateTime = new Date(`${formData.endDate}T${formData.endTime}`)
+
+      // Preparar datos para enviar al backend con fechas ISO (UTC)
       const groupData: CreateGroupFormData = {
         name: formData.name.trim(),
         slug: formData.slug.trim(),
         description: formData.description.trim(),
         password: formData.password,
-        startDate: formData.startDate,
-        startTime: formData.startTime,
-        endDate: formData.endDate,
-        endTime: formData.endTime,
+        startDate: startDateTime.toISOString(),
+        startTime: '', // Ya no necesitamos time separado
+        endDate: endDateTime.toISOString(),
+        endTime: '', // Ya no necesitamos time separado
       }
 
       // Llamar a la action
