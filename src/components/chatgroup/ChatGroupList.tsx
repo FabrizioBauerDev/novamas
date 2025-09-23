@@ -9,9 +9,10 @@ interface ChatGroupListProps {
   searchTerm: string
   onView: (group: ChatGroupWithCreator) => void
   onDelete: (group: ChatGroupWithCreator) => void
+  isStudent?: boolean
 }
 
-export default function ChatGroupList({ groups, searchTerm, onView, onDelete }: ChatGroupListProps) {
+export default function ChatGroupList({ groups, searchTerm, onView, onDelete, isStudent = false }: ChatGroupListProps) {
   return (
     <div className="space-y-2">
       {groups.length === 0 ? (
@@ -23,6 +24,7 @@ export default function ChatGroupList({ groups, searchTerm, onView, onDelete }: 
             group={group}
             onView={onView}
             onDelete={onDelete}
+            isStudent={isStudent}
           />
         ))
       )}

@@ -1,10 +1,10 @@
 "use server"
 
 import { getAllChatGroups, getChatGroupById, getChatGroupBySlug, isSlugAvailable } from "@/lib/db/queries/chatGroup"
-import { deleteChatGroupById, createChatGroup } from "@/lib/db/mutations/chatGroup"
+import { deleteChatGroupById, createChatGroup, updateChatGroupDescription } from "@/lib/db/mutations/chatGroup"
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
-import { createChatGroupSchema } from "@/schema/zodSchemas"
+import { createChatGroupSchema, updateDescriptionSchema } from "@/schema/zodSchemas"
 import type { CreateGroupFormData } from "@/types/types"
 import { decryptMessage } from "@/lib/crypto/encryption"
 
@@ -232,6 +232,48 @@ export async function verifyChatGroupPasswordAction(slug: string, password: stri
   } catch (error) {
     console.error("Error in verifyChatGroupPasswordAction:", error);
     return { success: false, error: "Error al verificar la contraseña" };
+  }
+}
+
+// Server Action para actualizar la descripción de un ChatGroup
+export async function updateChatGroupDescriptionAction(id: string, description: string) {
+  try {
+    // Validar los datos con Zod
+    const validatedFields = updateDescriptionSchema.safeParse({ id, description });
+    if (!validatedFields.success) {
+      const errors = validatedFields.error.errors.map(err => err.message);
+      return { success: false, error: errors.join(". ") };
+    }
+
+    // Obtener la sesión del usuario
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: "Usuario no autenticado" };
+    }
+
+    // Verificar permisos (solo ADMINISTRADOR e INVESTIGADOR)
+    const userRole = session.user.role;
+    if (userRole !== "ADMINISTRADOR" && userRole !== "INVESTIGADOR") {
+      return { success: false, error: "No tienes permisos para editar la descripción" };
+    }
+
+    // Verificar que el grupo existe
+    const group = await getChatGroupById(id);
+    if (!group) {
+      return { success: false, error: "Grupo no encontrado" };
+    }
+
+    // Actualizar la descripción
+    await updateChatGroupDescription(id, description);
+
+    // Revalidar las páginas para actualizar los datos
+    revalidatePath(`/chatgroup/${id}`);
+    revalidatePath("/chatgroup");
+
+    return { success: true, message: "Descripción actualizada correctamente" };
+  } catch (error) {
+    console.error("Error in updateChatGroupDescriptionAction:", error);
+    return { success: false, error: "Error al actualizar la descripción" };
   }
 }
 

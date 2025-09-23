@@ -64,6 +64,7 @@ export async function getChatGroupById(id: string) {
         id: users.id,
         name: users.name,
         email: users.email,
+        role: users.role,
         joinedAt: chatGroupMembers.createdAt,
       })
       .from(chatGroupMembers)

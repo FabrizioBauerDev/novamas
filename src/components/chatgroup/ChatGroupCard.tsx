@@ -9,12 +9,14 @@ interface ChatGroupCardProps {
   group: ChatGroupWithCreator;
   onView: (group: ChatGroupWithCreator) => void;
   onDelete: (group: ChatGroupWithCreator) => void;
+  isStudent?: boolean;
 }
 
 export default function ChatGroupCard({
   group,
   onView,
   onDelete,
+  isStudent = false,
 }: ChatGroupCardProps) {
   return (
     <Card className="hover:shadow-lg transition-shadow border-2 py-2">
@@ -95,15 +97,17 @@ export default function ChatGroupCard({
               <Eye className="h-4 w-4" />
               Ver
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2 text-destructive hover:text-white hover:bg-destructive bg-transparent"
-              onClick={() => onDelete(group)}
-            >
-              <Trash2 className="h-4 w-4" />
-              Eliminar
-            </Button>
+            {!isStudent && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 text-destructive hover:text-white hover:bg-destructive bg-transparent"
+                onClick={() => onDelete(group)}
+              >
+                <Trash2 className="h-4 w-4" />
+                Eliminar
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>

@@ -1,6 +1,6 @@
 {
   "name": "novamas",
-  "version": "0.2.9",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -47,6 +47,7 @@
     "extract2md": "^2.0.0",
     "form-data": "^4.0.4",
     "harden-react-markdown": "^1.0.4",
+    "jose": "^6.1.0",
     "katex": "^0.16.22",
     "langchain": "^0.3.30",
     "lucide-react": "^0.525.0",

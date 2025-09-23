@@ -8,9 +8,10 @@ import Link from "next/link"
 interface SearchBarProps {
   searchTerm: string
   onSearchChange: (value: string) => void
+  isStudent?: boolean
 }
 
-export default function SearchBar({ searchTerm, onSearchChange }: SearchBarProps) {
+export default function SearchBar({ searchTerm, onSearchChange, isStudent = false }: SearchBarProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-8">
       <div className="relative flex-1">
@@ -22,12 +23,14 @@ export default function SearchBar({ searchTerm, onSearchChange }: SearchBarProps
           className="pl-10"
         />
       </div>
-      <Button asChild className="bg-green-600 hover:bg-green-700 text-white">
-        <Link href="/chatgroup/create">
-          <Plus className="h-4 w-4 mr-2" />
-          Crear nuevo grupo
-        </Link>
-      </Button>
+      {!isStudent && (
+        <Button asChild className="bg-green-600 hover:bg-green-700 text-white">
+          <Link href="/chatgroup/create">
+            <Plus className="h-4 w-4 mr-2" />
+            Crear nuevo grupo
+          </Link>
+        </Button>
+      )}
     </div>
   )
 }

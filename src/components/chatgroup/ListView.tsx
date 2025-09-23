@@ -12,7 +12,11 @@ import {
 } from "@/lib/actions/actions-chatgroup";
 import { ChatGroupWithCreator } from "@/types/types";
 
-export default function ListView() {
+interface ListViewProps {
+  isStudent?: boolean;
+}
+
+export default function ListView({ isStudent = false }: ListViewProps) {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("");
   const [chatGroups, setChatGroups] = useState<ChatGroupWithCreator[]>([]);
@@ -170,6 +174,7 @@ export default function ListView() {
             <SearchBar
               searchTerm={searchTerm}
               onSearchChange={handleSearchChange}
+              isStudent={isStudent}
             />
 
             <ChatGroupList
@@ -177,6 +182,7 @@ export default function ListView() {
               searchTerm={searchTerm}
               onView={handleView}
               onDelete={handleDeleteClick}
+              isStudent={isStudent}
             />
 
             <Pagination

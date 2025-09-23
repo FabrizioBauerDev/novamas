@@ -43,6 +43,29 @@ export async function createChatGroup(data: {
   }
 }
 
+// Actualizar la descripción de un ChatGroup
+export async function updateChatGroupDescription(id: string, description: string) {
+  try {
+    const result = await db
+      .update(chatGroups)
+      .set({ 
+        description: description || null,
+        updatedAt: new Date()
+      })
+      .where(eq(chatGroups.id, id))
+      .returning()
+
+    if (result.length === 0) {
+      throw new Error("Chat group not found")
+    }
+
+    return result[0]
+  } catch (error) {
+    console.error("Error updating chat group description:", error)
+    throw new Error("Failed to update chat group description")
+  }
+}
+
 // Eliminar un ChatGroup por ID
 export async function deleteChatGroupById(id: string) {
   try {

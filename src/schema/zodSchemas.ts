@@ -68,4 +68,34 @@ const createChatGroupSchema = z.object({
   path: ["endTime"],
 });
 
-export { signInSchema, signUpSchema, createChatGroupSchema };
+// Esquemas para gestión de participantes
+const addParticipantSchema = z.object({
+  chatGroupId: z.string().uuid("ID de grupo inválido"),
+  userId: z.string().uuid("ID de usuario inválido"),
+});
+
+const removeParticipantSchema = z.object({
+  chatGroupId: z.string().uuid("ID de grupo inválido"),
+  userId: z.string().uuid("ID de usuario inválido"),
+});
+
+const searchUsersSchema = z.object({
+  chatGroupId: z.string().uuid("ID de grupo inválido"),
+  searchTerm: z.string().min(2, "Debe tener al menos 2 caracteres").max(50),
+});
+
+// Esquema para actualizar descripción
+const updateDescriptionSchema = z.object({
+  id: z.string().uuid("ID de grupo inválido"),
+  description: z.string().max(500, "La descripción no puede exceder los 500 caracteres").optional(),
+});
+
+export { 
+  signInSchema, 
+  signUpSchema, 
+  createChatGroupSchema,
+  addParticipantSchema,
+  removeParticipantSchema,
+  searchUsersSchema,
+  updateDescriptionSchema
+};

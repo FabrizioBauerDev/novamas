@@ -113,6 +113,9 @@ importers:
       harden-react-markdown:
         specifier: ^1.0.4
         version: 1.0.5(react-markdown@10.1.0(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)
+      jose:
+        specifier: ^6.1.0
+        version: 6.1.0
       katex:
         specifier: ^0.16.22
         version: 0.16.22

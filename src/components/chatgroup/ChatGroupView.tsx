@@ -2,24 +2,29 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Share2, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Share2, Eye, EyeOff, Edit3, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   getChatGroupByIdAction,
   decryptChatGroupPasswordAction,
+  updateChatGroupDescriptionAction,
 } from "@/lib/actions/actions-chatgroup";
 import { ChatGroupWithCreator } from "@/types/types";
 import QrGenerator from "@/components/shared/QrGenerator";
+import ParticipantManager from "./ParticipantManager";
 import Link from "next/link";
 import { toast } from "sonner";
 
 interface ChatGroupDetailPageProps {
   id: string;
+  isStudent?: boolean;
+  currentUserId?: string;
 }
 
-export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
+export default function ChatGroupDetailPage({ id, isStudent = false, currentUserId }: ChatGroupDetailPageProps) {
   const router = useRouter();
   const [group, setGroup] = useState<ChatGroupWithCreator | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -29,34 +34,96 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Estados para la edición de descripción
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editedDescription, setEditedDescription] = useState("");
+  const [isUpdatingDescription, setIsUpdatingDescription] = useState(false);
 
   const groupUrl = `${
     typeof window !== "undefined" ? window.location.origin : ""
   }/chatNova/${group?.slug}`;
 
-  useEffect(() => {
-    const loadGroup = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const result = await getChatGroupByIdAction(id);
-        if (result.success && result.data) {
-          setGroup(result.data);
-        } else {
-          setError(result.error || "Grupo no encontrado");
-        }
-      } catch (err) {
-        setError("Error al cargar el grupo");
-        console.error("Error loading group:", err);
-      } finally {
-        setLoading(false);
+  const loadGroup = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await getChatGroupByIdAction(id);
+      if (result.success && result.data) {
+        setGroup(result.data);
+      } else {
+        setError(result.error || "Grupo no encontrado");
       }
-    };
+    } catch (err) {
+      setError("Error al cargar el grupo");
+      console.error("Error loading group:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     if (id) {
       loadGroup();
     }
   }, [id]);
+
+  // Efecto para manejar la tecla Escape al editar descripción
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isEditingDescription) {
+        handleCancelEditDescription();
+      }
+    };
+
+    if (isEditingDescription) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isEditingDescription]);
+
+  // Función para recargar los datos cuando cambien los participantes
+  const handleParticipantsChange = () => {
+    loadGroup();
+  };
+
+  // Determinar si el usuario puede editar (solo ADMINISTRADOR e INVESTIGADOR)
+  const canEdit = !isStudent;
+
+  // Función para iniciar la edición de descripción
+  const handleStartEditDescription = () => {
+    setEditedDescription(group?.description || "");
+    setIsEditingDescription(true);
+  };
+
+  // Función para cancelar la edición
+  const handleCancelEditDescription = () => {
+    setIsEditingDescription(false);
+    setEditedDescription("");
+  };
+
+  // Función para guardar la descripción editada
+  const handleSaveDescription = async () => {
+    if (!group) return;
+
+    setIsUpdatingDescription(true);
+    try {
+      const result = await updateChatGroupDescriptionAction(group.id, editedDescription);
+      if (result.success) {
+        toast.success("Éxito", { description: result.message });
+        setIsEditingDescription(false);
+        // Actualizar la descripción localmente
+        setGroup(prev => prev ? { ...prev, description: editedDescription } : null);
+      } else {
+        toast.error("Error", { description: result.error });
+      }
+    } catch (error) {
+      console.error("Error updating description:", error);
+      toast.error("Error", { description: "Error al actualizar la descripción" });
+    } finally {
+      setIsUpdatingDescription(false);
+    }
+  };
 
   const handleShare = () => {
     // TODO: Implementar funcionalidad de compartir
@@ -297,12 +364,79 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Descripción</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Descripción</CardTitle>
+                    {canEdit && !isEditingDescription && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleStartEditDescription}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit3 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {group.description || "Sin descripción disponible"}
-                  </p>
+                  {isEditingDescription ? (
+                    <div className="space-y-3">
+                      <div className="relative">
+                        <Textarea
+                          value={editedDescription}
+                          onChange={(e) => setEditedDescription(e.target.value)}
+                          placeholder="Escribe la descripción del grupo..."
+                          className="min-h-[100px] resize-none"
+                          maxLength={500}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                              e.preventDefault();
+                              handleSaveDescription();
+                            }
+                          }}
+                          autoFocus
+                        />
+                        <div className={`absolute bottom-2 right-2 text-xs ${
+                          editedDescription.length > 450 
+                            ? 'text-red-500' 
+                            : editedDescription.length > 400 
+                            ? 'text-yellow-500' 
+                            : 'text-muted-foreground'
+                        }`}>
+                          {editedDescription.length}/500
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          onClick={handleSaveDescription}
+                          disabled={isUpdatingDescription || editedDescription.length > 500}
+                          className="flex items-center gap-2"
+                        >
+                          {isUpdatingDescription ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          ) : (
+                            <Check className="h-4 w-4" />
+                          )}
+                          {isUpdatingDescription ? "Guardando..." : "Guardar"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleCancelEditDescription}
+                          disabled={isUpdatingDescription}
+                          className="flex items-center gap-2"
+                        >
+                          <X className="h-4 w-4" />
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground leading-relaxed min-h-[24px]">
+                      {group.description || "Sin descripción disponible"}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -427,90 +561,46 @@ export default function ChatGroupDetailPage({ id }: ChatGroupDetailPageProps) {
             </Card>
           </div>
 
-          {/* Creator Information and Participants */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Creator Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Información del creador</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-lg font-medium">{group.creatorName}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Creador del grupo
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Creado el</p>
-                    <p className="font-medium">
-                      {group.createdAt.toLocaleString("es-AR", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                        timeZone: "America/Argentina/Buenos_Aires",
-                      })}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Participants del relevamiento */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  Participantes del relevamiento
-                  <span className="text-sm bg-gray-100 px-2 py-1 rounded-md text-gray-600">
-                    {participants.length}
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {participants.length > 0 ? (
-                  <div className="space-y-3 max-h-48 overflow-y-auto">
-                    {participants.map((participant) => (
-                      <div
-                        key={participant.id}
-                        className="flex items-center gap-2"
-                      >
-                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-sm font-medium text-primary">
-                            {participant.name?.charAt(0).toUpperCase() || "?"}
-                          </span>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-sm truncate">
-                            {participant.name || "Sin nombre"}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Añadido/a el:{" "}
-                            {participant.joinedAt.toLocaleDateString("es-AR", {
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: false,
-                              timeZone: "America/Argentina/Buenos_Aires",
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-sm">
-                    No hay participantes en el relevamiento de este grupo.
+          {/* Creator Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Información del creador</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <p className="text-lg font-medium">{group.creatorName}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Creador del grupo
                   </p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Creado el</p>
+                  <p className="font-medium">
+                    {group.createdAt.toLocaleString("es-AR", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                      timeZone: "America/Argentina/Buenos_Aires",
+                    })}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Gestión de Participantes */}
+          <ParticipantManager
+            chatGroupId={group.id}
+            participants={participants}
+            creatorId={group.creatorId}
+            currentUserId={currentUserId}
+            onParticipantsChange={handleParticipantsChange}
+            isStudent={isStudent}
+          />
         </div>
       </main>
     </div>
