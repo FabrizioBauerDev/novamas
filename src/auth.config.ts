@@ -16,7 +16,7 @@ export const authConfig = {
       
       // Rutas protegidas que requieren autenticación
       // (pueden ser exactas o prefijos)
-      const protectedRoutes = ['/dashboard', '/chatNova', '/register','/chatgroup','/bibliography'];
+      const protectedRoutes = ['/dashboard', '/register','/chatgroup','/bibliography'];
       const isProtectedRoute = protectedRoutes.some(route =>
         route.endsWith('/') ? pathname.startsWith(route) : pathname === route || pathname.startsWith(route + '/')
       );

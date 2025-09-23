@@ -1,6 +1,6 @@
 "use server"
 
-import { getAllChatGroups, getChatGroupById } from "@/lib/db/queries/chatGroup"
+import { getAllChatGroups, getChatGroupById, getChatGroupBySlug, isSlugAvailable } from "@/lib/db/queries/chatGroup"
 import { deleteChatGroupById, createChatGroup } from "@/lib/db/mutations/chatGroup"
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
@@ -62,6 +62,16 @@ export async function createChatGroupAction(formData: CreateGroupFormData) {
       endDateTime = new Date(`${endDate}T${endTime}`);
     }
 
+    // Verificar que el slug esté disponible en esa fecha y hora
+    const slugAvailable = await isSlugAvailable(slug, startDateTime, endDateTime);
+    if (!slugAvailable) {
+      return { 
+        success: false, 
+        error: `El slug "${slug}" ya está en uso durante el período seleccionado. Por favor, elija otro slug o modifique las fechas.` 
+      };
+    }
+
+
     // Crear el ChatGroup
     const newChatGroup = await createChatGroup({
       creatorId: session.user.id,
@@ -105,6 +115,123 @@ export async function decryptChatGroupPasswordAction(groupId: string) {
   } catch (error) {
     console.error("Error in decryptChatGroupPasswordAction:", error);
     return { success: false, error: "Error al desencriptar la contraseña" };
+  }
+}
+
+// Server Action para verificar disponibilidad de slug
+export async function checkSlugAvailabilityAction(slug: string, startDate: string, endDate: string, excludeId?: string) {
+  try {
+    // Convertir las fechas de string a Date
+    const startDateTime = new Date(startDate);
+    const endDateTime = new Date(endDate);
+
+    // Verificar validez de las fechas
+    if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
+      return { success: false, error: "Las fechas proporcionadas no son válidas" };
+    }
+
+    // Verificar que la fecha de inicio sea anterior a la fecha de fin
+    if (startDateTime >= endDateTime) {
+      return { success: false, error: "La fecha de inicio debe ser anterior a la fecha de fin" };
+    }
+
+    // Verificar disponibilidad del slug
+    const isAvailable = await isSlugAvailable(slug, startDateTime, endDateTime, excludeId);
+    
+    return { 
+      success: true, 
+      available: isAvailable,
+      message: isAvailable 
+        ? "El slug está disponible para el período seleccionado" 
+        : `El slug "${slug}" ya está en uso durante el período seleccionado`
+    };
+  } catch (error) {
+    console.error("Error in checkSlugAvailabilityAction:", error);
+    return { success: false, error: "Error al verificar la disponibilidad del slug" };
+  }
+}
+
+// Server Action para obtener un ChatGroup por slug y verificar su estado
+export async function getChatGroupBySlugAction(slug: string) {
+  try {
+    const group = await getChatGroupBySlug(slug);
+    if (!group) {
+      return { success: false, error: "Sesión grupal no encontrada" };
+    }
+
+    const now = new Date();
+    const startDate = new Date(group.startDate);
+    const endDate = new Date(group.endDate);
+    
+    // Verificar el estado de la sesión
+    if (now > endDate) {
+      return { 
+        success: false, 
+        error: "Esta sesión grupal ha finalizado",
+        status: "FINALIZADA"
+      };
+    }
+    
+    if (now < startDate) {
+      const timeDiff = startDate.getTime() - now.getTime();
+      const minutesDiff = Math.ceil(timeDiff / (1000 * 60));
+      
+      if (minutesDiff > 10) {
+        return { 
+          success: false, 
+          error: `Esta sesión grupal comenzará en ${Math.ceil(minutesDiff / 60)} horas y ${minutesDiff % 60} minutos. Vuelve cuando falten 10 minutos o menos.`,
+          status: "PENDIENTE_LEJANA"
+        };
+      } else {
+        return { 
+          success: true, 
+          data: group,
+          status: "PENDIENTE_PROXIMA",
+          minutesRemaining: minutesDiff
+        };
+      }
+    }
+    
+    // La sesión está activa
+    return { 
+      success: true, 
+      data: group,
+      status: "ACTIVA"
+    };
+  } catch (error) {
+    console.error("Error in getChatGroupBySlugAction:", error);
+    return { success: false, error: "Error al verificar la sesión grupal" };
+  }
+}
+
+// Server Action para verificar contraseña de un ChatGroup
+export async function verifyChatGroupPasswordAction(slug: string, password: string) {
+  try {
+    const group = await getChatGroupBySlug(slug);
+    if (!group) {
+      return { success: false, error: "Sesión grupal no encontrada" };
+    }
+
+    // Verificar que la sesión no haya finalizado antes de validar la contraseña
+    const now = new Date();
+    const endDate = new Date(group.endDate);
+    
+    if (now > endDate) {
+      return { success: false, error: "Esta sesión grupal ha finalizado" };
+    }
+
+    // Desencriptar la contraseña almacenada
+    const decryptedPassword = decryptMessage(group.password);
+    
+    // Verificar si la contraseña coincide
+    if (password === decryptedPassword) {
+      return { success: true, message: "Contraseña correcta" };
+    } else {
+      return { success: false, error: "Contraseña incorrecta" };
+    }
+  } catch (error) {
+    console.error("Error in verifyChatGroupPasswordAction:", error);
+    return { success: false, error: "Error al verificar la contraseña" };
   }
 }
 

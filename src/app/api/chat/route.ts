@@ -58,15 +58,6 @@ const ragSearchTool = tool({
 });
 
 export async function POST(req: Request) {
-  // Verificar autenticación
-  const session = await auth();
-  if (!session || !session.user) {
-    console.error("Error en API chatNova - No autorizado");
-    return NextResponse.json(
-        { error: "No autorizado. Debes iniciar sesión para usar el chat." },
-        { status: 401 }
-    );
-  }
 
   try {
     const logString = "APP | API | CHAT | ROUTE - ";
