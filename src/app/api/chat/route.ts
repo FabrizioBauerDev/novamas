@@ -19,20 +19,21 @@ export const maxDuration = 30;
 
 // Definir la tool para búsqueda RAG
 const ragSearchTool = tool({
-  description: `Busca información relevante en la base de conocimiento especializada. 
+  description: `Busca información relevante en la base de conocimiento especializada dependiendo la categoria especifica de informacion que necesites. 
     Usa esta herramienta cuando necesites información específica sobre temas académicos, 
     documentos o cualquier contenido que pueda estar almacenado en la base de datos de conocimiento.`,
   inputSchema: z.object({
-    query: z.string().describe('La consulta o pregunta para buscar en la base de conocimiento'),
+    query: z.string().describe('Consulta del usuario'),
+    category: z.enum(["ESTADISTICAS", "NUMERO_TELEFONO", "TECNICAS_CONTROL", "OTRO"])
   }),
-  execute: async ({ query }) => {
+  execute: async ({ query, category } ) => {
     try {
       // Validar que el query no esté vacío
       if (!query || query.trim() === "") {
         return "La consulta está vacía. Por favor, proporciona una pregunta específica para buscar en la base de conocimiento.";
       }
-      
-      const ragResponse = await getRelevantInformation(query);
+      console.log(category)
+      const ragResponse = await getRelevantInformation(query, category);
       
       // Verificar si la respuesta está vacía o es null/undefined
       if (!ragResponse || ragResponse.trim() === "") {
@@ -133,7 +134,27 @@ export async function POST(req: Request) {
     1. [Usa searchKnowledgeBase]
     2. [Responde]: "Basado en la información de la base de conocimiento..."
     
-    IMPORTANTE: Nunca dejes una respuesta vacía. Siempre genera texto después de usar herramientas.`;
+    IMPORTANTE: Nunca dejes una respuesta vacía. Siempre genera texto después de usar herramientas.
+    
+    Cuando el usuario haga una consulta, antes de llamar al tool de búsqueda RAG,
+    determiná internamente cuál es la categoría de información más adecuada según su intención.
+    
+    Las categorías válidas son:
+    - ESTADISTICAS
+    - NUMERO_TELEFONO
+    - TECNICAS_CONTROL
+    - OTRO
+    
+    Siempre generá un JSON con el siguiente formato:
+    {
+      "query": "(texto del usuario)",
+      "category": "(una de las categorías)"
+    }
+    
+    Si no estás seguro, usá "OTRO".
+    
+    Al obtener el resultado de la tool call, escribi tu respuesta basandote en la informacion obtenida 
+`;
 
     const result = streamText({
       model: google("gemini-2.5-flash"),

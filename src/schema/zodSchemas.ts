@@ -90,6 +90,15 @@ const updateDescriptionSchema = z.object({
   description: z.string().max(500, "La descripción no puede exceder los 500 caracteres").optional(),
 });
 
+const bibliographySchema = z.object({
+  id: z.string().uuid("ID de recurso inválido"),
+  title: z.string().min(2, "Debe tener al menos 2 caracteres").max(50),
+  author: z.string().optional(),
+  description: z.string().optional(),
+  category: z.enum(["ESTADISTICAS","NUMERO_TELEFONO","TECNICAS_CONTROL","OTRO"]),
+  createdAt: z.date()
+});
+
 export { 
   signInSchema, 
   signUpSchema, 
@@ -97,5 +106,6 @@ export {
   addParticipantSchema,
   removeParticipantSchema,
   searchUsersSchema,
-  updateDescriptionSchema
+  updateDescriptionSchema,
+  bibliographySchema
 };
