@@ -24,17 +24,22 @@ const ragSearchTool = tool({
     documentos o cualquier contenido que pueda estar almacenado en la base de datos de conocimiento.`,
   inputSchema: z.object({
     query: z.string().describe('Consulta del usuario'),
-    category: z.enum(["ESTADISTICAS", "NUMERO_TELEFONO", "TECNICAS_CONTROL", "OTRO"])
+    category: z.enum(["ESTADISTICAS", "NUMERO_TELEFONO", "TECNICAS_CONTROL", "OTRO"]),
+    location: z.string().describe('Ubicación del usuario')
   }),
-  execute: async ({ query, category } ) => {
+  execute: async ({ query, category, location } ) => {
     try {
       // Validar que el query no esté vacío
       if (!query || query.trim() === "") {
         return "La consulta está vacía. Por favor, proporciona una pregunta específica para buscar en la base de conocimiento.";
       }
       console.log(category)
+      console.log(location)
+
+
       const ragResponse = await getRelevantInformation(query, category);
-      
+
+
       // Verificar si la respuesta está vacía o es null/undefined
       if (!ragResponse || ragResponse.trim() === "") {
         return "No se encontró información relevante en la base de conocimiento para tu consulta. Puedo ayudarte con información general si lo deseas.";
@@ -50,9 +55,11 @@ const ragSearchTool = tool({
       
       // Aumentar el límite de palabras para conservar más contexto
       const limitedRag = cleanedRagResponse.split(" ").slice(0, 300).join(" ");
+      console.log(limitedRag)
       return `Información encontrada en la base de conocimiento: ${limitedRag}
       Fuente: Base de conocimiento especializada`;
     } catch (error) {
+      console.error("Error al acceder a la base de conocimiento:", error);
       return `Error al acceder a la base de conocimiento: ${error instanceof Error ? error.message : "Error desconocido"}. Puedo ayudarte con información general si lo deseas.`;
     }
   },
@@ -108,58 +115,17 @@ export async function POST(req: Request) {
     message.metadata.createdAt = Date.now();
 
     // Sistema mejorado para trabajar con la tool RAG
-    const enhancedSystemPrompt = `${system}
+    /*
+    const enhancedSystemPrompt = system
+        .replace(/<ubi>/g, chatSession.data?.location)
+        .replace(/<riesgo>/g, String(chatSession.data?.score))
+        .replace(/<diayhora>/g, String(message.metadata.createdAt));
 
-    INSTRUCCIONES CRÍTICAS PARA USO DE HERRAMIENTAS:
-    
-    1. **FLUJO OBLIGATORIO**: Para consultas académicas, técnicas o específicas:
-       - PASO 1: Usa SIEMPRE searchKnowledgeBase primero
-       - PASO 2: Analiza la respuesta de la herramienta
-       - PASO 3: Genera tu respuesta basada en esa información
-    
-    2. **RESPUESTA DESPUÉS DE HERRAMIENTAS**: 
-       - Después de usar searchKnowledgeBase, SIEMPRE proporciona una respuesta de texto
-       - Nunca termines sin responder al usuario
-       - Explica lo que encontraste y cómo responde a su pregunta
-    
-    3. **FORMATO DE RESPUESTA**:
-       - Si encontraste información relevante: Úsala para responder
-       - Si no encontraste información: Usa tu conocimiento general
-       - SIEMPRE termina con texto explicativo para el usuario
-    
-    4. **OBLIGATORIO**: Después de cualquier tool call, debes generar texto de respuesta.
-    
-    EJEMPLO CORRECTO:
-    Usuario: "¿Qué es la adolescencia?"
-    1. [Usa searchKnowledgeBase]
-    2. [Responde]: "Basado en la información de la base de conocimiento..."
-    
-    IMPORTANTE: Nunca dejes una respuesta vacía. Siempre genera texto después de usar herramientas.
-    
-    Cuando el usuario haga una consulta, antes de llamar al tool de búsqueda RAG,
-    determiná internamente cuál es la categoría de información más adecuada según su intención.
-    
-    Las categorías válidas son:
-    - ESTADISTICAS
-    - NUMERO_TELEFONO
-    - TECNICAS_CONTROL
-    - OTRO
-    
-    Siempre generá un JSON con el siguiente formato:
-    {
-      "query": "(texto del usuario)",
-      "category": "(una de las categorías)"
-    }
-    
-    Si no estás seguro, usá "OTRO".
-    
-    Al obtener el resultado de la tool call, escribi tu respuesta basandote en la informacion obtenida 
-`;
-
+*/
     const result = streamText({
       model: google("gemini-2.5-flash"),
       messages: convertToModelMessages(allMessages),
-      system: enhancedSystemPrompt,
+      system: system,
       temperature: 0.1,
       // maxOutputTokens: 4096, // Renamed from maxTokens
       // Temperatura, top_p y no se si top_k se pueden pasar aquí

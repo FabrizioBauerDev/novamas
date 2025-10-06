@@ -82,7 +82,7 @@ export async function getRelevantInformation(query: string, category: string): P
     filters.push(gt(similarity, 0.1));
 
     if(category && category!="OTRO"){
-        filters.push(ilike(bibliography.category, category))
+        filters.push(eq(bibliography.category, category as any))
     }
 
     const similarGuides = await db
