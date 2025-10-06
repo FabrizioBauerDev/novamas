@@ -53,9 +53,21 @@ export async function POST(request: NextRequest) {
     try {
         const formData = await request.formData();
         const file = formData.get("file") as File;
+
+
         const title = formData.get("title") as string;
         const author = formData.get("author") as string;
         const description = formData.get("description") as string;
+        const categoryStr = formData.get("category") as string;
+
+        let category;
+
+        switch (categoryStr){
+            case "Estadisticas": category="ESTADISTICAS"; break;
+            case "Numeros de telefono": category="NUMERO_TELEFONO";break;
+            case "Tecnicas de Control": category="TECNICAS_CONTROL";break;
+            default: category="OTRO";break;
+        }
 
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
@@ -64,7 +76,7 @@ export async function POST(request: NextRequest) {
             "Error converting PDF to Markdown"
         )
 
-        const updatedBibliography = await loadMarkdown(markdownContent, title, author, description);
+        const updatedBibliography = await loadMarkdown(markdownContent, title, author, description, category);
         return NextResponse.json(updatedBibliography);
     } catch (err) {
         console.error(err);

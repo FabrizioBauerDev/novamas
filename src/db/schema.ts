@@ -88,8 +88,7 @@ export const messages = pgTable("Message", {
   messageTokensIn: integer("messageTokensIn"),
   messageTokensOut: integer("messageTokensOut"),
   messageTokensReasoning: integer("messageTokensReasoning"),
-  sentimentScore: real("sentimentScore"),
-  sentimentLabel: text("sentimentLabel"),
+  sentiment: text("sentiment"),
   createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
 });
 
@@ -195,12 +194,21 @@ export type NewEvaluationForm = typeof evaluationForms.$inferInsert;
 // ========================== ESQUEMA RAG - BIBLIOGRAFÍA Y VECTORES =============================
 // ================================================================================================
 
+export const bibliographyCategoryEnum = pgEnum("BibliographyCategory", [
+  "ESTADISTICAS",
+  "NUMERO_TELEFONO",
+  "TECNICAS_CONTROL",
+  "OTRO",
+]);
+
+
 // Tabla de libros/bibliografía
 export const bibliography = pgTable("bibliography", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull().unique(),
   author: text("author"),
   description: text("description"),
+  category: bibliographyCategoryEnum("category").notNull().default("OTRO"),
   createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow()
 });
 
@@ -230,3 +238,41 @@ export type NewBibliography = typeof bibliography.$inferInsert;
 
 export type Chunk = typeof chunk.$inferSelect;
 export type NewChunk = typeof chunk.$inferInsert;
+
+
+// ================================================================================================
+// ========================== ESQUEMA ESTADISTICAS =============================
+// ================================================================================================
+
+export const BetTypeEnum = pgEnum("BetType", [
+  "CASINO_PRESENCIAL",
+  "CASINO_ONLINE",
+  "DEPORTIVA",
+  "LOTERIA",
+  "VIDEOJUEGO",
+  "NO_ESPECIFICA",
+]);
+
+export const statistics = pgTable("statistics", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  summary: text("summary"),
+  chatId: uuid("chat_id").notNull().references(() => chatSessions.id), // Ajustá el nombre si tu tabla es distinta
+  amountMessages: integer("amount_messages").notNull(),
+  minWordsPerMessage: integer("min_words_per_message").notNull(),
+  maxWordsPerMessage: integer("max_words_per_message").notNull(),
+  hateSpeechPercentage: real("hate_speech_percentage").notNull(),
+  ironicPercentage: real("ironic_percentage").notNull(),
+  changeTheme: boolean("change_theme").notNull(),
+  betType: BetTypeEnum("bet_type").notNull().default("NO_ESPECIFICA"),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow()
+});
+
+export const statisticsRelations = relations(statistics, ({ one }) => ({
+  chatSession: one(chatSessions, {
+    fields: [statistics.chatId],
+    references: [chatSessions.id],
+  }),
+}));
+
+export type Statistic = typeof statistics.$inferSelect;
+export type NewStatistic = typeof statistics.$inferInsert;
