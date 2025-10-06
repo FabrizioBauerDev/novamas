@@ -8,7 +8,7 @@ export function createWelcomeMessage(): UIMessage {
     parts: [
       {
         type: "text",
-        text: "¡Hola! Soy NoVa+, tu asistente virtual. ¿En qué puedo ayudarte hoy?",
+        text: "¡Hola! Soy NoVa+, tu asistente con inteligencia artificial para el juego responsable. ¿En qué puedo ayudarte?",
       },
     ],
     metadata: {

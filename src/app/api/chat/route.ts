@@ -67,6 +67,44 @@ export async function POST(req: Request) {
     const { message, id }: { message: MyUIMessage; id: string } =
         await req.json();
 
+    // Validar que el mensaje tenga contenido
+    if (!message || !message.parts || message.parts.length === 0) {
+      console.error(logString + "Mensaje vacío o sin partes");
+      return NextResponse.json(
+          { error: "El mensaje no puede estar vacío." },
+          { status: 400 }
+      );
+    }
+
+    // Validar que cada parte de texto no exceda 280 caracteres
+    for (const part of message.parts) {
+      if (part.type === "text") {
+        const trimmedText = part.text.trim();
+        
+        if (!trimmedText) {
+          console.error(logString + "Texto del mensaje vacío");
+          return NextResponse.json(
+              { error: "El mensaje no puede estar vacío." },
+              { status: 400 }
+          );
+        }
+        
+        if (trimmedText.length > 280) {
+          console.error(
+              logString + `Mensaje demasiado largo: ${trimmedText.length} caracteres`
+          );
+          return NextResponse.json(
+              { 
+                error: "El mensaje no puede exceder los 280 caracteres.",
+                length: trimmedText.length,
+                maxLength: 280
+              },
+              { status: 400 }
+          );
+        }
+      }
+    }
+
     // Obtener la sesion de chat para comprobar si tiene asociado un grupo de chat
     const chatSession = await getChatSessionById(id);
     if (!chatSession.success) {

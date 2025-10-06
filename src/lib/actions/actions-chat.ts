@@ -20,6 +20,15 @@ export async function createFormChatSessionAction(
       };
     }
     
+    // Validar rango de edad
+    const age = parseInt(formData.age);
+    if (isNaN(age) || age < 13 || age > 99) {
+      return {
+        success: false,
+        error: "La edad debe estar entre 13 y 99 años"
+      };
+    }
+    
     // Si onlineGaming es false, los otros campos pueden estar vacíos
     if (formData.onlineGaming === "true") {
       if (!formData.couldntStop || !formData.personalIssues || !formData.triedToQuit) {
