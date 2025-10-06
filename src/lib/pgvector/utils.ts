@@ -1,8 +1,8 @@
 import {db} from '@/db'
-import {bibliography, chunk} from '@/db/schema'
+import {bibliography, chunk, bibliographyCategoryEnum } from '@/db/schema'
 import { generateEmbeddingsQuery, generateEmbeddingsMd }from '@/lib/pgvector/embeddings'
-import {cosineDistance, eq, sql, gt, desc, and, ilike, SQL} from "drizzle-orm";
-import {BibliographyItem} from "@/types/bibliography";
+import {cosineDistance, eq, sql, gt, desc, and, SQL} from "drizzle-orm";
+import {BibliographyItem, BibliographyCategory} from "@/types/bibliography";
 
 
 export const getBibliography = async () : Promise<BibliographyItem[]> => {
@@ -24,18 +24,18 @@ export const getBibliography = async () : Promise<BibliographyItem[]> => {
 }
 
 // funcion para cargar un markdown en la base de datos vectorial
-export async function loadMarkdown(markdown: string, title: string, author: string, description: string, category: string): Promise<BibliographyItem[]> {
+export async function loadMarkdown(markdown: string, title: string, author: string, description: string, category: BibliographyCategory): Promise<BibliographyItem[]> {
     console.log("Ingresando a LoadMarkdown\n");
     try{
         await db.transaction(async (tx) => {
 
-            const [resource] = await db
+            const [resource] = await tx
                 .insert(bibliography)
                 .values({
                     title: title,
                     author: author,
                     description: description,
-                    category: category as "ESTADISTICAS"|"NUMERO_TELEFONO"|"TECNICAS_CONTROL"|"OTRO"
+                    category: category
                 })
                 .returning();
 
@@ -43,7 +43,7 @@ export async function loadMarkdown(markdown: string, title: string, author: stri
             const embeddings = await generateEmbeddingsMd(markdown);
             console.log("Termina de generar embeddings");
 
-            await db.insert(chunk).values(
+            await tx.insert(chunk).values(
                 embeddings.map(embedding => ({
                     resource_id: resource.id,
                     ...embedding
@@ -74,16 +74,25 @@ export async function deleteMarkdown(id: string) {
 // funcion para obtener un arreglo de los contenidos mas relevantes sobre la query dada
 export async function getRelevantInformation(query: string, category: string): Promise<string> {
     const queryEmbed = await generateEmbeddingsQuery(query)
-
+    console.log("Entre al getRelevantInformation\n");
     // con esto calcula la similitud entre la columna de embedding y la queryEmbed
     const similarity = sql<number>`1 - (${cosineDistance(chunk.embedding, queryEmbed)})`;
 
+
     const filters: SQL[] = [];
-    filters.push(gt(similarity, 0.1));
+    filters.push(gt(similarity, 0.5));
+
+    let category_enum;
 
     if(category && category!="OTRO"){
-        filters.push(eq(bibliography.category, category as any))
+        switch(category){
+            case "ESTADISTICAS": category_enum=bibliographyCategoryEnum.enumValues[0];break;
+            case "TECNICAS_CONTROL": category_enum=bibliographyCategoryEnum.enumValues[2];break;
+            default: category_enum=bibliographyCategoryEnum.enumValues[1];
+        }
+        filters.push(eq(bibliography.category, category_enum))
     }
+    console.log(filters);
 
     const similarGuides = await db
         .select({ content: chunk.content, similarity })

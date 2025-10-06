@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getBibliography, loadMarkdown, deleteMarkdown } from "@/lib/pgvector/utils";
 import FormData from "form-data";
 import axios from "axios";
+import {bibliographyCategoryEnum} from "@/db/schema";
 
 async function convertPdfToMarkdown(buffer: Buffer<ArrayBuffer>) {
     const formData = new FormData();
@@ -60,13 +61,13 @@ export async function POST(request: NextRequest) {
         const description = formData.get("description") as string;
         const categoryStr = formData.get("category") as string;
 
-        let category;
+        let category_enum;
 
         switch (categoryStr){
-            case "Estadisticas": category="ESTADISTICAS"; break;
-            case "Numeros de telefono": category="NUMERO_TELEFONO";break;
-            case "Tecnicas de Control": category="TECNICAS_CONTROL";break;
-            default: category="OTRO";break;
+            case "Estadisticas": category_enum=bibliographyCategoryEnum.enumValues[0];break;
+            case "Numeros de telefono": category_enum=bibliographyCategoryEnum.enumValues[1];
+            case "Tecnicas de Control": category_enum=bibliographyCategoryEnum.enumValues[2];break;
+            default: category_enum=bibliographyCategoryEnum.enumValues[3];
         }
 
         const arrayBuffer = await file.arrayBuffer();
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
             "Error converting PDF to Markdown"
         )
 
-        const updatedBibliography = await loadMarkdown(markdownContent, title, author, description, category);
+        const updatedBibliography = await loadMarkdown(markdownContent, title, author, description, category_enum);
         return NextResponse.json(updatedBibliography);
     } catch (err) {
         console.error(err);

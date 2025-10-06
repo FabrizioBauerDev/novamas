@@ -1,14 +1,14 @@
-import { 
-  pgTable, 
-  text, 
-  timestamp, 
-  uuid, 
+import {
+  pgTable,
+  text,
+  timestamp,
+  uuid,
   pgEnum,
   integer,
   real,
   boolean,
   primaryKey,
-  vector
+  vector, index
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -218,7 +218,10 @@ export const chunk = pgTable("chunk", {
   resource_id: uuid("resource_id").notNull().references(() => bibliography.id),
   content: text("content").notNull(),
   embedding: vector("embedding", { dimensions: 768 }).notNull(), // dimension de los vectores de all-MiniLM-L6-v2
-});
+},(table) => [
+  index('embeddingIndex').using('hnsw', table.embedding.op('vector_cosine_ops')),
+]
+);
 
 // Relaciones RAG
 export const bibliographyRelations = relations(bibliography, ({ many }) => ({

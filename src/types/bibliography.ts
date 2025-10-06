@@ -1,11 +1,11 @@
 import {bibliographyCategoryEnum} from "@/db/schema"
-
+export type BibliographyCategory = typeof bibliographyCategoryEnum.enumValues[number];
 export interface BibliographyItem {
     id: string
     title: string
     author: string | null
     description: string | null
-    category: typeof bibliographyCategoryEnum.enumValues[number];
+    category: BibliographyCategory;
     createdat: Date
 }
 
