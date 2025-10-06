@@ -164,8 +164,8 @@ export async function POST(req: Request) {
       model: google("gemini-2.5-flash"),
       messages: convertToModelMessages(allMessages),
       system: system,
-      temperature: 0.1,
-      // maxOutputTokens: 4096, // Renamed from maxTokens
+      temperature: 0.5,
+      maxOutputTokens: 500,
       // Temperatura, top_p y no se si top_k se pueden pasar aquí
       tools: {
         searchKnowledgeBase: ragSearchTool,
