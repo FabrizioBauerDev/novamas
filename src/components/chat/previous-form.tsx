@@ -187,13 +187,18 @@ export default function FormularioEvaluacion({
                   <Input
                     id="edad"
                     type="number"
-                    placeholder="Ingresa tu edad"
+                    placeholder="Ingresa tu edad (13-99)"
                     value={formData.age}
                     onChange={(e) => handleInputChange("age", e.target.value)}
                     min="13"
-                    max="100"
+                    max="99"
                     required
                   />
+                  {formData.age && (parseInt(formData.age) < 13 || parseInt(formData.age) > 99) && (
+                    <p className="text-sm text-red-600">
+                      La edad debe estar entre 13 y 99 años
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-4">
@@ -256,6 +261,8 @@ export default function FormularioEvaluacion({
                   disabled={
                     !formData.gender ||
                     !formData.age ||
+                    parseInt(formData.age) < 13 ||
+                    parseInt(formData.age) > 99 ||
                     !formData.onlineGaming ||
                     !termsAccepted ||
                     isLoading
