@@ -15,26 +15,64 @@ import {
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
 import { Loader } from "@/components/ai-elements/loader";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
 import { Response } from "@/components/ai-elements/response";
 import { MyUIMessage } from "@/types/types";
 import { DefaultChatTransport } from "ai";
 import { createWelcomeMessage } from "@/lib/chat-utils";
 import { FeedbackCard } from "./feedback-card";
+import { SessionTimer } from "./session-timer";
+import { finalizeChatSessionAction } from "@/lib/actions/actions-chat";
+import { useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface NewChatInterfaceProps {
   chatSessionId: string | null;
+  sessionData: {
+    createdAt: string;
+    chatGroupId: string | null;
+    maxDurationMs: number;
+    usedGraceMessage: boolean;
+  } | null;
+  isGroupSession: boolean;
+  onFinish?: () => void;
 }
 
 const ConversationDemo = ({
   chatSessionId,
+  sessionData: initialSessionData,
+  isGroupSession,
+  onFinish,
 }: {
   chatSessionId: string | null;
+  sessionData: {
+    createdAt: string;
+    chatGroupId: string | null;
+    maxDurationMs: number;
+    usedGraceMessage: boolean;
+  } | null;
+  isGroupSession: boolean;
+  onFinish?: () => void;
 }) => {
   const sessionId = chatSessionId || "default-session-id"; // Fallback si no hay ID
+  const router = useRouter();
   const [input, setInput] = useState("");
-  const { messages, sendMessage, status } = useChat<MyUIMessage>({
+  const [isFinishing, setIsFinishing] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
+  const [showTimeoutDialog, setShowTimeoutDialog] = useState(false);
+  const [showWarningDialog, setShowWarningDialog] = useState(false);
+  const [warningShown, setWarningShown] = useState(false);
+  const [autoRedirectStarted, setAutoRedirectStarted] = useState(false);
+  const [feedbackFormVisible, setFeedbackFormVisible] = useState(true);
+
+  const { messages, sendMessage, status, error, setMessages } = useChat<MyUIMessage>({
     id: sessionId,
     messages: [
       createWelcomeMessage() as MyUIMessage, // Usar la función global
@@ -46,7 +84,119 @@ const ConversationDemo = ({
         return { body: { message: messages[messages.length - 1], id } };
       },
     }),
+    onError: (error) => {
+      // Capturar error de tiempo expirado
+      if (error.message?.includes("TIEMPO_EXPIRADO") || error.message?.includes("403")) {
+        setSessionExpired(true);
+      }
+    },
+    onFinish: async () => {
+      // Después de cada respuesta, verificar si necesitamos recargar mensajes
+      // (para capturar el mensaje de gracia que se añade en el backend)
+      if (!isGroupSession && initialSessionData) {
+        const { getChatMessagesAction } = await import("@/lib/actions/actions-chat");
+        const result = await getChatMessagesAction(sessionId);
+        if (result.success && result.data) {
+          setMessages(result.data as MyUIMessage[]);
+        }
+      }
+    },
   });
+
+  // Detectar cuando llega el mensaje de gracia del asistente
+  useEffect(() => {
+    if (isGroupSession) return;
+
+    // Buscar si el último mensaje del asistente es el mensaje de gracia
+    const lastAssistantMessage = messages
+      .filter(m => m.role === "assistant")
+      .pop();
+
+    if (lastAssistantMessage) {
+      const hasGraceText = lastAssistantMessage.parts.some(
+        part => part.type === "text" && part.text.includes("Tu sesión ha alcanzado el tiempo máximo")
+      );
+
+      if (hasGraceText && !sessionExpired) {
+        setSessionExpired(true);
+        setShowTimeoutDialog(true);
+        setAutoRedirectStarted(true); // Activar el auto-redirect
+      }
+    }
+  }, [messages, isGroupSession, sessionExpired]);
+
+  // Mostrar advertencia cuando quedan 2 minutos (solo para sesiones individuales)
+  useEffect(() => {
+    if (!initialSessionData || isGroupSession || warningShown) {
+      return;
+    }
+
+    const checkTimeRemaining = () => {
+      const createdAt = new Date(initialSessionData.createdAt);
+      const maxDuration = initialSessionData.maxDurationMs || 1200000;
+      const elapsed = Date.now() - createdAt.getTime();
+      const remaining = maxDuration - elapsed;
+      
+      // Mostrar advertencia cuando quedan 2 minutos (120000 ms)
+      if (remaining <= 120000 && remaining > 0 && !warningShown) {
+        setShowWarningDialog(true);
+        setWarningShown(true);
+      }
+    };
+
+    // Chequear cada 5 segundos
+    const interval = setInterval(checkTimeRemaining, 5000);
+    
+    // Chequear inmediatamente también
+    checkTimeRemaining();
+
+    return () => clearInterval(interval);
+  }, [initialSessionData, isGroupSession, warningShown]);
+
+  /**
+   * Maneja la finalización manual del chat
+   */
+  const handleFinishChat = async () => {
+    // Evitar múltiples ejecuciones
+    if (isFinishing) {
+      return;
+    }
+    
+    setIsFinishing(true);
+    
+    try {
+      // Marcar sesión como finalizada en BD usando Server Action
+      const result = await finalizeChatSessionAction(sessionId);
+      
+      if (result.success) {
+        // Llamar al callback del contenedor para cambiar de vista
+        if (onFinish) {
+          onFinish();
+        }
+      } else {
+        alert("Hubo un error al finalizar el chat. Por favor intenta nuevamente.");
+        setIsFinishing(false);
+      }
+    } catch (error) {
+      alert("Hubo un error al finalizar el chat. Por favor intenta nuevamente.");
+      setIsFinishing(false);
+    }
+  };
+
+  // Auto-redirect después de que la sesión expire (1 minuto)
+  // Usamos un estado separado para que cerrar el modal no cancele el timer
+  useEffect(() => {
+    if (autoRedirectStarted && !isFinishing) {
+      const timer = setTimeout(() => {
+        handleFinishChat();
+      }, 60000); // 1 minuto
+
+      // Solo limpiar si el componente se desmonta
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [autoRedirectStarted, isFinishing]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +212,13 @@ const ConversationDemo = ({
       return;
     }
 
-    sendMessage({ text: trimmedInput });
+    // Añadir metadata con timestamp al enviar el mensaje
+    sendMessage({ 
+      text: trimmedInput,
+      metadata: {
+        createdAt: Date.now()
+      }
+    });
     setInput("");
   };
 
@@ -75,7 +231,7 @@ const ConversationDemo = ({
       {/* Advertencia para móviles */}
       <div className="md:hidden bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
         <p className="text-xs text-amber-800 text-center">
-          ⚠️ Recuerda que solo es un asistente basado en inteligencia
+          ⚠️ Recuerda que solo es un asistente con inteligencia
           artificial, no reemplaza a un profesional ni a una persona física.
         </p>
       </div>
@@ -91,7 +247,7 @@ const ConversationDemo = ({
                 Aviso importante
               </h3>
               <p className="text-xs text-amber-800 leading-relaxed">
-                Recuerda que solo es un asistente basado en inteligencia
+                Recuerda que solo es un asistente con inteligencia
                 artificial, no reemplaza a un profesional ni a una persona
                 física.
               </p>
@@ -190,7 +346,11 @@ const ConversationDemo = ({
                 <div className="flex w-full items-center">
                   <PromptInputTextarea
                     value={input}
-                    placeholder="Escribe tu mensaje..."
+                    placeholder={
+                      sessionExpired
+                        ? "La sesión ha finalizado. Redirigiendo..."
+                        : "Escribe tu mensaje..."
+                    }
                     onChange={(e) => {
                       const value = e.currentTarget.value;
                       // Validación en tiempo real: limitar a 280 caracteres
@@ -198,6 +358,7 @@ const ConversationDemo = ({
                         setInput(value);
                       }
                     }}
+                    disabled={sessionExpired}
                     className="flex-1"
                     maxLength={280}
                   />
@@ -207,7 +368,8 @@ const ConversationDemo = ({
                       !input.trim() ||
                       input.length > 280 ||
                       status === "submitted" ||
-                      status === "streaming"
+                      status === "streaming" ||
+                      sessionExpired
                     }
                     className="mr-2"
                   />
@@ -222,8 +384,20 @@ const ConversationDemo = ({
 
         {/* Feedback card a la derecha - columnas 11-12 */}
         <div className="col-span-2">
-          <div className="sticky top-4">
-            <FeedbackCard chatSessionId={sessionId} />
+          <div className="sticky top-4 space-y-4">
+            <SessionTimer
+              createdAt={initialSessionData?.createdAt ? new Date(initialSessionData.createdAt) : null}
+              maxDurationMs={initialSessionData?.maxDurationMs}
+              isGroupSession={isGroupSession}
+              messageCount={messages.length}
+              onFinish={handleFinishChat}
+              isFinishing={isFinishing}
+            />
+            <FeedbackCard 
+              chatSessionId={sessionId} 
+              isVisible={feedbackFormVisible}
+              onHide={() => setFeedbackFormVisible(false)}
+            />
           </div>
         </div>
       </div>
@@ -320,7 +494,11 @@ const ConversationDemo = ({
                 <div className="flex w-full items-center">
                   <PromptInputTextarea
                     value={input}
-                    placeholder="Escribe tu mensaje..."
+                    placeholder={
+                      sessionExpired
+                        ? "La sesión ha finalizado. Redirigiendo..."
+                        : "Escribe tu mensaje..."
+                    }
                     onChange={(e) => {
                       const value = e.currentTarget.value;
                       // Validación en tiempo real: limitar a 280 caracteres
@@ -328,6 +506,7 @@ const ConversationDemo = ({
                         setInput(value);
                       }
                     }}
+                    disabled={sessionExpired}
                     className="flex-1"
                     maxLength={280}
                   />
@@ -337,7 +516,8 @@ const ConversationDemo = ({
                       !input.trim() ||
                       input.length > 280 ||
                       status === "submitted" ||
-                      status === "streaming"
+                      status === "streaming" ||
+                      sessionExpired
                     }
                     className="mr-2"
                   />
@@ -350,17 +530,87 @@ const ConversationDemo = ({
           </div>
         </div>
 
-        {/* Feedback card para móviles - debajo del chat */}
-        <div className="pb-4">
-          <FeedbackCard chatSessionId={sessionId} />
+        {/* Feedback card y Timer para móviles - debajo del chat */}
+        <div className="pb-4 space-y-4">
+          <SessionTimer
+            createdAt={initialSessionData?.createdAt ? new Date(initialSessionData.createdAt) : null}
+            maxDurationMs={initialSessionData?.maxDurationMs}
+            isGroupSession={isGroupSession}
+            messageCount={messages.length}
+            onFinish={handleFinishChat}
+            isFinishing={isFinishing}
+          />
+          <FeedbackCard 
+            chatSessionId={sessionId} 
+            isVisible={feedbackFormVisible}
+            onHide={() => setFeedbackFormVisible(false)}
+          />
         </div>
       </div>
+
+      {/* Modal de advertencia (2 minutos antes) */}
+      <AlertDialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
+        <AlertDialogContent>
+          <AlertDialogTitle>⚠️ Tiempo Casi Agotado</AlertDialogTitle>
+          <AlertDialogDescription asChild>
+            <div className="space-y-3">
+              <div>
+                Te quedan <strong>menos de 2 minutos</strong> de conversación.
+              </div>
+              <div className="text-sm">
+                Considera finalizar pronto para completar el formulario de evaluación antes de que expire el tiempo.
+              </div>
+            </div>
+          </AlertDialogDescription>
+          <AlertDialogAction onClick={() => setShowWarningDialog(false)}>
+            Entendido
+          </AlertDialogAction>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Modal de sesión expirada */}
+      <AlertDialog open={showTimeoutDialog} onOpenChange={setShowTimeoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogTitle>⏰ Sesión Finalizada</AlertDialogTitle>
+          <AlertDialogDescription asChild>
+            <div className="space-y-3">
+              <div>
+                Tu sesión ha alcanzado el tiempo máximo de conversación.
+              </div>
+              <div className="text-sm text-gray-600">
+                Lee los últimos mensajes del chat. Puedes:
+              </div>
+              <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                <li>
+                  Pulsar el botón <strong>&quot;Finalizar Chat&quot;</strong> para ir al formulario de evaluación inmediatamente
+                </li>
+                <li>
+                  Esperar <strong>1 minuto</strong> para ser redirigido automáticamente
+                </li>
+              </ul>
+            </div>
+          </AlertDialogDescription>
+          <AlertDialogAction onClick={() => setShowTimeoutDialog(false)}>
+            Entendido
+          </AlertDialogAction>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
 
 export default function NewChatInterface({
   chatSessionId,
+  sessionData,
+  isGroupSession,
+  onFinish,
 }: NewChatInterfaceProps) {
-  return <ConversationDemo chatSessionId={chatSessionId} />;
+  return (
+    <ConversationDemo 
+      chatSessionId={chatSessionId}
+      sessionData={sessionData}
+      isGroupSession={isGroupSession}
+      onFinish={onFinish}
+    />
+  );
 }

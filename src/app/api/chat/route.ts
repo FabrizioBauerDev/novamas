@@ -9,10 +9,12 @@ import {
   getChat,
   getChatSessionById,
   saveChat,
+  markGraceMessageUsed,
 } from "@/lib/db";
 import { createWelcomeMessage } from "@/lib/chat-utils";
 import { getRelevantInformation } from "@/lib/pgvector/utils";
 import { z } from "zod";
+import { CHAT_CONFIG, isSessionExpired } from "@/lib/chat-config";
 
 // Permite respuestas de streaming hasta 30 segundos
 export const maxDuration = 30;
@@ -138,6 +140,54 @@ export async function POST(req: Request) {
       }
     }
 
+    // ========================================================================
+    // VALIDACIÓN DE TIEMPO - SOLO PARA SESIONES INDIVIDUALES (sin chatGroupId)
+    // ========================================================================
+    let shouldAddGraceMessage = false;
+    if (!chatSession.data?.chatGroupId) {
+      const maxDuration = chatSession.data?.maxDurationMs || CHAT_CONFIG.MAX_DURATION_MS;
+      const sessionExpired = isSessionExpired(chatSession.data!.createdAt, maxDuration);
+
+      if (sessionExpired) {
+        // La sesión ya superó el tiempo
+        
+        if (chatSession.data?.usedGraceMessage) {
+          // Ya usó su mensaje de gracia, bloquear completamente
+          console.log(
+            logString + 
+            `Sesión ${id} intentó enviar mensaje después de usar mensaje de gracia`
+          );
+          
+          return NextResponse.json(
+            {
+              error: "TIEMPO_EXPIRADO",
+              message: "Tu sesión ha finalizado. Por favor completa el formulario de evaluación.",
+              sessionExpired: true,
+            },
+            { status: 403 }
+          );
+        } else {
+          // Permitir este último mensaje y marcar el flag
+          console.log(
+            logString + 
+            `Sesión ${id} alcanzó el límite de tiempo. Permitiendo mensaje de gracia.`
+          );
+          
+          shouldAddGraceMessage = true;
+          
+          try {
+            await markGraceMessageUsed(id);
+          } catch (error) {
+            console.error(
+              logString + `Error marcando mensaje de gracia para sesión ${id}:`,
+              error
+            );
+            // Continuar de todas formas para no bloquear al usuario
+          }
+        }
+      }
+    }
+
     // Cargar mensajes previos de la BD (equivalente a loadChat de la guía)
     const previousMessages = await getChat(id);
 
@@ -196,15 +246,56 @@ export async function POST(req: Request) {
       },
       onFinish: async ({ messages }) => {
         try {
+          // Verificar si acabamos de usar el mensaje de gracia
+          const updatedSession = await getChatSessionById(id);
+          let messagesToSave = messages;
+
+          // Solo añadir mensaje de gracia para sesiones individuales
+          if (!updatedSession.data?.chatGroupId && updatedSession.data?.usedGraceMessage) {
+            // Verificar si ya existe el mensaje de gracia en los mensajes
+            const hasGraceMessage = messages.some(msg => 
+              msg.role === "assistant" && 
+              msg.parts.some(part => 
+                part.type === "text" && 
+                part.text.includes("Tu sesión ha alcanzado el tiempo máximo")
+              )
+            );
+
+            // Solo añadir si no existe ya
+            if (!hasGraceMessage) {
+              // Calcular minutos de duración desde maxDurationMs
+              const maxDurationMinutes = Math.floor(
+                (updatedSession.data.maxDurationMs || CHAT_CONFIG.MAX_DURATION_MS) / 60000
+              );
+              
+              const graceMessage: MyUIMessage = {
+                id: crypto.randomUUID(),
+                role: "assistant",
+                parts: [{
+                  type: "text",
+                  text: CHAT_CONFIG.getGraceMessage(maxDurationMinutes)
+                }],
+                metadata: { createdAt: Date.now() }
+              };
+
+              messagesToSave = [...messages, graceMessage];
+              console.log(logString + `Mensaje de gracia añadido para sesión ${id}`);
+            }
+          }
+
+          // Guardar mensajes
           if (welcomeMessage) {
             await saveChat({
               chatSessionId: id,
-              messages,
+              messages: messagesToSave,
             });
           } else {
+            // Si hay mensaje de gracia, guardar los últimos 3 (user + assistant + grace)
+            // Si no, guardar los últimos 2 (user + assistant)
+            const sliceCount = messagesToSave.length > messages.length ? -3 : -2;
             await saveChat({
               chatSessionId: id,
-              messages: (messages ?? []).slice(-2),
+              messages: (messagesToSave ?? []).slice(sliceCount),
             });
           }
         } catch (error) {

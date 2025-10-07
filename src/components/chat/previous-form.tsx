@@ -190,6 +190,12 @@ export default function FormularioEvaluacion({
                     placeholder="Ingresa tu edad (13-99)"
                     value={formData.age}
                     onChange={(e) => handleInputChange("age", e.target.value)}
+                    onKeyDown={(e) => {
+                      // Prevenir caracteres no permitidos: "," "." "e" "E" "+" "-"
+                      if ([',', '.', 'e', 'E', '+', '-'].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
                     min="13"
                     max="99"
                     required

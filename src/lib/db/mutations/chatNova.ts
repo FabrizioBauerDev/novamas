@@ -4,6 +4,7 @@ import { EvaluationFormData, MyUIMessage } from "@/types/types";
 import { checkChatGroupBySlug } from "../queries/chatNova";
 import { safeEncryptMessage } from "@/lib/crypto";
 import { eq } from "drizzle-orm";
+import { CHAT_CONFIG } from "@/lib/chat-config";
 
 export interface CreateFormChatSessionParams {
   formData: EvaluationFormData;
@@ -62,11 +63,12 @@ export async function createFormChatSession({
     
     // Iniciar transacción para crear la sesión de chat
     const result = await db.transaction(async (tx) => {
-      // Crear chatSession
+      // Crear chatSession con maxDurationMs desde la configuración
       const [newChatSession] = await tx
         .insert(chatSessions)
         .values({
           chatGroupId: chatGroupId,
+          maxDurationMs: CHAT_CONFIG.MAX_DURATION_MS, // Usar valor de configuración
           // Los demás campos se setearán con sus valores por defecto
         })
         .returning({ id: chatSessions.id });
@@ -245,6 +247,87 @@ export async function createChatFeedback({
     return {
       success: false,
       error: "Error interno del servidor al guardar la valoración"
+    };
+  }
+}
+
+// ===============================
+// FUNCIONES PARA CONTROL DE TIEMPO DE SESIÓN
+// ===============================
+
+/**
+ * Marca que una sesión de chat ha utilizado su mensaje de gracia
+ * @param chatSessionId - ID de la sesión de chat
+ * @returns Promise<void>
+ */
+export async function markGraceMessageUsed(chatSessionId: string): Promise<void> {
+  try {
+    await db
+      .update(chatSessions)
+      .set({ 
+        usedGraceMessage: true,
+        updatedAt: new Date()
+      })
+      .where(eq(chatSessions.id, chatSessionId));
+    
+    console.log(`Mensaje de gracia marcado para la sesión ${chatSessionId}`);
+  } catch (error) {
+    console.error(`Error marcando mensaje de gracia para sesión ${chatSessionId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Finaliza una sesión de chat marcando la fecha de finalización
+ * @param chatSessionId - ID de la sesión de chat
+ * @returns Promise con resultado de la operación
+ */
+export async function finalizeChatSession(chatSessionId: string): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    // Verificar que la sesión existe
+    const existingSession = await db
+      .select()
+      .from(chatSessions)
+      .where(eq(chatSessions.id, chatSessionId))
+      .limit(1);
+
+    if (existingSession.length === 0) {
+      return {
+        success: false,
+        error: "La sesión de chat no existe"
+      };
+    }
+
+    // Ya está finalizada?
+    if (existingSession[0].sessionEndedAt) {
+      return {
+        success: false,
+        error: "La sesión de chat ya fue finalizada"
+      };
+    }
+
+    // Marcar como finalizada
+    await db
+      .update(chatSessions)
+      .set({ 
+        sessionEndedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(chatSessions.id, chatSessionId));
+
+    console.log(`Sesión ${chatSessionId} finalizada exitosamente`);
+    
+    return {
+      success: true
+    };
+  } catch (error) {
+    console.error(`Error finalizando sesión ${chatSessionId}:`, error);
+    return {
+      success: false,
+      error: "Error interno del servidor al finalizar la sesión"
     };
   }
 }

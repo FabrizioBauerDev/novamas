@@ -238,24 +238,6 @@ export default function RegistroPage() {
                 Crear Cuenta
               </Button>
             </form>
-
-            {/* Enlaces adicionales */}
-            <div className="mt-6 space-y-4 text-center">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">¿Ya tienes cuenta?</span>
-                </div>
-              </div>
-
-              <Link href="/login" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                Iniciar Sesión
-              </Link>
-            </div>
-            {/* Texto informativo */}
-            {/* <p className="mt-6 text-center text-sm text-gray-500">Solo especialistas autorizados pueden registrarse.</p> */}
           </CardContent>
         </Card>
       </div>

@@ -130,3 +130,104 @@ export async function createChatFeedbackAction(
     };
   }
 }
+
+/**
+ * Server Action para obtener información de sesión
+ * Usado por el componente de chat para inicializar el timer
+ */
+export async function getSessionDataAction(chatSessionId: string) {
+  try {
+    const { getChatSessionById } = await import("@/lib/db");
+    
+    if (!chatSessionId) {
+      return {
+        success: false,
+        error: "ID de sesión requerido"
+      };
+    }
+
+    const chatSession = await getChatSessionById(chatSessionId);
+
+    if (!chatSession.success || !chatSession.data) {
+      return {
+        success: false,
+        error: "Sesión de chat no encontrada"
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        id: chatSession.data.id,
+        createdAt: chatSession.data.createdAt.toISOString(),
+        chatGroupId: chatSession.data.chatGroupId,
+        maxDurationMs: chatSession.data.maxDurationMs || 1200000,
+        usedGraceMessage: chatSession.data.usedGraceMessage || false,
+      }
+    };
+  } catch (error) {
+    console.error("Error en getSessionDataAction:", error);
+    return {
+      success: false,
+      error: "Error interno del servidor"
+    };
+  }
+}
+
+/**
+ * Server Action para obtener los mensajes de una sesión
+ * Útil para recargar mensajes después de eventos como mensaje de gracia
+ */
+export async function getChatMessagesAction(chatSessionId: string) {
+  try {
+    const { getChat } = await import("@/lib/db");
+    
+    if (!chatSessionId) {
+      return {
+        success: false,
+        error: "ID de sesión requerido",
+        data: []
+      };
+    }
+
+    const messages = await getChat(chatSessionId);
+
+    return {
+      success: true,
+      data: messages
+    };
+  } catch (error) {
+    console.error("Error en getChatMessagesAction:", error);
+    return {
+      success: false,
+      error: "Error interno del servidor",
+      data: []
+    };
+  }
+}
+
+/**
+ * Server Action para finalizar una sesión de chat
+ */
+export async function finalizeChatSessionAction(chatSessionId: string) {
+  try {
+    const { finalizeChatSession } = await import("@/lib/db");
+    
+    if (!chatSessionId) {
+      return {
+        success: false,
+        error: "ID de sesión requerido"
+      };
+    }
+
+    const result = await finalizeChatSession(chatSessionId);
+    return result;
+    
+  } catch (error) {
+    console.error("Error en finalizeChatSessionAction:", error);
+    return {
+      success: false,
+      error: "Error interno del servidor al finalizar la sesión"
+    };
+  }
+}

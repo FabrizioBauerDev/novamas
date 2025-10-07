@@ -3,6 +3,8 @@ export {
   createFormChatSession,
   saveChat,
   createChatFeedback,
+  markGraceMessageUsed,
+  finalizeChatSession,
   type CreateFormChatSessionParams,
   type CreateFormChatSessionResult,
   type SaveChatParams,

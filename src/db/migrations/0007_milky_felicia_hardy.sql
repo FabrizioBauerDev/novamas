@@ -1,0 +1,1 @@
+ALTER TABLE "statistics" ALTER COLUMN "summary" SET NOT NULL;

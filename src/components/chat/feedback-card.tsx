@@ -9,15 +9,19 @@ import { toast } from "sonner";
 
 interface FeedbackCardProps {
   chatSessionId: string;
+  isVisible?: boolean;
+  onHide?: () => void;
 }
 
-export function FeedbackCard({ chatSessionId }: FeedbackCardProps) {
+export function FeedbackCard({ chatSessionId, isVisible: externalIsVisible, onHide }: FeedbackCardProps) {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [isVisible, setIsVisible] = useState(true);
   const [isExiting, setIsExiting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Si se proporciona control externo de visibilidad, usarlo
+  const isVisible = externalIsVisible !== undefined ? externalIsVisible : true;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +62,9 @@ export function FeedbackCard({ chatSessionId }: FeedbackCardProps) {
         
         // Hacer desaparecer el cartel después de la animación
         setTimeout(() => {
-          setIsVisible(false);
+          if (onHide) {
+            onHide();
+          }
         }, 300);
       } else {
         toast.error(result.error || "Error al enviar la valoración");
@@ -77,14 +83,14 @@ export function FeedbackCard({ chatSessionId }: FeedbackCardProps) {
 
   return (
     <div 
-      className={`bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-lg p-3 shadow-lg transition-all duration-300 ${
+      className={`bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-300 ${
         isExiting ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
       }`}
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="p-4 space-y-3">
         {/* Título */}
-        <div className="text-center mb-1">
-          <h4 className="text-lg font-bold text-black-900">
+        <div className="text-center mb-2">
+          <h4 className="text-lg font-bold text-gray-800">
             ¿Qué te parece la idea de NoVa+?
           </h4>
         </div>
@@ -126,7 +132,7 @@ export function FeedbackCard({ chatSessionId }: FeedbackCardProps) {
         <div className="space-y-2">
           <label
             htmlFor="feedback-comment"
-            className="text-sm font-semibold text-black-800 block"
+            className="text-sm font-medium text-gray-600 block"
           >
             Comentario opcional
           </label>
@@ -141,10 +147,10 @@ export function FeedbackCard({ chatSessionId }: FeedbackCardProps) {
                 }
               }}
               placeholder="Cuéntanos qué piensas..."
-              className="min-h-[80px] text-sm resize-none border-green-300 focus:border-green-500 focus:ring-green-500 pb-6"
+              className="min-h-[80px] text-sm resize-none border-gray-200 focus:border-gray-300 focus:ring-gray-300 pb-6"
               maxLength={200}
             />
-            <p className="absolute bottom-2 right-2 text-xs px-1 rounded text-black-600">
+            <p className="absolute bottom-2 right-2 text-xs px-1 rounded text-gray-600">
               {comment.length}/200
             </p>
           </div>
