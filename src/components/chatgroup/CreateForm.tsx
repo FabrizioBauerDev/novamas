@@ -135,7 +135,15 @@ const handleInputChange = (field: keyof CreateGroupFormData, value: string) => {
         toast.success("Grupo creado exitosamente", {
           description: `El grupo "${formData.name}" ha sido creado correctamente`,
         })
-        router.push("/chatgroup")
+        // Redirigir a la visualización del grupo recién creado
+        if (result?.data?.id) {
+          router.push(`/chatgroup/${result.data.id}`)
+        } else {
+          toast.error("Error al redirigir", {
+            description: "No se pudo obtener el ID del grupo creado.",
+          })
+          router.push(`/chatgroup`)
+        }
       } else {
         toast.error("Error al crear el grupo", {
           description: result.error || "Ocurrió un error inesperado. Inténtalo nuevamente.",

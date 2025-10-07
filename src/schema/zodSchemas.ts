@@ -99,6 +99,20 @@ const bibliographySchema = z.object({
   createdAt: z.date()
 });
 
+// Esquema para el feedback de chat
+const chatFeedbackSchema = z.object({
+  chatSessionId: z.string().uuid("ID de sesión de chat inválido"),
+  rating: z.number()
+    .int("La valoración debe ser un número entero")
+    .min(1, "La valoración mínima es 1")
+    .max(5, "La valoración máxima es 5"),
+  comment: z.string()
+    .max(200, "El comentario no puede exceder los 200 caracteres")
+    .optional()
+    .or(z.literal(""))
+    .transform(val => val === "" ? undefined : val)
+});
+
 export { 
   signInSchema, 
   signUpSchema, 
@@ -107,5 +121,6 @@ export {
   removeParticipantSchema,
   searchUsersSchema,
   updateDescriptionSchema,
-  bibliographySchema
+  bibliographySchema,
+  chatFeedbackSchema
 };

@@ -1,8 +1,9 @@
 import { db } from "@/db";
-import { chatSessions, evaluationForms, messages } from "@/db/schema";
+import { chatSessions, evaluationForms, messages, chatFeedbacks } from "@/db/schema";
 import { EvaluationFormData, MyUIMessage } from "@/types/types";
 import { checkChatGroupBySlug } from "../queries/chatNova";
 import { safeEncryptMessage } from "@/lib/crypto";
+import { eq } from "drizzle-orm";
 
 export interface CreateFormChatSessionParams {
   formData: EvaluationFormData;
@@ -140,5 +141,110 @@ export async function saveChat({
   } catch (error) {
     console.error(`Error al guardar mensajes de chat ${chatSessionId}. Error:`, error);
     throw error;
+  }
+}
+
+// ===============================
+// FUNCIONES PARA CHAT FEEDBACK
+// ===============================
+
+export interface CreateChatFeedbackParams {
+  chatSessionId: string;
+  rating: number;
+  comment?: string;
+}
+
+export interface CreateChatFeedbackResult {
+  success: boolean;
+  feedbackId?: string;
+  error?: string;
+}
+
+export async function createChatFeedback({
+  chatSessionId,
+  rating,
+  comment
+}: CreateChatFeedbackParams): Promise<CreateChatFeedbackResult> {
+  try {
+    // Validaciones del lado del servidor
+    if (!chatSessionId) {
+      return {
+        success: false,
+        error: "ID de sesión de chat requerido"
+      };
+    }
+
+    // Validar que el rating esté en el rango correcto (1-5)
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+      return {
+        success: false,
+        error: "La valoración debe ser un número entre 1 y 5"
+      };
+    }
+
+    // Validar longitud del comentario si existe
+    if (comment && comment.length > 200) {
+      return {
+        success: false,
+        error: "El comentario no puede exceder los 200 caracteres"
+      };
+    }
+
+    // Verificar que la sesión de chat existe
+    const existingSession = await db
+      .select()
+      .from(chatSessions)
+      .where(eq(chatSessions.id, chatSessionId))
+      .limit(1);
+
+    if (existingSession.length === 0) {
+      return {
+        success: false,
+        error: "La sesión de chat no existe"
+      };
+    }
+
+    // Verificar si ya existe un feedback para esta sesión
+    if (existingSession[0].chatFeedBackId) {
+      return {
+        success: false,
+        error: "Ya existe un feedback para esta sesión de chat"
+      };
+    }
+
+    // Crear el feedback y actualizar la sesión en una transacción
+    const result = await db.transaction(async (tx) => {
+      // Crear el feedback
+      const [newFeedback] = await tx
+        .insert(chatFeedbacks)
+        .values({
+          rating,
+          comment: comment || null,
+        })
+        .returning({ id: chatFeedbacks.id });
+
+      // Actualizar la sesión de chat con el ID del feedback
+      await tx
+        .update(chatSessions)
+        .set({ 
+          chatFeedBackId: newFeedback.id,
+          updatedAt: new Date()
+        })
+        .where(eq(chatSessions.id, chatSessionId));
+
+      return newFeedback.id;
+    });
+
+    return {
+      success: true,
+      feedbackId: result
+    };
+
+  } catch (error) {
+    console.error("Error creando la valoración de chat:", error);
+    return {
+      success: false,
+      error: "Error interno del servidor al guardar la valoración"
+    };
   }
 }

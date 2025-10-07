@@ -21,6 +21,7 @@ import { Response } from "@/components/ai-elements/response";
 import { MyUIMessage } from "@/types/types";
 import { DefaultChatTransport } from "ai";
 import { createWelcomeMessage } from "@/lib/chat-utils";
+import { FeedbackCard } from "./feedback-card";
 
 interface NewChatInterfaceProps {
   chatSessionId: string | null;
@@ -50,17 +51,17 @@ const ConversationDemo = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedInput = input.trim();
-    
+
     // Validación del lado del cliente
     if (!trimmedInput) {
       return;
     }
-    
+
     if (trimmedInput.length > 280) {
       alert("El mensaje no puede exceder los 280 caracteres.");
       return;
     }
-    
+
     sendMessage({ text: trimmedInput });
     setInput("");
   };
@@ -70,11 +71,12 @@ const ConversationDemo = ({
       <h1 className="text-2xl font-bold text-gray-900 text-center mb-4">
         Bienvenido al chat con NoVa+
       </h1>
-      
+
       {/* Advertencia para móviles */}
       <div className="md:hidden bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
         <p className="text-xs text-amber-800 text-center">
-          ⚠️ Recuerda que solo es un asistente basado en inteligencia artificial, no reemplaza a un profesional ni a una persona física.
+          ⚠️ Recuerda que solo es un asistente basado en inteligencia
+          artificial, no reemplaza a un profesional ni a una persona física.
         </p>
       </div>
 
@@ -89,7 +91,9 @@ const ConversationDemo = ({
                 Aviso importante
               </h3>
               <p className="text-xs text-amber-800 leading-relaxed">
-                Recuerda que solo es un asistente basado en inteligencia artificial, no reemplaza a un profesional ni a una persona física.
+                Recuerda que solo es un asistente basado en inteligencia
+                artificial, no reemplaza a un profesional ni a una persona
+                física.
               </p>
             </div>
           </div>
@@ -216,13 +220,17 @@ const ConversationDemo = ({
           </div>
         </div>
 
-        {/* Espacio vacío a la derecha - columnas 11-12 */}
-        <div className="col-span-2"></div>
+        {/* Feedback card a la derecha - columnas 11-12 */}
+        <div className="col-span-2">
+          <div className="sticky top-4">
+            <FeedbackCard chatSessionId={sessionId} />
+          </div>
+        </div>
       </div>
 
       {/* Layout para móviles - sin grid */}
-      <div className="md:hidden">
-        <div className="h-[calc(100vh-9rem)] max-h-dvh rounded-lg shadow-lg border border-gray-200 bg-white overflow-hidden">
+      <div className="md:hidden flex flex-col gap-4">
+        <div className="h-[calc(100vh-25rem)] max-h-dvh rounded-lg shadow-lg border border-gray-200 bg-white overflow-hidden">
           <div className="flex flex-col h-full ">
             <Conversation className="flex-1 overflow-hidden">
               <ConversationContent>
@@ -340,6 +348,11 @@ const ConversationDemo = ({
               </form>
             </div>
           </div>
+        </div>
+
+        {/* Feedback card para móviles - debajo del chat */}
+        <div className="pb-4">
+          <FeedbackCard chatSessionId={sessionId} />
         </div>
       </div>
     </div>

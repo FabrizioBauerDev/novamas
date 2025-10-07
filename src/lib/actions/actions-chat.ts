@@ -3,6 +3,9 @@
 import {
   createFormChatSession,
   CreateFormChatSessionParams,
+  createChatFeedback,
+  CreateChatFeedbackParams,
+  CreateChatFeedbackResult,
 } from "@/lib/db/mutations/chatNova";
 import { headers } from "next/headers";
 
@@ -72,6 +75,58 @@ export async function createFormChatSessionAction(
     return {
       success: false,
       error: "Error interno del servidor"
+    };
+  }
+}
+
+export async function createChatFeedbackAction(
+  params: CreateChatFeedbackParams
+): Promise<CreateChatFeedbackResult> {
+  try {
+    // Validaciones del lado del servidor (duplicadas por seguridad)
+    const { chatSessionId, rating, comment } = params;
+    
+    // Validar chatSessionId
+    if (!chatSessionId || typeof chatSessionId !== "string") {
+      return {
+        success: false,
+        error: "ID de sesión de chat inválido"
+      };
+    }
+    
+    // Validar rating
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+      return {
+        success: false,
+        error: "La valoración debe ser un número entre 1 y 5"
+      };
+    }
+    
+    // Validar comentario opcional
+    if (comment !== undefined && comment !== null) {
+      if (typeof comment !== "string") {
+        return {
+          success: false,
+          error: "El comentario debe ser una cadena de texto"
+        };
+      }
+      
+      if (comment.length > 200) {
+        return {
+          success: false,
+          error: "El comentario no puede exceder los 200 caracteres"
+        };
+      }
+    }
+    
+    // Llamar a la función de mutación
+    return await createChatFeedback(params);
+    
+  } catch (error) {
+    console.error("Error en createChatFeedbackAction:", error);
+    return {
+      success: false,
+      error: "Error interno del servidor al procesar la valoración"
     };
   }
 }

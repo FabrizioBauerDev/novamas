@@ -2,7 +2,10 @@
 export {
   createFormChatSession,
   saveChat,
+  createChatFeedback,
   type CreateFormChatSessionParams,
   type CreateFormChatSessionResult,
   type SaveChatParams,
+  type CreateChatFeedbackParams,
+  type CreateChatFeedbackResult,
 } from "./chatNova";
