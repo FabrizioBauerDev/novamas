@@ -76,8 +76,6 @@ export const chatSessions = pgTable("ChatSession", {
   chatFeedBackId: uuid("chatFeedBackId").references(() => chatFeedbacks.id),
   numOfTokensIn: integer("numOfTokensIn"),
   numOfTokensOut: integer("numOfTokensOut"),
-  finished: boolean("finished").notNull().default(false),
-  analyzed: boolean("analyzed").notNull().default(false),
   ...timestamps,
 });
 
@@ -90,7 +88,7 @@ export const messages = pgTable("Message", {
   messageTokensIn: integer("messageTokensIn"),
   messageTokensOut: integer("messageTokensOut"),
   messageTokensReasoning: integer("messageTokensReasoning"),
-  sentimentLabel: text("sentimentLabel"),
+  sentiment: text("sentiment"),
   createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
 });
 
@@ -260,7 +258,7 @@ export const BetTypeEnum = pgEnum("BetType", [
 
 export const statistics = pgTable("statistics", {
   id: uuid("id").primaryKey().defaultRandom(),
-  summary: text("summary").notNull(),
+  summary: text("summary"),
   chatId: uuid("chat_id").notNull().references(() => chatSessions.id), // Ajustá el nombre si tu tabla es distinta
   amountMessages: integer("amount_messages").notNull(),
   minWordsPerMessage: integer("min_words_per_message").notNull(),
