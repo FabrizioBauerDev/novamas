@@ -42,7 +42,7 @@ export default function BibliographyView() {
     const [customTitle, setCustomTitle] = useState("")
     const [customAuthor, setCustomAuthor] = useState("")
     const [customDescription, setCustomDescription] = useState("")
-    const [selectedCategory, setSelectedCategory] = useState<string>("Otros")
+    const [selectedCategory, setSelectedCategory] = useState<string>("Otro")
     const [searchTerm, setSearchTerm] = useState("")
     const [categoryFilter, setCategoryFilter] = useState<string>("Todas")
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
@@ -92,7 +92,7 @@ export default function BibliographyView() {
             setCustomTitle("")
             setCustomAuthor("")
             setCustomDescription("")
-            setSelectedCategory("Otros")
+            setSelectedCategory("Otro")
             setIsAddDialogOpen(false)
 
             const fileInput = document.getElementById("file-upload") as HTMLInputElement

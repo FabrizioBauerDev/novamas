@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
         switch (categoryStr){
             case "Estadisticas": category_enum=bibliographyCategoryEnum.enumValues[0];break;
-            case "Numeros de telefono": category_enum=bibliographyCategoryEnum.enumValues[1];
+            case "Numeros de telefono": category_enum=bibliographyCategoryEnum.enumValues[1];break;
             case "Tecnicas de Control": category_enum=bibliographyCategoryEnum.enumValues[2];break;
             default: category_enum=bibliographyCategoryEnum.enumValues[3];
         }
