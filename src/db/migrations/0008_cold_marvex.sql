@@ -1,0 +1,2 @@
+CREATE INDEX "idx_messages_session_created" ON "Message" USING btree ("chatSessionId","createdAt" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "idx_messages_session_id" ON "Message" USING btree ("chatSessionId");

@@ -94,7 +94,14 @@ export const messages = pgTable("Message", {
   messageTokensReasoning: integer("messageTokensReasoning"),
   sentimentLabel: text("sentimentLabel"),
   createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
-});
+}, (table) => ({
+  // Índice compuesto optimizado para consultas frecuentes
+  // Usado en: getChatMessagesAction, saveChat, verificaciones de mensajes
+  sessionCreatedIdx: index("idx_messages_session_created")
+    .on(table.chatSessionId, table.createdAt.desc()),
+  // Índice simple para búsquedas por sesión (backup/alternativo)
+  sessionIdIdx: index("idx_messages_session_id").on(table.chatSessionId),
+}));
 
 // Tabla EvaluationForm
 export const evaluationForms = pgTable("EvaluationForm", {

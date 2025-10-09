@@ -198,11 +198,12 @@ export default function FormularioEvaluacion({
                     }}
                     min="13"
                     max="99"
+                    step="1"
                     required
                   />
-                  {formData.age && (parseInt(formData.age) < 13 || parseInt(formData.age) > 99) && (
+                  {formData.age && (parseInt(formData.age) < 13 || parseInt(formData.age) > 99 || !Number.isInteger(Number(formData.age))) && (
                     <p className="text-sm text-red-600">
-                      La edad debe estar entre 13 y 99 años
+                      La edad debe ser un número entero entre 13 y 99 años
                     </p>
                   )}
                 </div>
@@ -267,6 +268,7 @@ export default function FormularioEvaluacion({
                   disabled={
                     !formData.gender ||
                     !formData.age ||
+                    !Number.isInteger(Number(formData.age)) ||
                     parseInt(formData.age) < 13 ||
                     parseInt(formData.age) > 99 ||
                     !formData.onlineGaming ||

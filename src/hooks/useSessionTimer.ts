@@ -17,6 +17,11 @@ export interface UseSessionTimerProps {
    * Si es true, el timer no se ejecutará (para sesiones grupales)
    */
   disabled?: boolean;
+
+  /**
+   * Callback que se ejecuta cuando el timer expira (llega a 0)
+   */
+  onExpire?: () => void;
 }
 
 export interface UseSessionTimerReturn {
@@ -59,9 +64,11 @@ export function useSessionTimer({
   createdAt,
   maxDurationMs = CHAT_CONFIG.MAX_DURATION_MS,
   disabled = false,
+  onExpire,
 }: UseSessionTimerProps): UseSessionTimerReturn {
   const [timeRemaining, setTimeRemaining] = useState<number>(maxDurationMs);
   const [isExpired, setIsExpired] = useState<boolean>(false);
+  const [hasCalledOnExpire, setHasCalledOnExpire] = useState<boolean>(false);
 
   const updateTimer = useCallback(() => {
     if (!createdAt || disabled) {
@@ -71,9 +78,17 @@ export function useSessionTimer({
     }
 
     const remaining = getTimeRemaining(createdAt, maxDurationMs);
+    const expired = remaining === 0;
+    
     setTimeRemaining(remaining);
-    setIsExpired(remaining === 0);
-  }, [createdAt, maxDurationMs, disabled]);
+    setIsExpired(expired);
+
+    // Llamar a onExpire solo una vez cuando expire
+    if (expired && !hasCalledOnExpire && onExpire) {
+      setHasCalledOnExpire(true);
+      onExpire();
+    }
+  }, [createdAt, maxDurationMs, disabled, hasCalledOnExpire, onExpire]);
 
   // Actualizar el timer cada segundo
   useEffect(() => {

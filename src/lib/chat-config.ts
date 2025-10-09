@@ -9,7 +9,7 @@ export const CHAT_CONFIG = {
    * Default: 5 minutos (300000 ms)
    * Solo aplica a chats sin chatGroupId
    */
-  MAX_DURATION_MS: 5 * 60 * 1000, // 5 minutos
+  MAX_DURATION_MS: 3 * 60 * 1000, // 5 minutos
 
   /**
    * Umbral de advertencia antes de que expire la sesión
@@ -19,10 +19,10 @@ export const CHAT_CONFIG = {
   WARNING_THRESHOLD_MS: 2 * 60 * 1000, // 2 minutos
 
   /**
-   * Número mínimo de mensajes antes de poder finalizar el chat manualmente
-   * Default: 5 mensajes (incluye mensaje de bienvenida)
+   * Número mínimo de mensajes del usuario antes de poder finalizar el chat manualmente
+   * Default: 2 mensajes del usuario
    */
-  MIN_MESSAGES_TO_FINISH: 5,
+  MIN_MESSAGES_TO_FINISH: 2,
 
   /**
    * Tiempo de espera antes de redireccionar automáticamente al formulario
@@ -32,13 +32,23 @@ export const CHAT_CONFIG = {
   AUTO_REDIRECT_DELAY_MS: 5000, // 5 segundos
 
   /**
-   * Mensaje que el asistente enviará automáticamente cuando se use el mensaje de gracia
-   * Nota: El tiempo se reemplazará dinámicamente con el valor real de maxDurationMs
+   * Mensaje inicial que el asistente enviará cuando el tiempo expire
    */
-  getGraceMessage(maxDurationMinutes: number): string {
-    return `⏰ **Tu sesión ha alcanzado el tiempo máximo de ${maxDurationMinutes} minutos.**\n\n` +
-           "Este ha sido mi último mensaje. La conversación finalizará en breve.\n\n" +
-           "Serás redirigido al formulario de evaluación para completar tu experiencia. " +
+  getTimeExpiredMessage(maxDurationMinutes: number): string {
+    return `⏰ **Lo siento... El tiempo de la sesión ha finalizado.**\n\n` +
+           "Aún tienes **un mensaje** más para que puedas terminar de mejor manera nuestra conversación.\n\n" +
+           "Puedes:\n\n" +
+           "* Enviar un último mensaje si quieres.\n" +
+           "* Finalizar tu sesión pulsando el botón rojo **\"Finalizar Chat\"**";
+  },
+
+  /**
+   * Mensaje que el asistente enviará después de usar el mensaje de gracia
+   */
+  getGraceUsedMessage(): string {
+    return `⏰ **Has utilizado tu mensaje de gracia.**\n\n` +
+           "La sesión será finalizada automáticamente y serás redirigido al formulario de evaluación en **1 minuto**, " +
+           "o antes si pulsas el botón rojo **\"Finalizar Chat\"**.\n\n" +
            "¡Gracias por conversar conmigo! 💙";
   },
 } as const;

@@ -15,7 +15,7 @@ import {
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
 import { Loader } from "@/components/ai-elements/loader";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useChat } from "@ai-sdk/react";
 import { Response } from "@/components/ai-elements/response";
 import { MyUIMessage } from "@/types/types";
@@ -32,6 +32,7 @@ import {
   AlertDialogDescription,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import Link from "next/link";
 
 interface NewChatInterfaceProps {
   chatSessionId: string | null;
@@ -66,11 +67,15 @@ const ConversationDemo = ({
   const [input, setInput] = useState("");
   const [isFinishing, setIsFinishing] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [graceMessageUsed, setGraceMessageUsed] = useState(false);
   const [showTimeoutDialog, setShowTimeoutDialog] = useState(false);
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [warningShown, setWarningShown] = useState(false);
   const [autoRedirectStarted, setAutoRedirectStarted] = useState(false);
   const [feedbackFormVisible, setFeedbackFormVisible] = useState(true);
+  
+  // Usar useRef para sincronización inmediata y evitar llamadas duplicadas
+  const hasCalledExpireAPIRef = useRef(false);
 
   const { messages, sendMessage, status, error, setMessages } = useChat<MyUIMessage>({
     id: sessionId,
@@ -85,9 +90,9 @@ const ConversationDemo = ({
       },
     }),
     onError: (error) => {
-      // Capturar error de tiempo expirado
+      // Capturar error de tiempo expirado después de usar mensaje de gracia
       if (error.message?.includes("TIEMPO_EXPIRADO") || error.message?.includes("403")) {
-        setSessionExpired(true);
+        setGraceMessageUsed(true);
       }
     },
     onFinish: async () => {
@@ -103,27 +108,70 @@ const ConversationDemo = ({
     },
   });
 
-  // Detectar cuando llega el mensaje de gracia del asistente
+  // Función para manejar la expiración del timer
+  // Usar useRef para sincronización inmediata y evitar llamadas duplicadas
+  const handleTimerExpire = useCallback(async () => {
+    // Verificación síncrona con useRef para evitar race conditions
+    if (isGroupSession || hasCalledExpireAPIRef.current) {
+      console.log("⛔ handleTimerExpire bloqueado:", { 
+        isGroupSession, 
+        hasCalledExpireAPI: hasCalledExpireAPIRef.current 
+      });
+      return;
+    }
+    // Marcar inmediatamente como llamado (sincrónico)
+    hasCalledExpireAPIRef.current = true;
+    console.log("✅ handleTimerExpire ejecutándose para sesión:", sessionId);
+    try {
+      // Llamar a la API para añadir el mensaje de expiración
+      const response = await fetch("/api/chat/expire", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // OPTIMIZACIÓN: Usar el mensaje retornado por la API directamente
+        // En lugar de recargar todos los mensajes desde la BD
+        if (data.success && data.message && !data.alreadyExists) {
+          // Añadir el nuevo mensaje al final de la lista existente
+          setMessages(prevMessages => [...prevMessages, data.message]);
+        } else if (data.alreadyExists) {
+          console.log("ℹ️ Mensaje de expiración ya existe, no se añade duplicado");
+        }
+
+        // Marcar como expirado (pero permitir mensaje de gracia)
+        setSessionExpired(true);
+        setShowTimeoutDialog(true);
+      }
+    } catch (error) {
+      console.error("❌ Error al llamar API de expiración:", error);
+      // En caso de error, permitir reintentar
+      hasCalledExpireAPIRef.current = false;
+    }
+  }, [isGroupSession, sessionId, setMessages]);
+
+  // Detectar cuando llega el mensaje de gracia usado (después de enviar el último mensaje)
   useEffect(() => {
     if (isGroupSession) return;
 
-    // Buscar si el último mensaje del asistente es el mensaje de gracia
+    // Buscar si el último mensaje del asistente es el mensaje de gracia usado
     const lastAssistantMessage = messages
       .filter(m => m.role === "assistant")
       .pop();
 
     if (lastAssistantMessage) {
-      const hasGraceText = lastAssistantMessage.parts.some(
-        part => part.type === "text" && part.text.includes("Tu sesión ha alcanzado el tiempo máximo")
+      const hasGraceUsedText = lastAssistantMessage.parts.some(
+        part => part.type === "text" && part.text.includes("Has utilizado tu mensaje de gracia")
       );
 
-      if (hasGraceText && !sessionExpired) {
-        setSessionExpired(true);
-        setShowTimeoutDialog(true);
-        setAutoRedirectStarted(true); // Activar el auto-redirect
+      if (hasGraceUsedText && !autoRedirectStarted) {
+        setGraceMessageUsed(true); // Marcar que usó el mensaje de gracia
+        setAutoRedirectStarted(true); // Activar el auto-redirect de 1 minuto
       }
     }
-  }, [messages, isGroupSession, sessionExpired]);
+  }, [messages, isGroupSession, autoRedirectStarted]);
 
   // Mostrar advertencia cuando quedan 2 minutos (solo para sesiones individuales)
   useEffect(() => {
@@ -222,41 +270,19 @@ const ConversationDemo = ({
     setInput("");
   };
 
+  // Calcular el número de mensajes del usuario (excluyendo el mensaje de bienvenida)
+  const userMessageCount = messages.filter(msg => msg.role === "user").length;
+
   return (
     <div className="w-full py-4 px-4">
       <h1 className="text-2xl font-bold text-gray-900 text-center mb-4">
         Bienvenido al chat con NoVa+
       </h1>
 
-      {/* Advertencia para móviles */}
-      <div className="md:hidden bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-        <p className="text-xs text-amber-800 text-center">
-          ⚠️ Recuerda que solo es un asistente con inteligencia
-          artificial, no reemplaza a un profesional ni a una persona física.
-        </p>
-      </div>
-
-      {/* Grid layout para desktop: 2 columnas (cartel) + 8 columnas (chat) + 2 columnas (vacío) */}
+      {/* Grid layout para desktop: 10 columnas (chat) + 2 columnas (feedback) */}
       <div className="hidden md:grid md:grid-cols-12 md:gap-4">
-        {/* Advertencia para desktop - columnas 1-2 */}
-        <div className="col-span-2">
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 h-fit sticky top-4">
-            <div className="flex flex-col items-center text-center gap-2">
-              <span className="text-3xl">⚠️</span>
-              <h3 className="font-semibold text-amber-900 text-sm">
-                Aviso importante
-              </h3>
-              <p className="text-xs text-amber-800 leading-relaxed">
-                Recuerda que solo es un asistente con inteligencia
-                artificial, no reemplaza a un profesional ni a una persona
-                física.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Chat - columnas 3-10 (8 columnas) */}
-        <div className="col-span-8 h-[calc(100vh-9rem)] max-h-dvh rounded-lg shadow-lg border border-gray-200 bg-white overflow-hidden">
+        {/* Chat - columnas 1-10 (10 columnas) */}
+        <div className="col-span-10 h-[calc(100vh-9rem)] max-h-dvh rounded-lg shadow-lg border border-gray-200 bg-white overflow-hidden">
           <div className="flex flex-col h-full ">
             <Conversation className="flex-1 overflow-hidden">
               <ConversationContent>
@@ -347,8 +373,10 @@ const ConversationDemo = ({
                   <PromptInputTextarea
                     value={input}
                     placeholder={
-                      sessionExpired
-                        ? "La sesión ha finalizado. Redirigiendo..."
+                      graceMessageUsed
+                        ? "Has usado tu último mensaje, serás redirigido en 1 minuto si no pulsas \"Finalizar Sesión\"."
+                        : sessionExpired
+                        ? "Puedes enviar un último mensaje."
                         : "Escribe tu mensaje..."
                     }
                     onChange={(e) => {
@@ -358,7 +386,7 @@ const ConversationDemo = ({
                         setInput(value);
                       }
                     }}
-                    disabled={sessionExpired}
+                    disabled={graceMessageUsed}
                     className="flex-1"
                     maxLength={280}
                   />
@@ -369,7 +397,7 @@ const ConversationDemo = ({
                       input.length > 280 ||
                       status === "submitted" ||
                       status === "streaming" ||
-                      sessionExpired
+                      graceMessageUsed
                     }
                     className="mr-2"
                   />
@@ -378,6 +406,13 @@ const ConversationDemo = ({
                   {input.length}/280
                 </div>
               </form>
+              
+              {/* Advertencia debajo del textarea - desktop */}
+              <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg p-2">
+                <p className="text-xs text-amber-800 text-center">
+                  Recuerda que solo es un asistente con <strong>inteligencia artificial</strong>, no reemplaza a un profesional ni a una persona física.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -389,9 +424,10 @@ const ConversationDemo = ({
               createdAt={initialSessionData?.createdAt ? new Date(initialSessionData.createdAt) : null}
               maxDurationMs={initialSessionData?.maxDurationMs}
               isGroupSession={isGroupSession}
-              messageCount={messages.length}
+              messageCount={userMessageCount}
               onFinish={handleFinishChat}
               isFinishing={isFinishing}
+              onExpire={handleTimerExpire}
             />
             <FeedbackCard 
               chatSessionId={sessionId} 
@@ -495,8 +531,10 @@ const ConversationDemo = ({
                   <PromptInputTextarea
                     value={input}
                     placeholder={
-                      sessionExpired
-                        ? "La sesión ha finalizado. Redirigiendo..."
+                      graceMessageUsed
+                        ? "Has usado tu último mensaje, serás redirigido en 1 minuto si no pulsas \"Finalizar Sesión\"."
+                        : sessionExpired
+                        ? "Puedes enviar un último mensaje."
                         : "Escribe tu mensaje..."
                     }
                     onChange={(e) => {
@@ -506,7 +544,7 @@ const ConversationDemo = ({
                         setInput(value);
                       }
                     }}
-                    disabled={sessionExpired}
+                    disabled={graceMessageUsed}
                     className="flex-1"
                     maxLength={280}
                   />
@@ -517,7 +555,7 @@ const ConversationDemo = ({
                       input.length > 280 ||
                       status === "submitted" ||
                       status === "streaming" ||
-                      sessionExpired
+                      graceMessageUsed
                     }
                     className="mr-2"
                   />
@@ -526,6 +564,13 @@ const ConversationDemo = ({
                   {input.length}/280
                 </div>
               </form>
+              
+              {/* Advertencia debajo del textarea - móvil */}
+              <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg p-2">
+                <p className="text-xs text-amber-800 text-center">
+                  Recuerda que solo es un asistente con <strong>inteligencia artificial</strong>, no reemplaza a un profesional ni a una persona física.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -536,9 +581,10 @@ const ConversationDemo = ({
             createdAt={initialSessionData?.createdAt ? new Date(initialSessionData.createdAt) : null}
             maxDurationMs={initialSessionData?.maxDurationMs}
             isGroupSession={isGroupSession}
-            messageCount={messages.length}
+            messageCount={userMessageCount}
             onFinish={handleFinishChat}
             isFinishing={isFinishing}
+            onExpire={handleTimerExpire}
           />
           <FeedbackCard 
             chatSessionId={sessionId} 
@@ -551,15 +597,21 @@ const ConversationDemo = ({
       {/* Modal de advertencia (2 minutos antes) */}
       <AlertDialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
         <AlertDialogContent>
-          <AlertDialogTitle>⚠️ Tiempo Casi Agotado</AlertDialogTitle>
+          <AlertDialogTitle>⌛Tiempo Casi Agotado</AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-3">
-              <div>
-                Te quedan <strong>menos de 2 minutos</strong> de conversación.
-              </div>
-              <div className="text-sm">
-                Considera finalizar pronto para completar el formulario de evaluación antes de que expire el tiempo.
-              </div>
+                <div className="text-sm">
+                Quedan <strong>menos de 2 minutos</strong> de conversación. Veo que has usado casi todo tu tiempo. Considera contactarte con un profesional o persona física si necesitas más ayuda. <br />
+                Al finalizar podrás completar un formulario para ayudar al equipo detrás de NoVa+ en su investigación, sería de mucha ayuda. <br />
+                Si quieres contactarte con el equipo de NoVa+ visita{" "}
+                <Link href="/quienesSomos" className="text-blue-600 underline">
+                  quienes somos
+                </Link>{" "}
+                o puedes ver los contactos de emergencia en{" "}
+                <Link href="/emergencia" className="text-blue-600 underline">
+                  contactos de emergencia
+                </Link>.
+                </div>
             </div>
           </AlertDialogDescription>
           <AlertDialogAction onClick={() => setShowWarningDialog(false)}>
@@ -568,26 +620,26 @@ const ConversationDemo = ({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Modal de sesión expirada */}
+      {/* Modal de tiempo expirado (inicial) */}
       <AlertDialog open={showTimeoutDialog} onOpenChange={setShowTimeoutDialog}>
         <AlertDialogContent>
-          <AlertDialogTitle>⏰ Sesión Finalizada</AlertDialogTitle>
+          <AlertDialogTitle>⏰ Tiempo de Sesión Finalizado</AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-3">
-              <div>
-                Tu sesión ha alcanzado el tiempo máximo de conversación.
-              </div>
               <div className="text-sm text-gray-600">
-                Lee los últimos mensajes del chat. Puedes:
+                Muchas gracias por usar NoVa+. Puedes leer el último mensaje de NoVa+ en el chat para saber cuales son tus opciones:
               </div>
               <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
                 <li>
-                  Pulsar el botón <strong>&quot;Finalizar Chat&quot;</strong> para ir al formulario de evaluación inmediatamente
+                  <strong>Enviar un último mensaje</strong> si lo necesitas.
                 </li>
                 <li>
-                  Esperar <strong>1 minuto</strong> para ser redirigido automáticamente
+                  <strong>Finalizar tu sesión</strong> pulsando el botón rojo &quot;Finalizar Chat&quot;
                 </li>
               </ul>
+              <div className="text-xs text-amber-600 mt-2">
+                ℹ️ Si usas el mensaje de gracia (1 mensaje más), la sesión se finalizará automáticamente 1 minuto después de este mensaje.
+              </div>
             </div>
           </AlertDialogDescription>
           <AlertDialogAction onClick={() => setShowTimeoutDialog(false)}>

@@ -36,6 +36,11 @@ interface SessionTimerProps {
    * Si está en proceso de finalización
    */
   isFinishing?: boolean;
+
+  /**
+   * Callback cuando el timer expira (llega a 0)
+   */
+  onExpire?: () => void;
 }
 
 export function SessionTimer({
@@ -45,6 +50,7 @@ export function SessionTimer({
   messageCount,
   onFinish,
   isFinishing = false,
+  onExpire,
 }: SessionTimerProps) {
   const {
     formattedTime,
@@ -55,6 +61,7 @@ export function SessionTimer({
     createdAt,
     maxDurationMs,
     disabled: isGroupSession,
+    onExpire,
   });
 
   // No mostrar nada para sesiones grupales
@@ -63,8 +70,8 @@ export function SessionTimer({
   }
 
   // Determinar si el botón debe estar habilitado
-  // Requiere al menos 5 mensajes (incluye mensaje de bienvenida)
-  const minMessages = 5;
+  // Requiere al menos 2 mensajes del usuario
+  const minMessages = 2;
   const canFinish = messageCount >= minMessages;
   const messagesNeeded = Math.max(0, minMessages - messageCount);
 
@@ -115,7 +122,7 @@ export function SessionTimer({
           
           {isDanger && !isExpired && (
             <p className="text-xs text-red-600 text-center font-medium">
-              ⚠️ Tiempo casi agotado
+              ⌛ Tiempo casi agotado
             </p>
           )}
         </div>
@@ -137,7 +144,9 @@ export function SessionTimer({
               ? "Finalizando..."
               : canFinish
               ? "Finalizar Chat"
-              : `Faltan ${messagesNeeded} mensaje${messagesNeeded !== 1 ? "s" : ""}`}
+              : messagesNeeded === 1
+              ? "Falta 1 mensaje"
+              : `Faltan ${messagesNeeded} mensajes`}
           </Button>
           
           {!canFinish && (

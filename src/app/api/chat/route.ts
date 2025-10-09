@@ -257,29 +257,24 @@ export async function POST(req: Request) {
               msg.role === "assistant" && 
               msg.parts.some(part => 
                 part.type === "text" && 
-                part.text.includes("Tu sesión ha alcanzado el tiempo máximo")
+                part.text.includes("Has utilizado tu mensaje de gracia")
               )
             );
 
             // Solo añadir si no existe ya
             if (!hasGraceMessage) {
-              // Calcular minutos de duración desde maxDurationMs
-              const maxDurationMinutes = Math.floor(
-                (updatedSession.data.maxDurationMs || CHAT_CONFIG.MAX_DURATION_MS) / 60000
-              );
-              
               const graceMessage: MyUIMessage = {
                 id: crypto.randomUUID(),
                 role: "assistant",
                 parts: [{
                   type: "text",
-                  text: CHAT_CONFIG.getGraceMessage(maxDurationMinutes)
+                  text: CHAT_CONFIG.getGraceUsedMessage()
                 }],
                 metadata: { createdAt: Date.now() }
               };
 
               messagesToSave = [...messages, graceMessage];
-              console.log(logString + `Mensaje de gracia añadido para sesión ${id}`);
+              console.log(logString + `Mensaje de gracia utilizada añadido para sesión ${id}`);
             }
           }
 
