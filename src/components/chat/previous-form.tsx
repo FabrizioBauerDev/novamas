@@ -23,6 +23,7 @@ import {
   getEnumOptions,
 } from "@/lib/enums";
 import Geolocalizacion from "./geolocalizacion";
+import { toast } from "sonner";
 
 interface FormularioEvaluacionProps {
   onFormComplete?: () => void;
@@ -83,9 +84,16 @@ export default function FormularioEvaluacion({
           setChatSessionID?.(result.chatSessionId);
           setCurrentStep(3);
         } else {
-          console.error("Error creando la sesión de chat:", result.error);
+          toast.error("Error al crear la sesión", {
+            description: result.error || "No se pudo crear la sesión de chat. Por favor intenta nuevamente.",
+            duration: 5000,
+          });
         }
       } catch (error) {
+        toast.error("Error inesperado", {
+          description: "Ocurrió un error al procesar tu solicitud. Por favor intenta nuevamente.",
+          duration: 5000,
+        });
         console.error("Error:", error);
       } finally {
         setIsLoading(false);
@@ -116,9 +124,17 @@ export default function FormularioEvaluacion({
         setChatSessionID?.(result.chatSessionId);
         setCurrentStep(3);
       } else {
+        toast.error("Error al crear la sesión", {
+          description: result.error || "No se pudo crear la sesión de chat. Por favor intenta nuevamente.",
+          duration: 5000,
+        });
         console.error("Error creando la sesión de chat:", result.error);
       }
     } catch (error) {
+      toast.error("Error inesperado", {
+        description: "Ocurrió un error al procesar tu solicitud. Por favor intenta nuevamente.",
+        duration: 5000,
+      });
       console.error("Error:", error);
     } finally {
       setIsLoading(false);

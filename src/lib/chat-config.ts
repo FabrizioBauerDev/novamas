@@ -6,10 +6,10 @@
 export const CHAT_CONFIG = {
   /**
    * Duración máxima de una sesión de chat individual en milisegundos
-   * Default: 5 minutos (300000 ms)
+   * Default: 3 minutos (180000 ms)
    * Solo aplica a chats sin chatGroupId
    */
-  MAX_DURATION_MS: 3 * 60 * 1000, // 5 minutos
+  MAX_DURATION_MS: 3 * 60 * 1000, // 3 minutos
 
   /**
    * Umbral de advertencia antes de que expire la sesión
@@ -32,6 +32,13 @@ export const CHAT_CONFIG = {
   AUTO_REDIRECT_DELAY_MS: 5000, // 5 segundos
 
   /**
+   * Tiempo mínimo requerido para crear una sesión grupal
+   * Default: 3 minutos (180000 ms)
+   * No se permite crear sesiones si quedan menos de este tiempo hasta endDate
+   */
+  MIN_TIME_REQUIRED_MS: 3 * 60 * 1000, // 3 minutos
+
+  /**
    * Mensaje inicial que el asistente enviará cuando el tiempo expire
    */
   getTimeExpiredMessage(maxDurationMinutes: number): string {
@@ -47,7 +54,7 @@ export const CHAT_CONFIG = {
    */
   getGraceUsedMessage(): string {
     return `⏰ **Has utilizado tu mensaje de gracia.**\n\n` +
-           "La sesión será finalizada automáticamente y serás redirigido al formulario de evaluación en **1 minuto**, " +
+           "La sesión será finalizada automáticamente y serás redirigido a un formulario para ayudarnos en **1 minuto**, " +
            "o antes si pulsas el botón rojo **\"Finalizar Chat\"**.\n\n" +
            "¡Gracias por conversar conmigo! 💙";
   },

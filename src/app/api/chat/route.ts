@@ -15,6 +15,7 @@ import { createWelcomeMessage } from "@/lib/chat-utils";
 import { getRelevantInformation } from "@/lib/pgvector/utils";
 import { z } from "zod";
 import { CHAT_CONFIG, isSessionExpired } from "@/lib/chat-config";
+import { all } from "axios";
 
 // Permite respuestas de streaming hasta 30 segundos
 export const maxDuration = 30;
@@ -134,62 +135,87 @@ export async function POST(req: Request) {
       );
     }
 
-    // Chequear el grupo de chat por ID
-    if (chatSession.data?.chatGroupId) {
-      const chatGroup = await checkChatGroupById(chatSession.data.chatGroupId);
-      if (!chatGroup.success) {
-        console.error(
-            "Error en API chatNova - Grupo de chat no válido:",
-            chatGroup.error
-        );
-        return NextResponse.json({ error: chatGroup.error }, { status: 400 });
-      }
-    }
-
     // ========================================================================
-    // VALIDACIÓN DE TIEMPO - SOLO PARA SESIONES INDIVIDUALES (sin chatGroupId)
+    // VALIDACIÓN DE TIEMPO - APLICA TANTO PARA SESIONES INDIVIDUALES COMO GRUPALES
     // ========================================================================
     let shouldAddGraceMessage = false;
-    if (!chatSession.data?.chatGroupId) {
-      const maxDuration = chatSession.data?.maxDurationMs || CHAT_CONFIG.MAX_DURATION_MS;
-      const sessionExpired = isSessionExpired(chatSession.data!.createdAt, maxDuration);
+    let maxDuration: number;
+    let sessionExpired: boolean;
+    
+    if (chatSession.data?.chatGroupId) {
+      // SESIÓN GRUPAL: Calcular tiempo basado en endDate del grupo
+      // Obtener el endDate del grupo directamente (sin validar si está activo)
+      // para permitir el mensaje de gracia
+      const { getChatGroupById } = await import("@/lib/db/queries/chatGroup");
+      const groupData = await getChatGroupById(chatSession.data.chatGroupId);
+      
+      if (!groupData) {
+        return NextResponse.json(
+          { error: "No se pudo obtener información del grupo" },
+          { status: 400 }
+        );
+      }
+      
+      // Validar que el grupo exista y que no se esté intentando usar
+      // ANTES de la fecha de inicio (startDate)
+      const now = Date.now();
+      if (groupData.startDate.getTime() > now) {
+        console.error(
+          logString + "Intento de usar grupo antes de su inicio:",
+          groupData.startDate
+        );
+        return NextResponse.json(
+          { error: "El grupo de chat aún no ha iniciado." },
+          { status: 400 }
+        );
+      }
+      
+      // Calcular si ya pasó el endDate
+      const timeUntilEnd = groupData.endDate.getTime() - now;
+      sessionExpired = timeUntilEnd <= 0;
+      
+    } else {
+      // SESIÓN INDIVIDUAL: Usar maxDurationMs como antes
+      maxDuration = chatSession.data?.maxDurationMs || CHAT_CONFIG.MAX_DURATION_MS;
+      sessionExpired = isSessionExpired(chatSession.data!.createdAt, maxDuration);
+    }
 
-      if (sessionExpired) {
-        // La sesión ya superó el tiempo
+    // Lógica común para ambos tipos de sesión
+    if (sessionExpired) {
+      // La sesión ya superó el tiempo
+      
+      if (chatSession.data?.usedGraceMessage) {
+        // Ya usó su mensaje de gracia, bloquear completamente
+        console.log(
+          logString + 
+          `Sesión ${id} intentó enviar mensaje después de usar mensaje de gracia`
+        );
         
-        if (chatSession.data?.usedGraceMessage) {
-          // Ya usó su mensaje de gracia, bloquear completamente
-          console.log(
-            logString + 
-            `Sesión ${id} intentó enviar mensaje después de usar mensaje de gracia`
+        return NextResponse.json(
+          {
+            error: "TIEMPO_EXPIRADO",
+            message: "Tu sesión ha finalizado. Por favor completa el formulario final.",
+            sessionExpired: true,
+          },
+          { status: 403 }
+        );
+      } else {
+        // Permitir este último mensaje y marcar el flag
+        console.log(
+          logString + 
+          `Sesión ${id} alcanzó el límite de tiempo. Permitiendo mensaje de gracia.`
+        );
+        
+        shouldAddGraceMessage = true;
+        
+        try {
+          await markGraceMessageUsed(id);
+        } catch (error) {
+          console.error(
+            logString + `Error marcando mensaje de gracia para sesión ${id}:`,
+            error
           );
-          
-          return NextResponse.json(
-            {
-              error: "TIEMPO_EXPIRADO",
-              message: "Tu sesión ha finalizado. Por favor completa el formulario de evaluación.",
-              sessionExpired: true,
-            },
-            { status: 403 }
-          );
-        } else {
-          // Permitir este último mensaje y marcar el flag
-          console.log(
-            logString + 
-            `Sesión ${id} alcanzó el límite de tiempo. Permitiendo mensaje de gracia.`
-          );
-          
-          shouldAddGraceMessage = true;
-          
-          try {
-            await markGraceMessageUsed(id);
-          } catch (error) {
-            console.error(
-              logString + `Error marcando mensaje de gracia para sesión ${id}:`,
-              error
-            );
-            // Continuar de todas formas para no bloquear al usuario
-          }
+          // Continuar de todas formas para no bloquear al usuario
         }
       }
     }
@@ -256,8 +282,8 @@ export async function POST(req: Request) {
           const updatedSession = await getChatSessionById(id);
           let messagesToSave = messages;
 
-          // Solo añadir mensaje de gracia para sesiones individuales
-          if (!updatedSession.data?.chatGroupId && updatedSession.data?.usedGraceMessage) {
+          // Añadir mensaje de gracia para TODAS las sesiones (individuales y grupales)
+          if (updatedSession.data?.usedGraceMessage) {
             // Verificar si ya existe el mensaje de gracia en los mensajes
             const hasGraceMessage = messages.some(msg => 
               msg.role === "assistant" && 

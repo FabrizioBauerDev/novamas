@@ -41,6 +41,7 @@ interface NewChatInterfaceProps {
     chatGroupId: string | null;
     maxDurationMs: number;
     usedGraceMessage: boolean;
+    groupEndDate: string | null;
   } | null;
   isGroupSession: boolean;
   onFinish?: () => void;
@@ -58,6 +59,7 @@ const ConversationDemo = ({
     chatGroupId: string | null;
     maxDurationMs: number;
     usedGraceMessage: boolean;
+    groupEndDate: string | null;
   } | null;
   isGroupSession: boolean;
   onFinish?: () => void;
@@ -98,7 +100,7 @@ const ConversationDemo = ({
     onFinish: async () => {
       // Después de cada respuesta, verificar si necesitamos recargar mensajes
       // (para capturar el mensaje de gracia que se añade en el backend)
-      if (!isGroupSession && initialSessionData) {
+      if (initialSessionData) {
         const { getChatMessagesAction } = await import("@/lib/actions/actions-chat");
         const result = await getChatMessagesAction(sessionId);
         if (result.success && result.data) {
@@ -112,9 +114,8 @@ const ConversationDemo = ({
   // Usar useRef para sincronización inmediata y evitar llamadas duplicadas
   const handleTimerExpire = useCallback(async () => {
     // Verificación síncrona con useRef para evitar race conditions
-    if (isGroupSession || hasCalledExpireAPIRef.current) {
+    if (hasCalledExpireAPIRef.current) {
       console.log("⛔ handleTimerExpire bloqueado:", { 
-        isGroupSession, 
         hasCalledExpireAPI: hasCalledExpireAPIRef.current 
       });
       return;
@@ -132,11 +133,15 @@ const ConversationDemo = ({
 
       if (response.ok) {
         const data = await response.json();
-        // OPTIMIZACIÓN: Usar el mensaje retornado por la API directamente
-        // En lugar de recargar todos los mensajes desde la BD
-        if (data.success && data.message && !data.alreadyExists) {
-          // Añadir el nuevo mensaje al final de la lista existente
-          setMessages(prevMessages => [...prevMessages, data.message]);
+        
+        // Recargar todos los mensajes desde la base de datos
+        // para asegurar sincronización completa
+        if (data.success && !data.alreadyExists) {
+          const { getChatMessagesAction } = await import("@/lib/actions/actions-chat");
+          const result = await getChatMessagesAction(sessionId);
+          if (result.success && result.data) {
+            setMessages(result.data as MyUIMessage[]);
+          }
         } else if (data.alreadyExists) {
           console.log("ℹ️ Mensaje de expiración ya existe, no se añade duplicado");
         }
@@ -150,12 +155,10 @@ const ConversationDemo = ({
       // En caso de error, permitir reintentar
       hasCalledExpireAPIRef.current = false;
     }
-  }, [isGroupSession, sessionId, setMessages]);
+  }, [sessionId, setMessages]);
 
   // Detectar cuando llega el mensaje de gracia usado (después de enviar el último mensaje)
   useEffect(() => {
-    if (isGroupSession) return;
-
     // Buscar si el último mensaje del asistente es el mensaje de gracia usado
     const lastAssistantMessage = messages
       .filter(m => m.role === "assistant")
@@ -171,19 +174,28 @@ const ConversationDemo = ({
         setAutoRedirectStarted(true); // Activar el auto-redirect de 1 minuto
       }
     }
-  }, [messages, isGroupSession, autoRedirectStarted]);
+  }, [messages, autoRedirectStarted]);
 
-  // Mostrar advertencia cuando quedan 2 minutos (solo para sesiones individuales)
+  // Mostrar advertencia cuando quedan 2 minutos
   useEffect(() => {
-    if (!initialSessionData || isGroupSession || warningShown) {
+    if (!initialSessionData || warningShown) {
       return;
     }
 
     const checkTimeRemaining = () => {
-      const createdAt = new Date(initialSessionData.createdAt);
-      const maxDuration = initialSessionData.maxDurationMs || 1200000;
-      const elapsed = Date.now() - createdAt.getTime();
-      const remaining = maxDuration - elapsed;
+      let remaining: number;
+      
+      if (isGroupSession && initialSessionData.groupEndDate) {
+        // Para sesiones grupales, calcular desde el endDate
+        const endDate = new Date(initialSessionData.groupEndDate);
+        remaining = endDate.getTime() - Date.now();
+      } else {
+        // Para sesiones individuales, usar maxDurationMs
+        const createdAt = new Date(initialSessionData.createdAt);
+        const maxDuration = initialSessionData.maxDurationMs || 1200000;
+        const elapsed = Date.now() - createdAt.getTime();
+        remaining = maxDuration - elapsed;
+      }
       
       // Mostrar advertencia cuando quedan 2 minutos (120000 ms)
       if (remaining <= 120000 && remaining > 0 && !warningShown) {
@@ -423,6 +435,7 @@ const ConversationDemo = ({
             <SessionTimer
               createdAt={initialSessionData?.createdAt ? new Date(initialSessionData.createdAt) : null}
               maxDurationMs={initialSessionData?.maxDurationMs}
+              groupEndDate={initialSessionData?.groupEndDate ? new Date(initialSessionData.groupEndDate) : null}
               isGroupSession={isGroupSession}
               messageCount={userMessageCount}
               onFinish={handleFinishChat}
@@ -580,6 +593,7 @@ const ConversationDemo = ({
           <SessionTimer
             createdAt={initialSessionData?.createdAt ? new Date(initialSessionData.createdAt) : null}
             maxDurationMs={initialSessionData?.maxDurationMs}
+            groupEndDate={initialSessionData?.groupEndDate ? new Date(initialSessionData.groupEndDate) : null}
             isGroupSession={isGroupSession}
             messageCount={userMessageCount}
             onFinish={handleFinishChat}

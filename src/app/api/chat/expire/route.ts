@@ -28,13 +28,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Solo aplicar a sesiones individuales (sin chatGroupId)
-    if (chatSession.data.chatGroupId) {
-      return NextResponse.json(
-        { success: true, message: "Sesión grupal, no se aplica expiración" }
-      );
-    }
-
     // Verificar si ya tiene el mensaje de expiración
     // Para evitar duplicados si el usuario recarga la página
     const { getChatMessagesAction } = await import("@/lib/actions/actions-chat");
@@ -59,10 +52,31 @@ export async function POST(req: Request) {
       }
     }
 
-    // Calcular minutos de duración
-    const maxDurationMinutes = Math.floor(
-      (chatSession.data.maxDurationMs || CHAT_CONFIG.MAX_DURATION_MS) / 60000
-    );
+    // Calcular minutos de duración según el tipo de sesión
+    let maxDurationMinutes: number;
+    
+    if (chatSession.data.chatGroupId) {
+      // SESIÓN GRUPAL: Calcular tiempo transcurrido desde createdAt hasta endDate
+      const { getChatGroupById } = await import("@/lib/db/queries/chatGroup");
+      const groupData = await getChatGroupById(chatSession.data.chatGroupId);
+      
+      if (!groupData) {
+        return NextResponse.json(
+          { error: "No se pudo obtener información del grupo" },
+          { status: 400 }
+        );
+      }
+      
+      // Calcular duración total permitida (de createdAt hasta endDate)
+      const totalDurationMs = groupData.endDate.getTime() - chatSession.data.createdAt.getTime();
+      maxDurationMinutes = Math.floor(totalDurationMs / 60000);
+      
+    } else {
+      // SESIÓN INDIVIDUAL: Usar maxDurationMs
+      maxDurationMinutes = Math.floor(
+        (chatSession.data.maxDurationMs || CHAT_CONFIG.MAX_DURATION_MS) / 60000
+      );
+    }
 
     // Crear mensaje de tiempo expirado
     const expiredMessage: MyUIMessage = {

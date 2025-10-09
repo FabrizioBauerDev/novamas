@@ -44,12 +44,37 @@ export async function createFormChatSession({
 }: CreateFormChatSessionParams): Promise<CreateFormChatSessionResult> {
   try {
     let chatGroupId: string | null = null;
+    let groupEndDate: Date | null = null;
     
     // Si existe slug, buscar ChatGroup válido
     if (slug) {
       const checkSlug = await checkChatGroupBySlug(slug);
       if (checkSlug.success) {
         chatGroupId = checkSlug.id;
+        
+        // Obtener el endDate del grupo para validar tiempo mínimo
+        const { getChatGroupById } = await import("../queries/chatGroup");
+        const chatGroup = await getChatGroupById(chatGroupId!);
+        
+        if (!chatGroup) {
+          return {
+            success: false,
+            error: "No se pudo obtener información del grupo de chat."
+          };
+        }
+        
+        groupEndDate = chatGroup.endDate;
+        
+        // Validar que queden al menos 3 minutos hasta el endDate
+        const timeUntilEnd = groupEndDate.getTime() - Date.now();
+        
+        if (timeUntilEnd < CHAT_CONFIG.MIN_TIME_REQUIRED_MS) {
+          const minutesRemaining = Math.ceil(timeUntilEnd / 60000);
+          return {
+            success: false,
+            error: `No se puede iniciar una sesión de chat. El grupo finaliza en ${minutesRemaining} minuto(s) y se requiere un mínimo de 3 minutos.`
+          };
+        }
       }else{
         return {
           success: false,

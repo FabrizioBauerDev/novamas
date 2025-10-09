@@ -155,6 +155,18 @@ export async function getSessionDataAction(chatSessionId: string) {
       };
     }
 
+    // Si es sesión grupal, obtener el endDate del grupo
+    let groupEndDate: string | null = null;
+    
+    if (chatSession.data.chatGroupId) {
+      const { getChatGroupById } = await import("@/lib/db/queries/chatGroup");
+      const groupData = await getChatGroupById(chatSession.data.chatGroupId);
+      
+      if (groupData) {
+        groupEndDate = groupData.endDate.toISOString();
+      }
+    }
+
     return {
       success: true,
       data: {
@@ -163,6 +175,7 @@ export async function getSessionDataAction(chatSessionId: string) {
         chatGroupId: chatSession.data.chatGroupId,
         maxDurationMs: chatSession.data.maxDurationMs || 1200000,
         usedGraceMessage: chatSession.data.usedGraceMessage || false,
+        groupEndDate: groupEndDate,
       }
     };
   } catch (error) {

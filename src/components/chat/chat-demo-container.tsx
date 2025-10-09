@@ -15,6 +15,7 @@ interface SessionData {
   chatGroupId: string | null;
   maxDurationMs: number;
   usedGraceMessage: boolean;
+  groupEndDate: string | null;
 }
 
 type ViewState = "form" | "chat" | "evaluation"
@@ -42,6 +43,7 @@ export default function ChatDemoContainer({ slug }: ChatDemoContainerProps) {
           chatGroupId: result.data.chatGroupId,
           maxDurationMs: result.data.maxDurationMs,
           usedGraceMessage: result.data.usedGraceMessage,
+          groupEndDate: result.data.groupEndDate || null,
         })
         setCurrentView("chat")
       } else {

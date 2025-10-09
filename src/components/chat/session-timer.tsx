@@ -13,12 +13,17 @@ interface SessionTimerProps {
   createdAt: Date | null;
   
   /**
-   * Duración máxima en milisegundos
+   * Duración máxima en milisegundos (para sesiones individuales)
    */
   maxDurationMs?: number;
   
   /**
-   * Si es una sesión grupal (no muestra timer)
+   * Fecha de finalización del grupo (para sesiones grupales)
+   */
+  groupEndDate?: Date | null;
+  
+  /**
+   * Si es una sesión grupal
    */
   isGroupSession?: boolean;
   
@@ -46,6 +51,7 @@ interface SessionTimerProps {
 export function SessionTimer({
   createdAt,
   maxDurationMs,
+  groupEndDate,
   isGroupSession = false,
   messageCount,
   onFinish,
@@ -60,14 +66,10 @@ export function SessionTimer({
   } = useSessionTimer({
     createdAt,
     maxDurationMs,
-    disabled: isGroupSession,
+    groupEndDate,
+    isGroupSession,
     onExpire,
   });
-
-  // No mostrar nada para sesiones grupales
-  if (isGroupSession) {
-    return null;
-  }
 
   // Determinar si el botón debe estar habilitado
   // Requiere al menos 2 mensajes del usuario

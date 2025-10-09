@@ -8,15 +8,20 @@ export interface UseSessionTimerProps {
   createdAt: Date | null;
   
   /**
-   * Duración máxima de la sesión en milisegundos
-   * Default: CHAT_CONFIG.MAX_DURATION_MS (20 minutos)
+   * Duración máxima de la sesión en milisegundos (para sesiones individuales)
+   * Default: CHAT_CONFIG.MAX_DURATION_MS (3 minutos)
    */
   maxDurationMs?: number;
   
   /**
-   * Si es true, el timer no se ejecutará (para sesiones grupales)
+   * Fecha de finalización del grupo (para sesiones grupales)
    */
-  disabled?: boolean;
+  groupEndDate?: Date | null;
+  
+  /**
+   * Si es una sesión grupal
+   */
+  isGroupSession?: boolean;
 
   /**
    * Callback que se ejecuta cuando el timer expira (llega a 0)
@@ -59,11 +64,13 @@ export interface UseSessionTimerReturn {
 /**
  * Hook personalizado para gestionar el timer de sesión de chat
  * Actualiza cada segundo y proporciona estados visuales
+ * Soporta tanto sesiones individuales como grupales
  */
 export function useSessionTimer({
   createdAt,
   maxDurationMs = CHAT_CONFIG.MAX_DURATION_MS,
-  disabled = false,
+  groupEndDate,
+  isGroupSession = false,
   onExpire,
 }: UseSessionTimerProps): UseSessionTimerReturn {
   const [timeRemaining, setTimeRemaining] = useState<number>(maxDurationMs);
@@ -71,13 +78,22 @@ export function useSessionTimer({
   const [hasCalledOnExpire, setHasCalledOnExpire] = useState<boolean>(false);
 
   const updateTimer = useCallback(() => {
-    if (!createdAt || disabled) {
+    if (!createdAt) {
       setTimeRemaining(maxDurationMs);
       setIsExpired(false);
       return;
     }
 
-    const remaining = getTimeRemaining(createdAt, maxDurationMs);
+    let remaining: number;
+    
+    if (isGroupSession && groupEndDate) {
+      // Para sesiones grupales, calcular tiempo restante hasta endDate
+      remaining = Math.max(0, groupEndDate.getTime() - Date.now());
+    } else {
+      // Para sesiones individuales, usar maxDurationMs desde createdAt
+      remaining = getTimeRemaining(createdAt, maxDurationMs);
+    }
+    
     const expired = remaining === 0;
     
     setTimeRemaining(remaining);
@@ -88,12 +104,10 @@ export function useSessionTimer({
       setHasCalledOnExpire(true);
       onExpire();
     }
-  }, [createdAt, maxDurationMs, disabled, hasCalledOnExpire, onExpire]);
+  }, [createdAt, maxDurationMs, groupEndDate, isGroupSession, hasCalledOnExpire, onExpire]);
 
   // Actualizar el timer cada segundo
   useEffect(() => {
-    if (disabled) return;
-
     // Actualizar inmediatamente
     updateTimer();
 
@@ -102,7 +116,7 @@ export function useSessionTimer({
 
     // Limpiar intervalo al desmontar
     return () => clearInterval(intervalId);
-  }, [updateTimer, disabled]);
+  }, [updateTimer]);
 
   // Calcular estados de advertencia
   const showWarning = timeRemaining > 0 && timeRemaining <= CHAT_CONFIG.WARNING_THRESHOLD_MS;
