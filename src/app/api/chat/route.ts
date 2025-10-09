@@ -35,6 +35,12 @@ const ragSearchTool = tool({
       if (!query || query.trim() === "") {
         return "La consulta está vacía. Por favor, proporciona una pregunta específica para buscar en la base de conocimiento.";
       }
+
+      if(category=="NUMERO_TELEFONO"){
+        query = query+" "+location;
+      }
+
+      console.log(query)
       console.log(category)
       console.log(location)
 

@@ -270,7 +270,7 @@ export const BetTypeEnum = pgEnum("BetType", [
 export const statistics = pgTable("statistics", {
   id: uuid("id").primaryKey().defaultRandom(),
   summary: text("summary").notNull(),
-  chatId: uuid("chat_id").notNull().references(() => chatSessions.id), // Ajustá el nombre si tu tabla es distinta
+  chatId: uuid("chat_id").notNull().references(() => chatSessions.id),
   amountMessages: integer("amount_messages").notNull(),
   minWordsPerMessage: integer("min_words_per_message").notNull(),
   maxWordsPerMessage: integer("max_words_per_message").notNull(),
