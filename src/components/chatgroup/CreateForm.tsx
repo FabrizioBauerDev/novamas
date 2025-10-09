@@ -73,20 +73,24 @@ const handleInputChange = (field: keyof CreateGroupFormData, value: string) => {
         errors.push("La fecha de fin debe ser posterior a la fecha de inicio")
       }
 
-      // Si es el mismo día, validar que haya al menos 30 minutos de diferencia
+      // Si es el mismo día, validar que haya al menos 15 minutos de diferencia
       if (formData.startDate === formData.endDate) {
         const timeDiffMs = endDateTime.getTime() - startDateTime.getTime()
         const timeDiffMinutes = timeDiffMs / (1000 * 60)
         
-        if (timeDiffMinutes < 30) {
-          errors.push("La sesión debe durar al menos 30 minutos")
+        if (timeDiffMinutes < 15) {
+          errors.push("La sesión debe durar al menos 15 minutos")
         }
       }
 
-      // Comparar con la fecha actual en la zona horaria local
+      // Comparar con la fecha actual en la zona horaria local (ignorando segundos y milisegundos)
       const now = new Date()
-      if (startDateTime <= now) {
-        errors.push("La fecha de inicio debe ser futura")
+      // Truncar ambas fechas a minutos para comparar
+      const startMinutes = new Date(startDateTime.getFullYear(), startDateTime.getMonth(), startDateTime.getDate(), startDateTime.getHours(), startDateTime.getMinutes())
+      const nowMinutes = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes())
+      
+      if (startMinutes < nowMinutes) {
+        errors.push("La fecha de inicio debe ser actual o futura")
       }
     }
 

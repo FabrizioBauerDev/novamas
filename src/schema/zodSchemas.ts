@@ -45,9 +45,15 @@ const createChatGroupSchema = z.object({
   };
 
   const startDateTime = createDateTime(data.startDate, data.startTime);
-  return startDateTime > new Date();
+  const now = new Date();
+  
+  // Truncar ambas fechas a minutos para comparar (ignorar segundos y milisegundos)
+  const startMinutes = new Date(startDateTime.getFullYear(), startDateTime.getMonth(), startDateTime.getDate(), startDateTime.getHours(), startDateTime.getMinutes());
+  const nowMinutes = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
+  
+  return startMinutes >= nowMinutes;
 }, {
-  message: "La fecha de inicio debe ser futura",
+  message: "La fecha de inicio debe ser actual o futura",
   path: ["startDate"],
 }).refine((data) => {
   const createDateTime = (dateStr: string, timeStr?: string) => {
@@ -62,9 +68,9 @@ const createChatGroupSchema = z.object({
   
   const timeDiffMs = endDateTime.getTime() - startDateTime.getTime();
   const timeDiffMinutes = timeDiffMs / (1000 * 60);
-  return timeDiffMinutes >= 30;
+  return timeDiffMinutes >= 15;
 }, {
-  message: "La sesión debe durar al menos 30 minutos",
+  message: "La sesión debe durar al menos 15 minutos",
   path: ["endTime"],
 });
 
