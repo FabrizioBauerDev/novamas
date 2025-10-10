@@ -78,6 +78,13 @@
       "when": 1760104630419,
       "tag": "0010_striped_zombie",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1760122913243,
+      "tag": "0011_tough_scalphunter",
+      "breakpoints": true
     }
   ]
 }

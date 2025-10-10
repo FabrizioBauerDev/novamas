@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { chatSessions, evaluationForms, messages, chatFeedbacks } from "@/db/schema";
+import { chatSessions, evaluationForms, messages, chatFeedbacks, geoLocations } from "@/db/schema";
 import { EvaluationFormData, MyUIMessage } from "@/types/types";
 import { checkChatGroupBySlug } from "../queries/chatNova";
 import { safeEncryptMessage } from "@/lib/crypto";
@@ -9,6 +9,8 @@ import { CHAT_CONFIG } from "@/lib/chat-config";
 export interface CreateFormChatSessionParams {
   formData: EvaluationFormData;
   slug?: string;
+  ip?: string;
+  address?: string;
 }
 
 export interface CreateFormChatSessionResult {
@@ -40,7 +42,9 @@ function calcScore(formData: EvaluationFormData): number {
 
 export async function createFormChatSession({
   formData,
-  slug
+  slug,
+  ip,
+  address
 }: CreateFormChatSessionParams): Promise<CreateFormChatSessionResult> {
   try {
     let chatGroupId: string | null = null;
@@ -110,7 +114,21 @@ export async function createFormChatSession({
           personalIssues: formData.personalIssues as "NO" | "NO_AP" | "SI",
           triedToQuit: formData.triedToQuit === "true",
           score: calculatedScore,
+          ip: ip || null,
+          address: address || null,
         });
+      
+      // Si hay datos de ubicación GPS, crear el registro de geoLocation
+      if (formData.location) {
+        await tx
+          .insert(geoLocations)
+          .values({
+            evaluationFormId: newChatSession.id,
+            latitude: formData.location.latitude,
+            longitude: formData.location.longitude,
+            accuracy: formData.location.accuracy || null,
+          });
+      }
       
       return newChatSession.id;
     });

@@ -113,7 +113,19 @@ export const evaluationForms = pgTable("EvaluationForm", {
   personalIssues: personalIssuesTypeEnum("personalIssues").notNull(),
   triedToQuit: boolean("triedToQuit").notNull(),
   score: integer("score").notNull(),
+  ip: text("ip"),
+  address: text("address"),
   ...timestamps,
+});
+
+// Tabla GeoLocation (relación 1:1 con EvaluationForm)
+export const geoLocations = pgTable("GeoLocation", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  evaluationFormId: uuid("evaluationFormId").notNull().unique().references(() => evaluationForms.id, { onDelete: "cascade" }),
+  latitude: real("latitude").notNull(),
+  longitude: real("longitude").notNull(),
+  accuracy: real("accuracy"),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
 });
 
 // Definición de relaciones
@@ -177,6 +189,17 @@ export const evaluationFormsRelations = relations(evaluationForms, ({ one }) => 
     fields: [evaluationForms.id],
     references: [chatSessions.id],
   }),
+  geoLocation: one(geoLocations, {
+    fields: [evaluationForms.id],
+    references: [geoLocations.evaluationFormId],
+  }),
+}));
+
+export const geoLocationsRelations = relations(geoLocations, ({ one }) => ({
+  evaluationForm: one(evaluationForms, {
+    fields: [geoLocations.evaluationFormId],
+    references: [evaluationForms.id],
+  }),
 }));
 
 // Tipos TypeScript
@@ -200,6 +223,9 @@ export type NewChatFeedback = typeof chatFeedbacks.$inferInsert;
 
 export type EvaluationForm = typeof evaluationForms.$inferSelect;
 export type NewEvaluationForm = typeof evaluationForms.$inferInsert;
+
+export type GeoLocation = typeof geoLocations.$inferSelect;
+export type NewGeoLocation = typeof geoLocations.$inferInsert;
 
 // ================================================================================================
 // ========================== ESQUEMA RAG - BIBLIOGRAFÍA Y VECTORES =============================

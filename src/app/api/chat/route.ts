@@ -254,6 +254,14 @@ export async function POST(req: Request) {
       },
       stopWhen: stepCountIs(3),
       maxRetries: 2,
+      providerOptions: {
+        google: {
+          thinkingConfig: {
+            thinkingBudget: 8192, // Número de tokens de pensamiento permitidos
+            includeThoughts: false, // No incluir resumen del proceso de pensamiento
+          },
+        },
+      },
       onError: (error) => {
         console.error('❌ Error while streaming:', JSON.stringify(error, null, 2))
       },

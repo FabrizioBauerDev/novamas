@@ -47,28 +47,115 @@ export async function createFormChatSessionAction(
       formData.triedToQuit = "false";
     }
     
+    // Obtener IP del cliente
     const headersList = await headers();
     const ip =
       headersList.get("x-forwarded-for")?.split(",")[0] ||
-      headersList.get("x-real-ip");
+      headersList.get("x-real-ip") ||
+      null;
     
     console.log("IP del cliente:", ip);
     
+    let address: string | undefined = undefined;
+    
+    // Si el usuario proporcionó ubicación GPS
     if (params.formData.location) {
-      console.log("Ubicación obtenida: ", params.formData.location);
+      console.log("Ubicación GPS obtenida:", params.formData.location);
       
       try {
+        // Obtener dirección desde OpenStreetMap usando coordenadas GPS
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${params.formData.location.latitude}&lon=${params.formData.location.longitude}&zoom=14&format=json`
+          `https://nominatim.openstreetmap.org/reverse?lat=${params.formData.location.latitude}&lon=${params.formData.location.longitude}&zoom=14&format=json`,
+          {
+            headers: {
+              'User-Agent': 'NoVaMas-App/1.0'
+            }
+          }
         );
-        const data = await response.json();
-        console.log("Ubicación geográfica:", data);
+        
+        if (response.ok) {
+          const data = await response.json();
+          address = data.display_name || undefined;
+          console.log("Dirección obtenida desde GPS (OpenStreetMap):", address);
+        } else {
+          console.warn("Error en respuesta de Nominatim:", response.status);
+        }
       } catch (geoError) {
-        console.warn("Error obteniendo ubicación geográfica:", geoError);
+        console.warn("Error obteniendo ubicación geográfica desde GPS:", geoError);
+      }
+      
+      // Si no se pudo obtener dirección desde OpenStreetMap, intentar con IP
+      if (!address && ip) {
+        console.log("OpenStreetMap falló. Intentando obtener dirección desde IP...");
+        
+        try {
+          const response = await fetch(`https://ipapi.co/${ip}/json/`);
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Verificar que no sea un error de rate limit o similar
+            if (!data.error) {
+              // Concatenar city, region, country_name y postal
+              const parts = [
+                data.city,
+                data.region,
+                data.country_name,
+                data.postal
+              ].filter(Boolean); // Filtrar valores vacíos o undefined
+              
+              address = parts.join(", ");
+              console.log("Dirección obtenida desde IP (fallback):", address);
+            } else {
+              console.warn("Error en respuesta de ipapi.co (fallback):", data.error);
+            }
+          } else {
+            console.warn("Error en respuesta de ipapi.co (fallback):", response.status);
+          }
+        } catch (ipError) {
+          console.warn("Error obteniendo ubicación desde IP (fallback):", ipError);
+        }
+      }
+    } 
+    // Si no hay ubicación GPS pero tenemos IP, usar geolocalización por IP
+    else if (ip) {
+      console.log("No hay ubicación GPS. Usando IP para geolocalización:", ip);
+      
+      try {
+        const response = await fetch(`https://ipapi.co/${ip}/json/`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Verificar que no sea un error de rate limit o similar
+          if (!data.error) {
+            // Concatenar city, region, country_name y postal
+            const parts = [
+              data.city,
+              data.region,
+              data.country_name,
+              data.postal
+            ].filter(Boolean); // Filtrar valores vacíos o undefined
+            
+            address = parts.join(", ");
+            console.log("Dirección obtenida desde IP:", address);
+          } else {
+            console.warn("Error en respuesta de ipapi.co:", data.error);
+          }
+        } else {
+          console.warn("Error en respuesta de ipapi.co:", response.status);
+        }
+      } catch (ipError) {
+        console.warn("Error obteniendo ubicación desde IP:", ipError);
       }
     }
     
-    return await createFormChatSession(params);
+    // Llamar a la función de creación con IP y address
+    return await createFormChatSession({
+      ...params,
+      ip: ip || undefined,
+      address: address
+    });
     
   } catch (error) {
     console.error("Error en createFormChatSessionAction:", error);
