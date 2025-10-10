@@ -15,29 +15,33 @@ export async function createFormChatSessionAction(
   try {
     // Validar que los campos requeridos estén presentes
     const { formData } = params;
-    
+
     if (!formData.gender || !formData.age || !formData.onlineGaming) {
       return {
         success: false,
-        error: "Campos requeridos faltantes"
+        error: "Campos requeridos faltantes",
       };
     }
-    
+
     // Validar rango de edad
     const age = parseInt(formData.age);
     if (isNaN(age) || age < 13 || age > 99) {
       return {
         success: false,
-        error: "La edad debe estar entre 13 y 99 años"
+        error: "La edad debe estar entre 13 y 99 años",
       };
     }
-    
+
     // Si onlineGaming es false, los otros campos pueden estar vacíos
     if (formData.onlineGaming === "true") {
-      if (!formData.couldntStop || !formData.personalIssues || !formData.triedToQuit) {
+      if (
+        !formData.couldntStop ||
+        !formData.personalIssues ||
+        !formData.triedToQuit
+      ) {
         return {
           success: false,
-          error: "Todos los campos del paso 2 son requeridos"
+          error: "Todos los campos del paso 2 son requeridos",
         };
       }
     } else {
@@ -46,33 +50,33 @@ export async function createFormChatSessionAction(
       formData.personalIssues = "NO";
       formData.triedToQuit = "false";
     }
-    
+
     // Obtener IP del cliente
     const headersList = await headers();
     const ip =
       headersList.get("x-forwarded-for")?.split(",")[0] ||
       headersList.get("x-real-ip") ||
       null;
-    
+
     console.log("IP del cliente:", ip);
-    
+
     let address: string | undefined = undefined;
-    
+
     // Si el usuario proporcionó ubicación GPS
     if (params.formData.location) {
       console.log("Ubicación GPS obtenida:", params.formData.location);
-      
+
       try {
         // Obtener dirección desde OpenStreetMap usando coordenadas GPS
         const response = await fetch(
           `https://nominatim.openstreetmap.org/reverse?lat=${params.formData.location.latitude}&lon=${params.formData.location.longitude}&zoom=14&format=json`,
           {
             headers: {
-              'User-Agent': 'NoVaMas-App/1.0'
-            }
+              "User-Agent": "NoVaMas-App/1.0",
+            },
           }
         );
-        
+
         if (response.ok) {
           const data = await response.json();
           address = data.display_name || undefined;
@@ -81,19 +85,28 @@ export async function createFormChatSessionAction(
           console.warn("Error en respuesta de Nominatim:", response.status);
         }
       } catch (geoError) {
-        console.warn("Error obteniendo ubicación geográfica desde GPS:", geoError);
+        console.warn(
+          "Error obteniendo ubicación geográfica desde GPS:",
+          geoError
+        );
       }
-      
+
       // Si no se pudo obtener dirección desde OpenStreetMap, intentar con IP
       if (!address && ip) {
-        console.log("OpenStreetMap falló. Intentando obtener dirección desde IP...");
-        
+        console.log(
+          "OpenStreetMap falló. Intentando obtener dirección desde IP..."
+        );
+
         try {
-          const response = await fetch(`https://ipapi.co/${ip}/json/`);
-          
+          const response = await fetch(`https://ipapi.co/${ip}/json/`, {
+            headers: {
+              "User-Agent": "NoVaMas-App/1.0",
+            },
+          });
+
           if (response.ok) {
             const data = await response.json();
-            
+
             // Verificar que no sea un error de rate limit o similar
             if (!data.error) {
               // Concatenar city, region, country_name y postal
@@ -101,32 +114,45 @@ export async function createFormChatSessionAction(
                 data.city,
                 data.region,
                 data.country_name,
-                data.postal
+                data.postal,
               ].filter(Boolean); // Filtrar valores vacíos o undefined
-              
+
               address = parts.join(", ");
               console.log("Dirección obtenida desde IP (fallback):", address);
             } else {
-              console.warn("Error en respuesta de ipapi.co (fallback):", data.error);
+              console.warn(
+                "Error en respuesta de ipapi.co (fallback):",
+                data.error
+              );
             }
           } else {
-            console.warn("Error en respuesta de ipapi.co (fallback):", response.status);
+            console.warn(
+              "Error en respuesta de ipapi.co (fallback):",
+              response.status
+            );
           }
         } catch (ipError) {
-          console.warn("Error obteniendo ubicación desde IP (fallback):", ipError);
+          console.warn(
+            "Error obteniendo ubicación desde IP (fallback):",
+            ipError
+          );
         }
       }
-    } 
+    }
     // Si no hay ubicación GPS pero tenemos IP, usar geolocalización por IP
     else if (ip) {
       console.log("No hay ubicación GPS. Usando IP para geolocalización:", ip);
-      
+
       try {
-        const response = await fetch(`https://ipapi.co/${ip}/json/`);
-        
+        const response = await fetch(`https://ipapi.co/${ip}/json/`, {
+            headers: {
+              "User-Agent": "NoVaMas-App/1.0",
+            },
+          });
+
         if (response.ok) {
           const data = await response.json();
-          
+
           // Verificar que no sea un error de rate limit o similar
           if (!data.error) {
             // Concatenar city, region, country_name y postal
@@ -134,9 +160,9 @@ export async function createFormChatSessionAction(
               data.city,
               data.region,
               data.country_name,
-              data.postal
+              data.postal,
             ].filter(Boolean); // Filtrar valores vacíos o undefined
-            
+
             address = parts.join(", ");
             console.log("Dirección obtenida desde IP:", address);
           } else {
@@ -149,19 +175,18 @@ export async function createFormChatSessionAction(
         console.warn("Error obteniendo ubicación desde IP:", ipError);
       }
     }
-    
+
     // Llamar a la función de creación con IP y address
     return await createFormChatSession({
       ...params,
       ip: ip || undefined,
-      address: address
+      address: address,
     });
-    
   } catch (error) {
     console.error("Error en createFormChatSessionAction:", error);
     return {
       success: false,
-      error: "Error interno del servidor"
+      error: "Error interno del servidor",
     };
   }
 }
@@ -172,48 +197,47 @@ export async function createChatFeedbackAction(
   try {
     // Validaciones del lado del servidor (duplicadas por seguridad)
     const { chatSessionId, rating, comment } = params;
-    
+
     // Validar chatSessionId
     if (!chatSessionId || typeof chatSessionId !== "string") {
       return {
         success: false,
-        error: "ID de sesión de chat inválido"
+        error: "ID de sesión de chat inválido",
       };
     }
-    
+
     // Validar rating
     if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
       return {
         success: false,
-        error: "La valoración debe ser un número entre 1 y 5"
+        error: "La valoración debe ser un número entre 1 y 5",
       };
     }
-    
+
     // Validar comentario opcional
     if (comment !== undefined && comment !== null) {
       if (typeof comment !== "string") {
         return {
           success: false,
-          error: "El comentario debe ser una cadena de texto"
+          error: "El comentario debe ser una cadena de texto",
         };
       }
-      
+
       if (comment.length > 200) {
         return {
           success: false,
-          error: "El comentario no puede exceder los 200 caracteres"
+          error: "El comentario no puede exceder los 200 caracteres",
         };
       }
     }
-    
+
     // Llamar a la función de mutación
     return await createChatFeedback(params);
-    
   } catch (error) {
     console.error("Error en createChatFeedbackAction:", error);
     return {
       success: false,
-      error: "Error interno del servidor al procesar la valoración"
+      error: "Error interno del servidor al procesar la valoración",
     };
   }
 }
@@ -225,11 +249,11 @@ export async function createChatFeedbackAction(
 export async function getSessionDataAction(chatSessionId: string) {
   try {
     const { getChatSessionById } = await import("@/lib/db");
-    
+
     if (!chatSessionId) {
       return {
         success: false,
-        error: "ID de sesión requerido"
+        error: "ID de sesión requerido",
       };
     }
 
@@ -238,17 +262,17 @@ export async function getSessionDataAction(chatSessionId: string) {
     if (!chatSession.success || !chatSession.data) {
       return {
         success: false,
-        error: "Sesión de chat no encontrada"
+        error: "Sesión de chat no encontrada",
       };
     }
 
     // Si es sesión grupal, obtener el endDate del grupo
     let groupEndDate: string | null = null;
-    
+
     if (chatSession.data.chatGroupId) {
       const { getChatGroupById } = await import("@/lib/db/queries/chatGroup");
       const groupData = await getChatGroupById(chatSession.data.chatGroupId);
-      
+
       if (groupData) {
         groupEndDate = groupData.endDate.toISOString();
       }
@@ -263,13 +287,13 @@ export async function getSessionDataAction(chatSessionId: string) {
         maxDurationMs: chatSession.data.maxDurationMs || 1200000,
         usedGraceMessage: chatSession.data.usedGraceMessage || false,
         groupEndDate: groupEndDate,
-      }
+      },
     };
   } catch (error) {
     console.error("Error en getSessionDataAction:", error);
     return {
       success: false,
-      error: "Error interno del servidor"
+      error: "Error interno del servidor",
     };
   }
 }
@@ -281,12 +305,12 @@ export async function getSessionDataAction(chatSessionId: string) {
 export async function getChatMessagesAction(chatSessionId: string) {
   try {
     const { getChat } = await import("@/lib/db");
-    
+
     if (!chatSessionId) {
       return {
         success: false,
         error: "ID de sesión requerido",
-        data: []
+        data: [],
       };
     }
 
@@ -294,14 +318,14 @@ export async function getChatMessagesAction(chatSessionId: string) {
 
     return {
       success: true,
-      data: messages
+      data: messages,
     };
   } catch (error) {
     console.error("Error en getChatMessagesAction:", error);
     return {
       success: false,
       error: "Error interno del servidor",
-      data: []
+      data: [],
     };
   }
 }
@@ -312,22 +336,21 @@ export async function getChatMessagesAction(chatSessionId: string) {
 export async function finalizeChatSessionAction(chatSessionId: string) {
   try {
     const { finalizeChatSession } = await import("@/lib/db");
-    
+
     if (!chatSessionId) {
       return {
         success: false,
-        error: "ID de sesión requerido"
+        error: "ID de sesión requerido",
       };
     }
 
     const result = await finalizeChatSession(chatSessionId);
     return result;
-    
   } catch (error) {
     console.error("Error en finalizeChatSessionAction:", error);
     return {
       success: false,
-      error: "Error interno del servidor al finalizar la sesión"
+      error: "Error interno del servidor al finalizar la sesión",
     };
   }
 }
