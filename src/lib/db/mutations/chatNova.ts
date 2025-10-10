@@ -232,39 +232,32 @@ export async function createChatFeedback({
     }
 
     // Verificar si ya existe un feedback para esta sesión
-    if (existingSession[0].chatFeedBackId) {
+    const existingFeedback = await db
+      .select()
+      .from(chatFeedbacks)
+      .where(eq(chatFeedbacks.chatSessionId, chatSessionId))
+      .limit(1);
+
+    if (existingFeedback.length > 0) {
       return {
         success: false,
         error: "Ya existe un feedback para esta sesión de chat"
       };
     }
 
-    // Crear el feedback y actualizar la sesión en una transacción
-    const result = await db.transaction(async (tx) => {
-      // Crear el feedback
-      const [newFeedback] = await tx
-        .insert(chatFeedbacks)
-        .values({
-          rating,
-          comment: comment || null,
-        })
-        .returning({ id: chatFeedbacks.id });
-
-      // Actualizar la sesión de chat con el ID del feedback
-      await tx
-        .update(chatSessions)
-        .set({ 
-          chatFeedBackId: newFeedback.id,
-          updatedAt: new Date()
-        })
-        .where(eq(chatSessions.id, chatSessionId));
-
-      return newFeedback.id;
-    });
+    // Crear el feedback con FK a la sesión
+    const [newFeedback] = await db
+      .insert(chatFeedbacks)
+      .values({
+        chatSessionId: chatSessionId, // FK UNIQUE (garantiza 1:1)
+        rating,
+        comment: comment || null,
+      })
+      .returning({ id: chatFeedbacks.id });
 
     return {
       success: true,
-      feedbackId: result
+      feedbackId: newFeedback.id
     };
 
   } catch (error) {

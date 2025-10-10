@@ -64,6 +64,20 @@
       "when": 1760021002789,
       "tag": "0008_cold_marvex",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1760102608313,
+      "tag": "0009_thick_mastermind",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1760104630419,
+      "tag": "0010_striped_zombie",
+      "breakpoints": true
     }
   ]
 }

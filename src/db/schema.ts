@@ -61,19 +61,10 @@ export const chatGroupMembers = pgTable("ChatGroupMember", {
   pk: primaryKey({ columns: [table.userId, table.chatGroupId] })
 }));
 
-// Tabla ChatFeedback
-export const chatFeedbacks = pgTable("ChatFeedback", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  rating: integer("rating").notNull(),
-  comment: text("comment"),
-  createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
-});
-
 // Tabla ChatSession
 export const chatSessions = pgTable("ChatSession", {
   id: uuid("id").primaryKey().defaultRandom(),
   chatGroupId: uuid("chatGroupId").references(() => chatGroups.id),
-  chatFeedBackId: uuid("chatFeedBackId").references(() => chatFeedbacks.id),
   numOfTokensIn: integer("numOfTokensIn"),
   numOfTokensOut: integer("numOfTokensOut"),
   usedGraceMessage: boolean("usedGraceMessage").notNull().default(false),
@@ -81,6 +72,15 @@ export const chatSessions = pgTable("ChatSession", {
   maxDurationMs: integer("maxDurationMs").notNull().default(1200000), // 20 minutos en milisegundos
   analyzed: boolean("analyzed").notNull().default(false),
   ...timestamps,
+});
+
+// Tabla ChatFeedback (relación 1:1 con ChatSession)
+export const chatFeedbacks = pgTable("ChatFeedback", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  chatSessionId: uuid("chatSessionId").notNull().unique().references(() => chatSessions.id, { onDelete: "cascade" }),
+  rating: integer("rating").notNull(),
+  comment: text("comment"),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
 });
 
 // Tabla Message
@@ -148,8 +148,8 @@ export const chatSessionsRelations = relations(chatSessions, ({ one, many }) => 
     references: [chatGroups.id],
   }),
   feedback: one(chatFeedbacks, {
-    fields: [chatSessions.chatFeedBackId],
-    references: [chatFeedbacks.id],
+    fields: [chatSessions.id],
+    references: [chatFeedbacks.chatSessionId],
   }),
   messages: many(messages),
   evaluationForm: one(evaluationForms, {
@@ -167,8 +167,8 @@ export const messagesRelations = relations(messages, ({ one }) => ({
 
 export const chatFeedbacksRelations = relations(chatFeedbacks, ({ one }) => ({
   chatSession: one(chatSessions, {
-    fields: [chatFeedbacks.id],
-    references: [chatSessions.chatFeedBackId],
+    fields: [chatFeedbacks.chatSessionId],
+    references: [chatSessions.id],
   }),
 }));
 
