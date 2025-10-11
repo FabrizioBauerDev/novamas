@@ -270,7 +270,6 @@ export async function POST(req: Request) {
       minute: '2-digit',
     });
 
-    // Sistema mejorado para trabajar con la tool RAG
     const enhancedSystemPrompt = system
         .replace(/<ubi>/g, evaluationForm.address || "Ubicación no disponible")
         .replace(/<riesgo>/g, String(evaluationForm.score))

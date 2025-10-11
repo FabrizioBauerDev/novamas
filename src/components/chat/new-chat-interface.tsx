@@ -262,6 +262,18 @@ const ConversationDemo = ({
     e.preventDefault();
     const trimmedInput = input.trim();
 
+    // PREVENCIÓN DE SPAM
+    if (status === "submitted" || status === "streaming") {
+      console.log("⛔ Intento de enviar mensaje mientras hay una petición en curso");
+      return;
+    }
+    
+    // Bloquear si ya se usó el mensaje de gracia
+    if (graceMessageUsed) {
+      console.log("⛔ Intento de enviar mensaje después de usar mensaje de gracia");
+      return;
+    }
+
     // Validación del lado del cliente
     if (!trimmedInput) {
       return;
