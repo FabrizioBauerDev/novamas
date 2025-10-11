@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import FormularioEvaluacion from "./previous-form"
+import { useState, useEffect} from "react"
+import PreviousForm from "./previous-form"
 import NewChatInterface from "./new-chat-interface"
 import EvaluationForm from "./evaluation-form"
 import { getSessionDataAction } from "@/lib/actions/actions-chat"
@@ -25,6 +25,30 @@ export default function ChatDemoContainer({ slug }: ChatDemoContainerProps) {
   const [chatSessionId, setChatSessionId] = useState<string | null>(null)
   const [sessionData, setSessionData] = useState<SessionData | null>(null)
   const [isLoadingSession, setIsLoadingSession] = useState(false)
+
+  // Prevenir que el usuario salga de la página
+  useEffect(() => {
+    // Solo prevenir si no está en el formulario final
+    const shouldPreventUnload = currentView !== "evaluation"
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (shouldPreventUnload) {
+        // Mostrar mensaje de confirmación estándar del navegador (No se puede personalizar F)
+        e.preventDefault()
+        // Chrome requiere que se establezca returnValue
+        e.returnValue = ""
+        return ""
+      }
+    }
+
+    if (shouldPreventUnload) {
+      window.addEventListener("beforeunload", handleBeforeUnload)
+    }
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload)
+    }
+  }, [currentView])
 
   const handleFormComplete = async () => {
     if (!chatSessionId) {
@@ -76,7 +100,7 @@ export default function ChatDemoContainer({ slug }: ChatDemoContainerProps) {
 
   if (currentView === "form") {
     return (
-      <FormularioEvaluacion 
+      <PreviousForm 
         onFormComplete={handleFormComplete} 
         setChatSessionID={setChatSessionId}
         slug={slug}

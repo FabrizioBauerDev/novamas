@@ -10,6 +10,7 @@ import {
   getChatSessionById,
   saveChat,
   markGraceMessageUsed,
+  getEvaluationFormBySessionId,
 } from "@/lib/db";
 import { createWelcomeMessage } from "@/lib/chat-utils";
 import { getRelevantInformation } from "@/lib/pgvector/utils";
@@ -79,6 +80,14 @@ export async function POST(req: Request) {
   try {
     const logString = "APP | API | CHAT | ROUTE - ";
     const system = env.SYSTEM_PROMPT;
+
+    if (!system) {
+      console.error(logString + "SYSTEM_PROMPT no está definido");
+      return NextResponse.json(
+        { error: "Error de configuración del sistema" },
+        { status: 500 }
+      );
+    }
 
     // Siguiendo la guía AI SDK: recibir solo el último mensaje cuando se optimiza
     const { message, id }: { message: MyUIMessage; id: string } =
@@ -234,18 +243,44 @@ export async function POST(req: Request) {
     message.metadata = message.metadata ?? {};
     message.metadata.createdAt = Date.now();
 
-    // Sistema mejorado para trabajar con la tool RAG
-    /*
-    const enhancedSystemPrompt = system
-        .replace(/<ubi>/g, chatSession.data?.location)
-        .replace(/<riesgo>/g, String(chatSession.data?.score))
-        .replace(/<diayhora>/g, String(message.metadata.createdAt));
+    // Obtener el formulario de evaluación asociado a la sesión
+    const evaluationFormResponse = await getEvaluationFormBySessionId(id);
+    
+    if (!evaluationFormResponse.success || !evaluationFormResponse.data) {
+      console.error(
+        logString + "Error obteniendo formulario de evaluación:",
+        evaluationFormResponse.error
+      );
+      return NextResponse.json(
+        { error: "No se pudo obtener el formulario de evaluación de esta sesión." },
+        { status: 400 }
+      );
+    }
 
-*/
+    const evaluationForm = evaluationFormResponse.data;
+    
+    // Formatear la fecha y hora
+    const messageDate = new Date(message.metadata.createdAt);
+    const formattedDateTime = messageDate.toLocaleString('es-AR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    // Sistema mejorado para trabajar con la tool RAG
+    const enhancedSystemPrompt = system
+        .replace(/<ubi>/g, evaluationForm.address || "Ubicación no disponible")
+        .replace(/<riesgo>/g, String(evaluationForm.score))
+        .replace(/<edad>/g, String(evaluationForm.age))
+        .replace(/<diayhora>/g, formattedDateTime);
+
     const result = streamText({
       model: google("gemini-2.5-flash"),
       messages: convertToModelMessages(allMessages),
-      system: system,
+      system: enhancedSystemPrompt,
       temperature: 0.5,
       maxOutputTokens: 500,
       // Temperatura, top_p y no se si top_k se pueden pasar aquí

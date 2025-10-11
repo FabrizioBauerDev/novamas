@@ -4,4 +4,5 @@ export {
   getChatSessionById,
   checkChatGroupBySlug,
   checkChatGroupById,
+  getEvaluationFormBySessionId,
 } from "./chatNova";

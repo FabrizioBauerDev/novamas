@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { messages, chatGroups, chatSessions } from "@/db/schema";
+import { messages, chatGroups, chatSessions, evaluationForms } from "@/db/schema";
 import { eq, and, gte, lte } from "drizzle-orm";
 import type { UIMessage } from "ai";
 import { safeDecryptMessage } from "@/lib/crypto";
@@ -129,6 +129,37 @@ export async function checkChatGroupById(chatGroupId: string) {
     return {
       success: false,
       error: "Error interno del servidor",
+    };
+  }
+}
+
+export async function getEvaluationFormBySessionId(chatSessionId: string) {
+  try {
+    const dbEvaluationForm = await db
+      .select()
+      .from(evaluationForms)
+      .where(eq(evaluationForms.id, chatSessionId))
+      .limit(1);
+    
+    if (dbEvaluationForm.length === 0) {
+      return {
+        success: false,
+        error: "No existe un formulario de evaluación para esta sesión.",
+        data: null,
+      };
+    }
+    
+    return {
+      success: true,
+      error: "",
+      data: dbEvaluationForm[0],
+    };
+  } catch (error) {
+    console.error("queries - chatNova - getEvaluationFormBySessionId - Error loading evaluation form:", error);
+    return {
+      success: false,
+      error: "Error interno del servidor",
+      data: null,
     };
   }
 }
