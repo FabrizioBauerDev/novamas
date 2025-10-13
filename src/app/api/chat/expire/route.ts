@@ -1,13 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getChatSessionById, saveChat } from "@/lib/db";
 import { CHAT_CONFIG } from "@/lib/chat-config";
 import { MyUIMessage } from "@/types/types";
+import { protectApiRoute } from "@/lib/api-protection";
 
 /**
  * API endpoint para marcar la sesión como expirada y añadir el mensaje de tiempo expirado
  * Se llama desde el frontend cuando el timer llega a 0
  */
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // Proteger la ruta: verificar origen y autenticación
+  const protectionCheck = await protectApiRoute(req, { requireAuth: false });
+  if (protectionCheck) return protectionCheck;
+
   try {
     const { sessionId } = await req.json();
 

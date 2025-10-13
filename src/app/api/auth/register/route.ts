@@ -4,8 +4,13 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { signUpSchema } from "@/schema/zodSchemas";
+import { protectApiRoute } from "@/lib/api-protection";
 
 export async function POST(request: NextRequest) {
+  // Proteger la ruta: verificar origen y autenticación
+  const protectionCheck = await protectApiRoute(request, { requireAuth: true });
+  if (protectionCheck) return protectionCheck;
+
   try {
     const body = await request.json();
     

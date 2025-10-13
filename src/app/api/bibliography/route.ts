@@ -3,6 +3,7 @@ import { getBibliography, loadMarkdown, deleteMarkdown } from "@/lib/pgvector/ut
 import FormData from "form-data";
 import axios from "axios";
 import {bibliographyCategoryEnum} from "@/db/schema";
+import { protectApiRoute } from "@/lib/api-protection";
 
 async function convertPdfToMarkdown(buffer: Buffer<ArrayBuffer>) {
     const formData = new FormData();
@@ -41,7 +42,11 @@ async function convertPdfToMarkdown(buffer: Buffer<ArrayBuffer>) {
     }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+    // Proteger la ruta: verificar origen y autenticación
+    const protectionCheck = await protectApiRoute(request, { requireAuth: true });
+    if (protectionCheck) return protectionCheck;
+
     try {
         const data = await getBibliography();
         return NextResponse.json(data);
@@ -51,6 +56,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+    // Proteger la ruta: verificar origen y autenticación
+    const protectionCheck = await protectApiRoute(request, { requireAuth: true });
+    if (protectionCheck) return protectionCheck;
+
     try {
         const formData = await request.formData();
         const file = formData.get("file") as File;
@@ -87,6 +96,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+    // Proteger la ruta: verificar origen y autenticación
+    const protectionCheck = await protectApiRoute(request, { requireAuth: true });
+    if (protectionCheck) return protectionCheck;
+
     try {
         const { id } = await request.json();
         const updatedBibliography = await deleteMarkdown(id);

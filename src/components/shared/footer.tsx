@@ -43,11 +43,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/recursos" className="text-gray-300 hover:text-white transition-colors">
-                  Recursos
-                </Link>
-              </li>
-              <li>
                 <Link
                   href="http://www.prevencionenadicciones.unsl.edu.ar/"
                   className="text-gray-300 hover:text-white transition-colors"
@@ -65,8 +60,8 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-4">Soporte</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/contacto" className="text-gray-300 hover:text-white transition-colors">
-                  Contacto
+                <Link href="/nosotros" className="text-gray-300 hover:text-white transition-colors">
+                  Quienes somos
                 </Link>
               </li>
               <li>
@@ -75,8 +70,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/privacidad" className="text-gray-300 hover:text-white transition-colors">
-                  Política de Privacidad
+                <Link href="/recursos" className="text-gray-300 hover:text-white transition-colors">
+                  Recursos
                 </Link>
               </li>
             </ul>
@@ -103,7 +98,7 @@ export default function Footer() {
                     141
                   </a><br />
                   • Disponible 24/7 (orientación en adicciones).
-                  <br/>En San Luis podés consultar en el Programa de Prevención y Asistencia del Juego Patológico (Ministerio de Salud).
+                  <br/>En San Luis podés consultar en el Centro de Prevención y Asistencia a las Adicciones (CPAA).
                 </p>
                 
               </div>
@@ -115,16 +110,13 @@ export default function Footer() {
         <div className="border-t border-gray-700 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">Desarrollado por Luciana Loyola y Fabrizio Riera.</p>
-            <p className="text-gray-400 text-sm">© 2025 No va más. Todos los derechos reservados.</p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
+            <p className="text-gray-400 text-sm md:absolute md:left-1/2 md:transform md:-translate-x-1/2">© 2025 No va más.</p>
+            <div className="flex space-x-6 md:mt-0">
               <Link href="/terminos" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Términos de Uso
+                Términos y Condiciones
               </Link>
               <Link href="/privacidad" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Privacidad
-              </Link>
-              <Link href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Cookies
+                Políticas de Privacidad
               </Link>
             </div>
           </div>

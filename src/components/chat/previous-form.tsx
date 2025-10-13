@@ -265,16 +265,16 @@ export default function FormularioEvaluacion({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Términos
+                      Términos y Condiciones
                     </a>{" "}
-                    y la{" "}
+                    y las{" "}
                     <a
                       className="underline"
                       href="/privacidad"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Política de Privacidad
+                      Políticas de Privacidad
                     </a>
                     .
                   </label>

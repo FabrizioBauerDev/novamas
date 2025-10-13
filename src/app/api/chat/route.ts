@@ -1,9 +1,10 @@
 import { google } from "@ai-sdk/google";
 import { streamText, convertToModelMessages, tool, stepCountIs } from "ai";
 import { auth } from "@/auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { env } from "process";
 import { MyUIMessage } from "@/types/types";
+import { protectApiRoute } from "@/lib/api-protection";
 import {
   checkChatGroupById,
   getChat,
@@ -75,7 +76,10 @@ const ragSearchTool = tool({
   },
 });
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // Proteger la ruta: verificar origen y autenticación
+  const protectionCheck = await protectApiRoute(req, { requireAuth: false });
+  if (protectionCheck) return protectionCheck;
 
   try {
     const logString = "APP | API | CHAT | ROUTE - ";

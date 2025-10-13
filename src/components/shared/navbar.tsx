@@ -27,7 +27,7 @@ export default function Navbar({ user }: NavbarProps) {
   const navigationLinks = [
     { href: "/", label: "Inicio" },
     { href: "/recursos", label: "Recursos" },
-    { href: "/contacto", label: "Contacto" },
+    { href: "/nosotros", label: "Quienes somos" },
     { href: "/emergencia", label: "Líneas de Emergencia" },
   ];
 
