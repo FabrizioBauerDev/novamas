@@ -142,10 +142,10 @@ export default function Navbar({ user }: NavbarProps) {
                       <Link href="/dashboard" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
                         Dashboard
                       </Link>
-                      <Link href="/estadisticas" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
+                      <Link href="/statistics" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
                         Estadísticas
                       </Link>
-                      <Link href="/sesion-grupal" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
+                      <Link href="/chatgroup" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
                         Sesión Grupal
                       </Link>
                       <Link href="/configuracion" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">

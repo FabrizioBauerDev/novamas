@@ -125,9 +125,45 @@ export default function ChatGroupDetailPage({ id, isStudent = false, currentUser
     }
   };
 
-  const handleShare = () => {
-    // TODO: Implementar funcionalidad de compartir
-    console.log("Compartir grupo:", group?.name);
+  const handleShare = async () => {
+    if (!group) return;
+
+    const shareData = {
+      title: `Sesión grupal: ${group.name}`,
+      text: `Únete a la sesión grupal "${group.name}"`,
+      url: groupUrl,
+    };
+
+    try {
+      // Verificar si el navegador soporta Web Share API
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copiar al portapapeles
+        await navigator.clipboard.writeText(groupUrl);
+        toast.success("Enlace copiado", { 
+          description: "El enlace ha sido copiado al portapapeles" 
+        });
+      }
+    } catch (error) {
+      // Si el usuario cancela el share, no mostrar error
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
+      
+      // Intentar copiar al portapapeles como último recurso
+      try {
+        await navigator.clipboard.writeText(groupUrl);
+        toast.success("Enlace copiado", { 
+          description: "El enlace ha sido copiado al portapapeles" 
+        });
+      } catch (clipboardError) {
+        console.error("Error al compartir o copiar:", clipboardError);
+        toast.error("Error", { 
+          description: "No se pudo compartir ni copiar el enlace" 
+        });
+      }
+    }
   };
 
   const handleTogglePassword = async () => {
