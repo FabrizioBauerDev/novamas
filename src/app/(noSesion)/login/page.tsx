@@ -4,6 +4,16 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Acceso para Investigadores',
+  description: 'Inicio de sesión para investigadores y profesionales autorizados de NoVa+. Accede al panel de administración y gestión del sistema.',
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function LoginPage() {
     const session = await auth();

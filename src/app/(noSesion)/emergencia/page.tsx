@@ -1,4 +1,16 @@
 import { provincias } from "@/contactos-provincia";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'Contactos de Emergencia',
+  description: 'Líneas de ayuda y asistencia para adicción al juego y prevención del suicidio en Argentina. Contactos nacionales y provinciales.',
+  keywords: ['emergencia', 'línea de ayuda', 'ludopatía', 'prevención suicidio', 'contactos provinciales', 'argentina', 'ayuda inmediata'],
+  openGraph: {
+    title: 'Contactos de Emergencia | NoVa+',
+    description: 'Líneas de ayuda y asistencia en cada provincia de Argentina para adicción al juego y prevención del suicidio.',
+    type: 'website',
+  }
+};
 
 export default function Home() {
   return (
@@ -54,7 +66,7 @@ export default function Home() {
                   href={prov.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-900 mt-4 inline-block hover:underline font-medium hover:text-gray-700 transition-colors"
+                  className="text-blue-800 mt-4 inline-block underline font-medium hover:text-blue-600 transition-colors"
                 >
                   Página de Juego Responsable
                 </a>

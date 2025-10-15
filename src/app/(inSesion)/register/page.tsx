@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { User, Mail, Lock, Eye, EyeOff } from "lucide-react"
-import Link from "next/link"
 
 export default function RegistroPage() {
   const [showPassword, setShowPassword] = useState(false)

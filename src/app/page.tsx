@@ -1,4 +1,16 @@
 import Link from "next/link";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Inicio",
+  description: "NoVa+ tu asistente virtual para la prevención de problemáticas con las apuestas y juegos de azar. Comienza tu conversación con NoVa+ y accede a recursos de ayuda.",
+  keywords: ["adicción", "juegos de azar", "apuestas online", "ludopatía", "prevención", "asistente virtual", "IA"],
+  openGraph: {
+    title: "NoVa+ | Tu asistente virtual para el juego responsable",
+    description: "Tu asistente virtual para abordar la temática de la prevención de problemáticas con las apuestas y juegos de azar online.",
+    type: "website",
+  }
+};
 
 export default function Home() {
   return (

@@ -622,22 +622,25 @@ const ConversationDemo = ({
 
       {/* Modal de advertencia (2 minutos antes) */}
       <AlertDialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
-        <AlertDialogContent>
-          <AlertDialogTitle>⌛Tiempo Casi Agotado</AlertDialogTitle>
+        <AlertDialogContent className="max-w-md">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
+              <span className="text-2xl">⌛</span>
+            </div>
+            <AlertDialogTitle className="text-xl font-semibold text-gray-900 m-0">
+              Tiempo Casi Agotado
+            </AlertDialogTitle>
+          </div>
           <AlertDialogDescription asChild>
             <div className="space-y-3">
-                <div className="text-sm">
-                Quedan <strong>menos de 2 minutos</strong> de conversación. Veo que has usado casi todo tu tiempo. Considera contactarte con un profesional o persona física si necesitas más ayuda. <br />
-                Al finalizar podrás completar un formulario para ayudar al equipo detrás de NoVa+ en su investigación, sería de mucha ayuda. <br />
-                Si quieres contactarte con el equipo de NoVa+ visita{" "}
-                <Link href="/quienesSomos" className="text-blue-600 underline">
-                  quienes somos
-                </Link>{" "}
-                o puedes ver los contactos de emergencia en{" "}
-                <Link href="/emergencia" className="text-blue-600 underline">
-                  contactos de emergencia
-                </Link>.
-                </div>
+              <div className="text-sm">
+              Quedan <strong>menos de 2 minutos</strong> de conversación. Veo que has usado casi todo tu tiempo. Considera contactarte con un profesional o persona física si necesitas más ayuda. <br /><br />
+              Al finalizar podrás completar un formulario para ayudar al equipo detrás de NoVa+ en su investigación, sería de mucha ayuda. <br /><br />
+              <strong>Recuerda:</strong> visita las {" "}
+              <a href="/emergencia" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                líneas de emergencia
+              </a> ante cualquier problema.
+              </div>
             </div>
           </AlertDialogDescription>
           <AlertDialogAction onClick={() => setShowWarningDialog(false)}>

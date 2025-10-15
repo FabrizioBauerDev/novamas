@@ -1,6 +1,16 @@
 import { auth } from "@/auth"
 import Link from "next/link"
 import { redirect } from "next/navigation"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+  description: 'Panel de control para especialistas de NoVa+. Accede a estadísticas, gestión de sesiones y gestión de bibliografía.',
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function DashboardPage() {
   const session = await auth()

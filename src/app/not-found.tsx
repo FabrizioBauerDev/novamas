@@ -2,6 +2,16 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Bot, Wrench } from "lucide-react"
 import Link from "next/link"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: '404 - Página no encontrada',
+  description: 'La página que buscas no existe o está en construcción. Vuelve al inicio de NoVa+.',
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function PerfilPage() {
   return (

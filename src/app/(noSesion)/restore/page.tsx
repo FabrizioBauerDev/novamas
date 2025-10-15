@@ -2,6 +2,16 @@ import PasswordRecoveryForm from '@/components/auth/password-recovery-form';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Recuperar Contraseña',
+  description: 'Recupera el acceso a tu cuenta de investigador en NoVa+. Solicita un enlace de restablecimiento de contraseña.',
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function PasswordRestorePage() {
   const session = await auth();
