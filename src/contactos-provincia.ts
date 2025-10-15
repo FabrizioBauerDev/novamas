@@ -1,0 +1,135 @@
+export const provincias = [
+  {
+    nombre: "Buenos Aires",
+    ludopatia: "0800-444-4000 (PBA)",
+    suicidio: "Línea 135 / 5275-1135 (nacional)",
+    link: "https://www.loteria.gba.gov.ar/index.php/133-juego-responsable",
+  },
+  {
+    nombre: "Ciudad Autónoma de Buenos Aires",
+    ludopatia: "0800-666-6006",
+    suicidio: "Línea 135 / 5275-1135 (nacional)",
+    link: "https://saberjugar.gob.ar/",
+  },
+  {
+    nombre: "Catamarca",
+    ludopatia: "Programa de asistencia (sin número)",
+    suicidio: "(011) 5275-1135 o el 0800 345 1435",
+  },
+  {
+    nombre: "Chaco",
+    ludopatia: "0800-888-2008",
+    suicidio: "(011) 5275-1135 o el 0800 345 1435",
+  },
+  {
+    nombre: "Chubut",
+    ludopatia: "Autoexclusión disponible",
+    suicidio: "(011) 5275-1135 o el 0800 345 1436",
+  },
+  {
+    nombre: "Córdoba",
+    ludopatia: "0800-777-2983",
+    suicidio: "(011) 5275-1135 o el 0800 345 1437",
+    link: "http://www.juegoresponsablecba.com.ar/",
+  },
+  {
+    nombre: "Corrientes",
+    ludopatia: "0800-444-0033 o WhatsApp +54 379 4282707",
+    suicidio: "(011) 5275-1135 o el 0800 345 1438",
+  },
+  {
+    nombre: "Entre Ríos",
+    ludopatia: "0800-888-2202, teléfono fijo (0343) 4209570, WhatsApp 3434055252",
+    suicidio: "(011) 5275-1135 o el 0800 345 1439",
+    link: "https://www.iafas.gov.ar/juego-responsable/prevenjuego/",
+  },
+  {
+    nombre: "Formosa",
+    ludopatia: "0800-5555-427 o +54 (370) 4456582",
+    suicidio: "(011) 5275-1135 o el 0800 345 1440",
+    link: "https://www.ias.gob.ar/juegoresponsable/detectar_el_problema.php",
+  },
+  {
+    nombre: "Jujuy",
+    ludopatia: "0800 888 4767",
+    suicidio: "(011) 5275-1135 o el 0800 345 1441",
+  },
+  {
+    nombre: "La Pampa",
+    ludopatia: "132",
+    suicidio: "(011) 5275-1135 o el 0800 345 1442",
+    link: "https://www.ias.gob.ar/juegoresponsable/detectar_el_problema.php",
+  },
+  {
+    nombre: "La Rioja",
+    ludopatia: "Sin número específico",
+    suicidio: "(011) 5275-1135 o el 0800 345 1443",
+  },
+  {
+    nombre: "Mendoza",
+    ludopatia: "2614247536 o WhatsApp 2614722471",
+    suicidio: "(011) 5275-1135 o el 0800 345 1444",
+    link: "https://www.mendoza.gov.ar/juegosycasinos/juego-responsable",
+  },
+  {
+    nombre: "Misiones",
+    ludopatia: "WhatsApp: 3764-683173 o 0800-888-LUDO (5836)",
+    suicidio: "(011) 5275-1135 o el 0800 345 1445",
+  },
+  {
+    nombre: "Neuquén",
+    ludopatia: "Línea municipal de Prevención de Consumos Problemáticos 2995078822",
+    suicidio: "(011) 5275-1135 o el 0800 345 1446",
+  },
+  {
+    nombre: "Río Negro",
+    ludopatia: "0800-222-1700",
+    suicidio: "(011) 5275-1135 o el 0800 345 1447",
+    link: "https://www.loteriaderionegro.gob.ar/",
+  },
+  {
+    nombre: "Salta",
+    ludopatia: "0-800-55-58346, WhatsApp +5493875420599",
+    suicidio: "(011) 5275-1135 o el 0800 345 1448",
+    link: "https://www.loteriadesalta.com/juego-responsable/",
+  },
+  {
+    nombre: "San Juan",
+    ludopatia: "0800 999 1314",
+    suicidio: "(011) 5275-1135 o el 0800 345 1449",
+  },
+  {
+    nombre: "San Luis",
+    ludopatia: "0800-666-6176",
+    suicidio: "911 o (011) 5275-1135 o el 0800 345 1450",
+    link: "https://www.loteriadesanluis.com/juego-responsable.php",
+  },
+  {
+    nombre: "Santa Cruz",
+    ludopatia: "Sin número específico",
+    suicidio: "(011) 5275-1135 o el 0800 345 1451",
+    link: "https://loteriadesantacruz.gob.ar/institucional/#juego-resp",
+  },
+  {
+    nombre: "Santa Fe",
+    ludopatia: "0800-268-5640 y WhatsApp 341-540-7653",
+    suicidio: "(011) 5275-1135 o el 0800 345 1452",
+    link: "https://www.loteriasantafe.gov.ar/index.php/juego-responsable",
+  },
+  {
+    nombre: "Santiago del Estero",
+    ludopatia: "(0385) 428-8850",
+    suicidio: "(011) 5275-1135 o el 0800 345 1453",
+  },
+  {
+    nombre: "Tierra del Fuego",
+    ludopatia: "02901-433515 Int. 512 (Centro de Abordaje de Problemáticas de Consumo)",
+    suicidio: "(011) 5275-1135 o el 0800 345 1454",
+    link: "https://www.ipra.gov.ar/web/tramite/consulta-de-asistencia-e-informacion-al-jugador-compulsivo/",
+  },
+  {
+    nombre: "Tucumán",
+    ludopatia: "(0381) 450-7237",
+    suicidio: "(011) 5275-1135 o el 0800 345 1455",
+  },
+];

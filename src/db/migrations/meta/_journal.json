@@ -85,6 +85,13 @@
       "when": 1760122913243,
       "tag": "0011_tough_scalphunter",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1760536876415,
+      "tag": "0012_long_flatman",
+      "breakpoints": true
     }
   ]
 }

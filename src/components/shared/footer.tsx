@@ -60,8 +60,8 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-4">Soporte</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/nosotros" className="text-gray-300 hover:text-white transition-colors">
-                  Quienes somos
+                <Link href="/recursos" className="text-gray-300 hover:text-white transition-colors">
+                  Recursos
                 </Link>
               </li>
               <li>
@@ -70,8 +70,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/recursos" className="text-gray-300 hover:text-white transition-colors">
-                  Recursos
+                <Link href="/nosotros" className="text-gray-300 hover:text-white transition-colors">
+                  Quienes somos
                 </Link>
               </li>
             </ul>
