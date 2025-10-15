@@ -34,7 +34,7 @@ export default function DropboxUser() {
           <DropdownMenuLabel>Acciones rápidas</DropdownMenuLabel>
           <DropdownMenuGroup>
             <Link href="/dashboard"><DropdownMenuItem className={menuItemClass}>Dashboard</DropdownMenuItem></Link>
-            <Link href="/estadisticas"><DropdownMenuItem className={menuItemClass}>Estadísticas</DropdownMenuItem></Link>
+            <Link href="/statistics"><DropdownMenuItem className={menuItemClass}>Estadísticas</DropdownMenuItem></Link>
             <Link href="/chatgroup"><DropdownMenuItem className={menuItemClass}>Sesión Grupal</DropdownMenuItem></Link>
             <Link href="/configuracion"><DropdownMenuItem className={menuItemClass}>Configuración</DropdownMenuItem></Link>
           </DropdownMenuGroup>
