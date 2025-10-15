@@ -1,6 +1,6 @@
 import { db } from "@/db"
-import { chatGroups, users, chatGroupMembers } from "@/db/schema"
-import { eq, desc, and, or, lt, gt, ne } from "drizzle-orm"
+import {chatGroups, users, chatGroupMembers, chatSessions} from "@/db/schema"
+import { eq, desc, and, lt, gt, ne } from "drizzle-orm"
 
 // Obtener todos los ChatGroups con información del creador, ordenados por startDate
 export async function getAllChatGroups() {
@@ -186,4 +186,74 @@ export async function isSlugAvailable(slug: string, startDate: Date, endDate: Da
     console.error("Error checking slug availability:", error)
     throw new Error("Failed to check slug availability")
   }
+}
+
+export async function getGroupNames(){
+    try {
+        const result = await db
+            .select({
+                id: chatGroups.id,
+                name: chatGroups.name,
+                startDate: chatGroups.startDate,
+            })
+            .from(chatGroups)
+
+        return result;
+    }catch (error) {
+        console.error("Error getting slugs:", error)
+        throw new Error("Failed to get slugs")
+    }
+}
+
+export async function getGroupConversationInfo(chatGroupId: string): Promise<{id: string, name: string, startDate: Date}> {
+    try {
+        // Obtener información básica del grupo
+        const groupResult = await db
+            .select({
+                id: chatGroups.id,
+                name: chatGroups.name,
+                startDate: chatGroups.startDate,
+            })
+            .from(chatGroups)
+            .where(eq(chatGroups.id, chatGroupId))
+            .limit(1)
+
+        if(groupResult.length === 0)
+            throw new Error(
+                "Chat group not found"
+            )
+        const group = groupResult[0]
+
+        return {id: group.id, name: group.name, startDate: group.startDate};
+    } catch (error) {
+        console.error("Error fetching chat group info conversation by ID:", error)
+        throw new Error("Failed to fetch chat group info conversation ")
+    }
+}
+
+export async function getGroupConversationByChatId(id: string): Promise<{id: string, name: string, startDate: Date}> {
+    try {
+        // Obtener información básica del grupo
+        const groupResult = await db
+            .select({
+                id: chatGroups.id,
+                name: chatGroups.name,
+                startDate: chatGroups.startDate,
+            })
+            .from(chatGroups)
+            .innerJoin(chatSessions, eq(chatSessions.chatGroupId, chatGroups.id))
+            .where(eq(chatSessions.id, id))
+            .limit(1)
+
+        if(groupResult.length === 0)
+            throw new Error(
+                "Chat group not found"
+            )
+        const group = groupResult[0]
+
+        return {id: group.id, name: group.name, startDate: group.startDate};
+    } catch (error) {
+        console.error("Error fetching chat group info conversation by ID:", error)
+        throw new Error("Failed to fetch chat group info conversation ")
+    }
 }

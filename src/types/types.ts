@@ -1,6 +1,6 @@
 import { UIMessage } from 'ai';
 import { z } from 'zod';
-import { GenderType, CouldntStopType, PersonalIssuesType, BooleanType } from '@/lib/enums';
+import {GenderType, CouldntStopType, PersonalIssuesType, BooleanType, ScaleType} from '@/lib/enums';
 
 // Define your metadata schema
 export const messageMetadataSchema = z.object({
@@ -15,6 +15,14 @@ export type MessageMetadata = z.infer<typeof messageMetadataSchema>;
 // Create a typed UIMessage
 export type MyUIMessage = UIMessage<MessageMetadata>;
 
+export interface FinalFormData{
+  chatId: string,
+  assistantDesign: ScaleType | undefined,
+  assistantPurpose: ScaleType | undefined,
+  assistantResponses: ScaleType | undefined,
+  userFriendly: ScaleType | undefined,
+  usefulToUnderstandRisks: ScaleType | undefined,
+}
 // Define a type for the form data used in the evaluation form
 export interface EvaluationFormData {
   gender: GenderType | "";

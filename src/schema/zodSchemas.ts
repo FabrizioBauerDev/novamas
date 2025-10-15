@@ -1,5 +1,13 @@
 import z from 'zod';
 
+const finalFormSchema = z.object({
+  chatId: z.string().uuid("ID de sesión de chat inválido"),
+  assistantDesign: z.number().int().min(1).max(5),
+  assistantPurpose: z.number().int().min(1).max(5),
+  assistantResponses: z.number().int().min(1).max(5),
+  userFriendly: z.number().int().min(1).max(5),
+  usefulToUnderstandRisks: z.number().int().min(1).max(5)
+});
 const signInSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(100),
@@ -128,5 +136,6 @@ export {
   searchUsersSchema,
   updateDescriptionSchema,
   bibliographySchema,
-  chatFeedbackSchema
+  chatFeedbackSchema,
+  finalFormSchema,
 };

@@ -19,6 +19,7 @@ export const senderTypeEnum = pgEnum("SenderType", ["assistant", "user"]);
 export const genderTypeEnum = pgEnum("GenderType", ["MASCULINO", "FEMENINO", "OTRO"]);
 export const couldntStopTypeEnum = pgEnum("CouldntStopType", ["NO", "NO_ES_SEG", "SI"]);
 export const personalIssuesTypeEnum = pgEnum("PersonalIssuesType", ["NO", "NO_AP", "SI"]);
+export const sentimentLabelTypeEnum = pgEnum("sentimentLabelType", ["POS", "NEG", "NEU"]);
 
 // Definición de campos de timestamps reutilizables
 const timestamps = {
@@ -92,7 +93,7 @@ export const messages = pgTable("Message", {
   messageTokensIn: integer("messageTokensIn"),
   messageTokensOut: integer("messageTokensOut"),
   messageTokensReasoning: integer("messageTokensReasoning"),
-  sentimentLabel: text("sentimentLabel"),
+  sentimentLabel: sentimentLabelTypeEnum("sentimentLabel"),
   createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
 }, (table) => ({
   // Índice compuesto optimizado para consultas frecuentes
@@ -297,11 +298,16 @@ export const statistics = pgTable("statistics", {
   id: uuid("id").primaryKey().defaultRandom(),
   summary: text("summary").notNull(),
   chatId: uuid("chat_id").notNull().references(() => chatSessions.id),
+  chatGroupId: uuid("chat_group_id").references(() => chatGroups.id),
   amountMessages: integer("amount_messages").notNull(),
   minWordsPerMessage: integer("min_words_per_message").notNull(),
   maxWordsPerMessage: integer("max_words_per_message").notNull(),
-  hateSpeechPercentage: real("hate_speech_percentage").notNull(),
-  ironicPercentage: real("ironic_percentage").notNull(),
+  hateSpeech: boolean("hate_speech").notNull(),
+  ironic: boolean("ironic").notNull(),
+  positivePercentage: real("positive_percentage").notNull(),
+  negativePercentage: real("negative_percentage").notNull(),
+  neutralPercentage: real("neutral_percentage").notNull(),
+  mostFrequentSentiment: sentimentLabelTypeEnum("most_frequent_sentiment").notNull(),
   changeTheme: boolean("change_theme").notNull(),
   betType: BetTypeEnum("bet_type").notNull().default("NO_ESPECIFICA"),
   createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow()
@@ -312,7 +318,38 @@ export const statisticsRelations = relations(statistics, ({ one }) => ({
     fields: [statistics.chatId],
     references: [chatSessions.id],
   }),
+  chatGroup: one(chatGroups, {
+    fields: [statistics.chatGroupId],
+    references: [chatGroups.id],
+  }),
 }));
 
 export type Statistic = typeof statistics.$inferSelect;
 export type NewStatistic = typeof statistics.$inferInsert;
+
+
+// ================================================================================================
+// ========================== ESQUEMA FORMULARIO FINAL =============================
+// ================================================================================================
+
+
+export const finalForm = pgTable("FinalForm", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  chatId: uuid("chatId").notNull().references(() => chatSessions.id),
+  assistantDesign: integer("assistantDesign").notNull(),
+  assistantPurpose: integer("assistantPurpose").notNull(),
+  assistantResponses: integer("assistantResponses").notNull(),
+  userFriendly: integer("userFriendly").notNull(),
+  usefulToUnderstandRisks: integer("usefulToUnderstandRisks").notNull(),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow()
+});
+
+export const finalFormRelations = relations(finalForm, ({ one }) => ({
+  chatSession: one(chatSessions, {
+    fields: [finalForm.chatId],
+    references: [chatSessions.id],
+  }),
+}));
+
+export type FinalForm = typeof finalForm.$inferSelect;
+export type NewFinalForm = typeof finalForm.$inferInsert;

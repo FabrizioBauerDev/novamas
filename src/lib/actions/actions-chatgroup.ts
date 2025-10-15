@@ -1,6 +1,11 @@
 "use server"
 
-import { getAllChatGroups, getChatGroupById, getChatGroupBySlug, isSlugAvailable } from "@/lib/db/queries/chatGroup"
+import {
+  getAllChatGroups,
+  getChatGroupById,
+  getChatGroupBySlug, getGroupConversationByChatId, getGroupConversationInfo, getGroupNames,
+  isSlugAvailable
+} from "@/lib/db/queries/chatGroup"
 import { deleteChatGroupById, createChatGroup, updateChatGroupDescription } from "@/lib/db/mutations/chatGroup"
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
@@ -27,6 +32,36 @@ export async function getChatGroupByIdAction(id: string) {
   } catch (error) {
     console.error("Error in getChatGroupByIdAction:", error)
     return { success: false, error: "Error al cargar la sesión grupal" }
+  }
+}
+
+export async function getGroupNamesAction(){
+  try {
+    const groups = await getGroupNames()
+    return { success: true, data: groups }
+  } catch (error) {
+    console.error("Error in getGroupNamesAction:", error)
+    return { success: false, error: "Error al cargar los nombres usados" }
+  }
+}
+
+export async function getGroupConversationInfoAction(id: string){
+  try {
+    const groups = await getGroupConversationInfo(id)
+    return { success: true, data: groups }
+  } catch (error) {
+    console.error("Error in getGroupNamesAction:", error)
+    return { success: false, error: "Error al cargar los nombres usados" }
+  }
+}
+
+export async function getGroupConversationByChatSessionAction(id: string){
+  try {
+    const groups = await getGroupConversationByChatId(id)
+    return { success: true, data: groups }
+  } catch (error) {
+    console.error("Error in getGroupNamesAction:", error)
+    return { success: false, error: "Error al cargar los nombres usados" }
   }
 }
 
