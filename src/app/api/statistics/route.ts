@@ -13,11 +13,11 @@ export async function POST(request: NextRequest) {
 
         // Devolver la respuesta de FastAPI al cliente
         return NextResponse.json(response.data);
-    } catch (err: any) {
-        console.error(err.response?.data || err.message || err);
+    } catch (err) {
+        console.error(err);
         return NextResponse.json(
-            { error: "Error agregando estadísticas", details: err.response?.data },
-            { status: err.response?.status || 500 }
+            { error: "Error agregando estadísticas" },
+            { status: 500 }
         );
     }
 }

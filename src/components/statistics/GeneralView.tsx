@@ -49,9 +49,9 @@ export function GeneralView() {
                     duration: 5000,
                 });
             }
-        } catch (err: any) {
+        } catch (err) {
             toast.error("Error al analizar las estadísticas", {
-                description: err.message || "Error de conexión",
+                description: "Error de conexión",
                 duration: 5000,
             });
         } finally {

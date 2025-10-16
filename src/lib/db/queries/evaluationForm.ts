@@ -156,7 +156,7 @@ export async function getEvaluationFormByGroupId(group_id: string): Promise<Eval
         if (!evaluationForm) {
             return null
         }
-        let evaluationArray: EvaluationFormResult[] = [];
+        const evaluationArray: EvaluationFormResult[] = [];
         for (let i=0; i<evaluationForm.length; ++i) {
             evaluationArray.push(convertAddress(evaluationForm[i]))
         }

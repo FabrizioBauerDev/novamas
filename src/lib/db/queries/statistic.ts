@@ -125,7 +125,7 @@ export async function getGeneralStats(chatGroupId: string | null) {
             .where(condition);
 
 
-        let evaluationArray: GeneralStats[]= [];
+        const evaluationArray: GeneralStats[]= [];
         for (let i=0; i<result.length; ++i) {
             evaluationArray.push(convertAddress(result[i]))
         }
