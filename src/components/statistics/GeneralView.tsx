@@ -175,7 +175,6 @@ export function GeneralView() {
 
                         <Button
                             size="lg"
-                            onClick={}
                             disabled={topStats.analyzedFalse === 0 || loadingAPI}
                             className="h-auto rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-3 text-base font-bold text-white shadow-lg shadow-emerald-500/30 transition-all hover:from-emerald-600 hover:to-emerald-700 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                         >
