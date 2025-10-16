@@ -9,7 +9,7 @@ export const CHAT_CONFIG = {
    * Default: 3 minutos (180000 ms)
    * Solo aplica a chats sin chatGroupId
    */
-  MAX_DURATION_MS: 3 * 60 * 1000, // 3 minutos
+  MAX_DURATION_MS: 15 * 60 * 1000, // 15 minutos
 
   /**
    * Umbral de advertencia antes de que expire la sesión
