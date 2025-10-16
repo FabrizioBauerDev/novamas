@@ -31,7 +31,6 @@ async function convertPdfToMarkdown(buffer: Buffer<ArrayBuffer>) {
         });
 
         const resultString: string = response.data;
-        console.log(resultString);
         return resultString;
     } catch (error) {
         console.error("Error convirtiendo el archivo PDF a Markdown", error);
@@ -82,11 +81,18 @@ export async function POST(request: NextRequest) {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
         const markdownContent = await convertPdfToMarkdown(buffer);
-        if(!markdownContent || markdownContent.length<1) throw new Error(
-            "Error converting PDF to Markdown"
-        )
 
-        const updatedBibliography = await loadMarkdown(markdownContent, title, author, description, category_enum);
+        // Eliminar imágenes Markdown
+        const markdownSinImagenes = markdownContent.replace(/!\[.*?\]\(.*?\)/g, '');
+        const markdownSinImagenes2 = markdownSinImagenes.replace(/!\[.*?\]\(data:image\/.*?;base64,.*?\)/g, '');
+
+        // También opcional: eliminar etiquetas HTML de imágenes
+        const markdownFinal = markdownSinImagenes2.replace(/<img.*?>/g, '');
+
+        if(!markdownFinal || markdownFinal.length < 1) throw new Error("Error converting PDF to Markdown");
+        console.log(markdownFinal);
+
+        const updatedBibliography = await loadMarkdown(markdownFinal, title, author, description, category_enum);
         return NextResponse.json(updatedBibliography);
     } catch (err) {
         console.error(err);

@@ -16,6 +16,7 @@ import {
 } from "recharts"
 import { useEffect, useState } from "react"
 
+
 const GENDER_COLORS = ["#4f46e5", "#ec4899", "#f59e0b"]
 const AGE_COLORS = ["#3b82f6", "#6366f1", "#8b5cf6", "#f472b6", "#fbbf24"]
 const RISK_COLORS = ["#10b981", "#facc15", "#f97316"]
@@ -26,6 +27,7 @@ interface StatisticsChartsProps {
     generalStats: GeneralStats[]
 }
 
+
 export function StatisticsCharts({ generalStats }: StatisticsChartsProps) {
     const [genderCounts, setGenderCounts] = useState<{ [key: string]: number }>({})
     const [ageCounts, setAgeCounts] = useState<{ [key: string]: number }>({})
@@ -33,8 +35,15 @@ export function StatisticsCharts({ generalStats }: StatisticsChartsProps) {
     const [sentimentCounts, setSentimentCounts] = useState<{ [key: string]: number }>({})
     const [usefulCounts, setUsefulCounts] = useState<{ [key: string]: number }>({})
     const [betCounts, setBetCounts] = useState<{ [key: string]: number }>({})
+    const [countryCounts, setCountryCounts] = useState<{ [key: string]: number }>({})
+    const [provinceCounts, setProvinceCounts] = useState<{ [key: string]: number }>({})
+    const [neighbourhoodCounts, setNeighbourhoodCounts] = useState<{ [key: string]: number }>({})
+
 
     useEffect(() => {
+        const country: { [key: string]: number } = {}
+        const province: { [key: string]: number } = {}
+        const neighbourhood: { [key: string]: number } = {}
         const gender = { Femenino: 0, Masculino: 0, Otro: 0 }
         const escala = { "Muy en desacuerdo": 0, "En desacuerdo": 0, "Neutral": 0, "De acuerdo":0, "Muy de acuerdo": 0 }
         const betType = {
@@ -50,6 +59,27 @@ export function StatisticsCharts({ generalStats }: StatisticsChartsProps) {
         const risk = { Alto: 0, Medio: 0, Bajo: 0 }
 
         for (const stat of generalStats) {
+            if(stat.country){
+                if(!(stat.country in country)) {
+                    country[stat.country] = 0
+                }
+                country[stat.country]++;
+            }
+
+            if(stat.province){
+                if(!(stat.province in province)) {
+                    province[stat.province] = 0
+                }
+                province[stat.province]++;
+            }
+
+            if(stat.neighbourhood){
+                if(!(stat.neighbourhood in neighbourhood)) {
+                    neighbourhood[stat.neighbourhood] = 0
+                }
+                neighbourhood[stat.neighbourhood]++;
+            }
+
             switch (stat.gender) {
                 case "FEMENINO": gender["Femenino"]++; break
                 case "MASCULINO": gender["Masculino"]++; break
@@ -97,7 +127,11 @@ export function StatisticsCharts({ generalStats }: StatisticsChartsProps) {
         setGenderCounts(gender)
         setAgeCounts(age)
         setRiskCounts(risk)
+        setCountryCounts(country)
+        setProvinceCounts(province)
+        setNeighbourhoodCounts(neighbourhood)
     }, [generalStats])
+
 
     const genderData = Object.entries(genderCounts).map(([name, value]) => ({ name, value }))
     const sentimentData = Object.entries(sentimentCounts).map(([name, value]) => ({ name, value }))
@@ -105,6 +139,10 @@ export function StatisticsCharts({ generalStats }: StatisticsChartsProps) {
     const usefulData = Object.entries(usefulCounts).map(([name, value]) => ({ name, value }))
     const ageData = Object.entries(ageCounts).map(([name, value]) => ({ name, value }))
     const riskData = Object.entries(riskCounts).map(([name, value]) => ({ name, value }))
+    const countryData = Object.entries(countryCounts).map(([name, value]) => ({ name, value }))
+    const provinceData = Object.entries(provinceCounts).map(([name, value]) => ({ name, value }))
+    const neighbourhoodData = Object.entries(neighbourhoodCounts).map(([name, value]) => ({ name, value }))
+
 
     return (
         <>
@@ -185,6 +223,7 @@ export function StatisticsCharts({ generalStats }: StatisticsChartsProps) {
                 {/* Sentimientos */}
                 <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
                     <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">Sentimientos</h3>
+                    {Object.keys(sentimentData).length > 0 ? (
                     <ResponsiveContainer width="100%" height={180}>
                         <BarChart data={sentimentData} layout="vertical">
                             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.5} />
@@ -198,11 +237,17 @@ export function StatisticsCharts({ generalStats }: StatisticsChartsProps) {
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
+                    ): (
+                        <div className="flex h-36 items-center justify-center text-gray-400 font-bold">
+                            No se pudieron determinar los sentimientos
+                        </div>
+                    )}
                 </div>
 
                 {/* Tipo de apuesta */}
                 <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
                     <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">Tipo de apuesta</h3>
+                    {Object.keys(typeData).length > 0 ? (
                     <ResponsiveContainer width="100%" height={180}>
                         <BarChart data={typeData} layout="vertical">
                             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.5} />
@@ -216,6 +261,11 @@ export function StatisticsCharts({ generalStats }: StatisticsChartsProps) {
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
+                        ): (
+                        <div className="flex h-36 items-center justify-center text-gray-400 font-bold">
+                            No se pudo tipo de apuesta
+                        </div>
+                    )}
                 </div>
 
                 {/* Utilidad de comprender */}
@@ -236,6 +286,98 @@ export function StatisticsCharts({ generalStats }: StatisticsChartsProps) {
                     </ResponsiveContainer>
                 </div>
             </div>
+            <div className="grid gap-6 md:grid-cols-3">
+            {/* País */}
+            <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">País</h3>
+                {Object.keys(countryData).length > 0 ? (
+                    <ResponsiveContainer width="100%" height={180}>
+                        <PieChart>
+                            <Pie
+                                data={countryData}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={false}
+                                outerRadius={70}
+                                fill="#8884d8"
+                                dataKey="value"
+                            >
+                                {countryData.map((entry, index) => (
+                                    <Cell key={index} fill={TYPE_COLORS[index % TYPE_COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend wrapperStyle={{ fontSize: "12px" }} />
+                        </PieChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <div className="flex h-36 items-center justify-center text-gray-400 font-bold">
+                        No se pudo determinar país
+                    </div>
+                )}
+            </div>
+
+            {/* Provincia */}
+            <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">Provincia</h3>
+                {Object.keys(provinceData).length > 0 ? (
+                    <ResponsiveContainer width="100%" height={180}>
+                        <PieChart>
+                            <Pie
+                                data={provinceData}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={false}
+                                outerRadius={70}
+                                fill="#8884d8"
+                                dataKey="value"
+                            >
+                                {provinceData.map((entry, index) => (
+                                    <Cell key={index} fill={TYPE_COLORS[index % TYPE_COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend wrapperStyle={{ fontSize: "12px" }} />
+                        </PieChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <div className="flex h-36 items-center justify-center text-gray-400 font-bold">
+                        No se pudo determinar provincia
+                    </div>
+                )}
+            </div>
+
+            {/* Barrio */}
+            <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">Barrio</h3>
+                {Object.keys(neighbourhoodData).length > 0 ? (
+                    <ResponsiveContainer width="100%" height={180}>
+                        <PieChart>
+                            <Pie
+                                data={neighbourhoodData}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={false}
+                                outerRadius={70}
+                                fill="#8884d8"
+                                dataKey="value"
+                            >
+                                {neighbourhoodData.map((entry, index) => (
+                                    <Cell key={index} fill={TYPE_COLORS[index % TYPE_COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend wrapperStyle={{ fontSize: "12px" }} />
+                        </PieChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <div className="flex h-36 items-center justify-center text-gray-400 font-bold">
+                        No se pudo determinar barrio
+                    </div>
+                )}
+            </div>
+            </div>
+
         </>
     )
 }

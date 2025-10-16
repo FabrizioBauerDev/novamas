@@ -9,6 +9,9 @@ interface EvaluationFormData {
     personalIssues: PersonalIssuesType
     triedToQuit: boolean
     score: number
+    country: string | null
+    province: string | null
+    neighbourhood: string | null
 }
 
 interface EvaluationFormTabProps {
@@ -95,6 +98,28 @@ export function EvaluationFormTab({ formData }: EvaluationFormTabProps) {
                     <p className="mb-2 text-sm font-medium uppercase tracking-wide text-slate-500">Intentó dejarlo</p>
                     <p className="text-2xl font-bold text-slate-900">{formData.triedToQuit ? "Sí" : "No"}</p>
                 </div>
+
+                {formData.country && (
+                        <div className="rounded-xl bg-slate-50 p-6">
+                            <p className="mb-2 text-sm font-medium uppercase tracking-wide text-slate-500">País</p>
+                            <p className="text-2xl font-bold text-slate-900">{formData.country}</p>
+                        </div>
+                )}
+
+                {formData.province && (
+                        <div className="rounded-xl bg-slate-50 p-6">
+                            <p className="mb-2 text-sm font-medium uppercase tracking-wide text-slate-500">Provincia</p>
+                            <p className="text-2xl font-bold text-slate-900">{formData.province}</p>
+                        </div>
+                    )}
+
+                {formData.neighbourhood && (
+                        <div className="rounded-xl bg-slate-50 p-6">
+                            <p className="mb-2 text-sm font-medium uppercase tracking-wide text-slate-500">Barrio</p>
+                            <p className="text-2xl font-bold text-slate-900">{formData.neighbourhood}</p>
+                        </div>
+                    )}
+
             </div>
         </div>
     )
