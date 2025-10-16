@@ -25,11 +25,12 @@ export default function ChatDemoContainer({ slug }: ChatDemoContainerProps) {
   const [chatSessionId, setChatSessionId] = useState<string | null>(null)
   const [sessionData, setSessionData] = useState<SessionData | null>(null)
   const [isLoadingSession, setIsLoadingSession] = useState(false)
+  const [evaluationCompleted, setEvaluationCompleted] = useState(false)
 
   // Prevenir que el usuario salga de la página
   useEffect(() => {
-    // Solo prevenir si no está en el formulario final
-    const shouldPreventUnload = currentView !== "evaluation"
+    // Solo prevenir si no está en el paso 2 del formulario de evaluación
+    const shouldPreventUnload = currentView !== "evaluation" || !evaluationCompleted
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (shouldPreventUnload) {
@@ -48,7 +49,7 @@ export default function ChatDemoContainer({ slug }: ChatDemoContainerProps) {
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload)
     }
-  }, [currentView])
+  }, [currentView, evaluationCompleted])
 
   const handleFormComplete = async () => {
     if (!chatSessionId) {
@@ -121,7 +122,10 @@ export default function ChatDemoContainer({ slug }: ChatDemoContainerProps) {
 
   if (currentView === "evaluation") {
     return (
-      <EvaluationForm chatSessionId={chatSessionId || ""} />
+      <EvaluationForm 
+        chatSessionId={chatSessionId || ""} 
+        onEvaluationSubmitted={() => setEvaluationCompleted(true)}
+      />
     )
   }
 

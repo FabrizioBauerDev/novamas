@@ -19,8 +19,6 @@ export async function getFinalFormAction(chatId: string) {
 export async function createFinalFormAction(formData: FinalFormData) {
     try {
         // Validar los datos con Zod
-        console.log("entre al action")
-        console.log(formData)
         const validatedFields = finalFormSchema.safeParse(formData);
         if (!validatedFields.success) {
             console.log("hubo un error en el zod");
@@ -33,9 +31,6 @@ export async function createFinalFormAction(formData: FinalFormData) {
 
         // Crear el FinalForm
         const newFinalForm = await createFinalForm(chatId, assistantDesign, assistantResponses, assistantPurpose, userFriendly, usefulToUnderstandRisks);
-        console.log(newFinalForm)
-        console.log("sali del crear form");
-
         return { success: true, data: newFinalForm };
     } catch (error) {
         console.error("Error in createFinalFormAction:", error);

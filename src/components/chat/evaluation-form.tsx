@@ -14,6 +14,7 @@ import Link from "next/link";
 interface EvaluationFormProps {
   onFormComplete?: () => void;
   chatSessionId: string;
+  onEvaluationSubmitted?: () => void;
 }
 
 function getLabelNumber(value: string) {
@@ -26,7 +27,7 @@ function getLabelNumber(value: string) {
   }
 }
 
-export default function EvaluationForm({ onFormComplete, chatSessionId }: EvaluationFormProps) {
+export default function EvaluationForm({ onFormComplete, chatSessionId, onEvaluationSubmitted }: EvaluationFormProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<FinalFormData>({
     chatId: chatSessionId,
@@ -56,6 +57,8 @@ export default function EvaluationForm({ onFormComplete, chatSessionId }: Evalua
 
       if (result.success) {
         setCurrentStep(2);
+        // Notificar al componente padre que se completó la evaluación
+        onEvaluationSubmitted?.();
       } else {
         console.log("no fue success");
         console.error("Error creando formulario final:", result.error);
@@ -107,13 +110,13 @@ export default function EvaluationForm({ onFormComplete, chatSessionId }: Evalua
                       <div className="flex flex-wrap gap-3 mt-4">
                         {getEnumOptions(ScaleEnum)
                             .map(({value, label}) => (
-                                <div key={value} className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border-2 border-gray-200 hover:border-blue-400 transition-all cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                                <label key={value} htmlFor={`assistant-design-${value}`} className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border-2 border-gray-200 hover:border-blue-400 transition-all cursor-pointer has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
                                   <RadioGroupItem
                                       value={ScaleEnum[value]}
                                       id={`assistant-design-${value}`}
                                   />
                                   <Label htmlFor={`assistant-design-${value}`} className="cursor-pointer font-medium">{label}</Label>
-                                </div>
+                                </label>
                             ))}
                       </div>
                     </RadioGroup>
@@ -130,13 +133,13 @@ export default function EvaluationForm({ onFormComplete, chatSessionId }: Evalua
                       <div className="flex flex-wrap gap-3 mt-4">
                         {getEnumOptions(ScaleEnum)
                             .map(({value, label}) => (
-                                <div key={value} className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border-2 border-gray-200 hover:border-purple-400 transition-all cursor-pointer has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50">
+                                <label key={value} htmlFor={`assistant-purpose-${value}`} className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border-2 border-gray-200 hover:border-purple-400 transition-all cursor-pointer has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50">
                                   <RadioGroupItem
                                       value={ScaleEnum[value]}
                                       id={`assistant-purpose-${value}`}
                                   />
                                   <Label htmlFor={`assistant-purpose-${value}`} className="cursor-pointer font-medium">{label}</Label>
-                                </div>
+                                </label>
                             ))}
                       </div>
                     </RadioGroup>
@@ -153,13 +156,13 @@ export default function EvaluationForm({ onFormComplete, chatSessionId }: Evalua
                       <div className="flex flex-wrap gap-3 mt-4">
                         {getEnumOptions(ScaleEnum)
                             .map(({value, label}) => (
-                                <div key={value} className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border-2 border-gray-200 hover:border-green-400 transition-all cursor-pointer has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
+                                <label key={value} htmlFor={`assistant-responses-${value}`} className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border-2 border-gray-200 hover:border-green-400 transition-all cursor-pointer has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
                                   <RadioGroupItem
                                       value={ScaleEnum[value]}
                                       id={`assistant-responses-${value}`}
                                   />
                                   <Label htmlFor={`assistant-responses-${value}`} className="cursor-pointer font-medium">{label}</Label>
-                                </div>
+                                </label>
                             ))}
                       </div>
                     </RadioGroup>
@@ -176,13 +179,13 @@ export default function EvaluationForm({ onFormComplete, chatSessionId }: Evalua
                       <div className="flex flex-wrap gap-3 mt-4">
                         {getEnumOptions(ScaleEnum)
                             .map(({value, label}) => (
-                                <div key={value} className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border-2 border-gray-200 hover:border-orange-400 transition-all cursor-pointer has-[:checked]:border-orange-500 has-[:checked]:bg-orange-50">
+                                <label key={value} htmlFor={`user-friendly-${value}`} className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border-2 border-gray-200 hover:border-orange-400 transition-all cursor-pointer has-[:checked]:border-orange-500 has-[:checked]:bg-orange-50">
                                   <RadioGroupItem
                                       value={ScaleEnum[value]}
                                       id={`user-friendly-${value}`}
                                   />
                                   <Label htmlFor={`user-friendly-${value}`} className="cursor-pointer font-medium">{label}</Label>
-                                </div>
+                                </label>
                             ))}
                       </div>
                     </RadioGroup>
@@ -199,13 +202,13 @@ export default function EvaluationForm({ onFormComplete, chatSessionId }: Evalua
                       <div className="flex flex-wrap gap-3 mt-4">
                         {getEnumOptions(ScaleEnum)
                             .map(({value, label}) => (
-                                <div key={value} className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border-2 border-gray-200 hover:border-red-400 transition-all cursor-pointer has-[:checked]:border-red-500 has-[:checked]:bg-red-50">
+                                <label key={value} htmlFor={`useful-risks-${value}`} className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border-2 border-gray-200 hover:border-red-400 transition-all cursor-pointer has-[:checked]:border-red-500 has-[:checked]:bg-red-50">
                                   <RadioGroupItem
                                       value={ScaleEnum[value]}
                                       id={`useful-risks-${value}`}
                                   />
                                   <Label htmlFor={`useful-risks-${value}`} className="cursor-pointer font-medium">{label}</Label>
-                                </div>
+                                </label>
                             ))}
                       </div>
                     </RadioGroup>

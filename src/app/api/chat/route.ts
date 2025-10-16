@@ -284,7 +284,7 @@ export async function POST(req: NextRequest) {
       model: google("gemini-2.5-flash"),
       messages: convertToModelMessages(allMessages),
       system: enhancedSystemPrompt,
-      temperature: 0.7,
+      temperature: 0.8,
       maxOutputTokens: 1000, // Aumentado de 500 a 1000 para evitar cortes
       // Temperatura, top_p y no se si top_k se pueden pasar aquí
       tools: {
