@@ -1,6 +1,7 @@
 "use server"
 
 import {
+    getConversationInfo,
     getGeneralStats,
     getNumberStats,
     getStatsByChatGroupId,
@@ -14,6 +15,16 @@ export async function getGeneralStatisticsAction(chatGroupId: string|null) {
     } catch (error) {
         console.error("Error in getGeneralStatisticsAction:", error)
         return { success: false, error: "Error al cargar las estadisticas generales" }
+    }
+}
+
+export async function getStatsConversationInfoAction(chatGroupId: string) {
+    try {
+        const conv = await getConversationInfo(chatGroupId)
+        return { success: true, data: conv }
+    } catch (error) {
+        console.error("Error in getConversationInfoAction:", error)
+        return { success: false, error: "Error al cargar las estadisticas de las conversaciones" }
     }
 }
 

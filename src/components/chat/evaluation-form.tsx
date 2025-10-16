@@ -72,7 +72,7 @@ export default function EvaluationForm({ onFormComplete, chatSessionId }: Evalua
 
   return (
       <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl p-6">
+        <Card className="w-full max-w-4xl p-6">
           {currentStep === 1 && (
               <>
                 <div className="text-center mb-6">
@@ -85,118 +85,132 @@ export default function EvaluationForm({ onFormComplete, chatSessionId }: Evalua
             </p>
           </div>
 
-                <div className="space-y-4 mb-6">
-                  <Label>
-                    El diseño del asistente fue realista y atractivo.
+                <div className="space-y-4 mb-5">
+                  <Label className="text-base font-medium text-gray-700 block">
+                    1. El diseño del asistente fue realista y atractivo.
                   </Label>
                   <RadioGroup
-                      value={formData.assistantDesign? ScaleEnum[formData.assistantDesign] : undefined}
+                      value={formData.assistantDesign ? ScaleEnum[formData.assistantDesign] : undefined}
                       onValueChange={(value) => handleInputChange("assistantDesign", value)}
                   >
-                    <div className="flex flex-wrap gap-4">
-                      {getEnumOptions(ScaleEnum)
-                          .map(({value, label}) => (
-                              <div key={value} className="flex items-center space-x-2">
-                                <RadioGroupItem
-                                    value={ScaleEnum[value]}
-                                    id={`assistant-design-${value}`}
-                                />
-                                <Label htmlFor={`assistant-design-${value}`}>{label}</Label>
-                              </div>
-                          ))}
+                    <div className="grid grid-cols-5 gap-2">
+                      {getEnumOptions(ScaleEnum).map(({ value, label }) => (
+                          <div key={value} className="relative">
+                            <RadioGroupItem
+                                value={ScaleEnum[value]}
+                                id={`assistant-design-${value}`}
+                                className="peer sr-only"
+                            />
+                            <Label
+                                htmlFor={`assistant-design-${value}`}
+                                className="flex items-center justify-center rounded-lg border-2 border-gray-200 bg-white p-3 hover:bg-gray-50 hover:border-gray-300 peer-data-[state=checked]:border-gray-900 peer-data-[state=checked]:bg-gray-900 peer-data-[state=checked]:text-white cursor-pointer transition-all duration-200 h-13"
+                            >
+                              <span className="text-s text-center leading-tight font-medium">{label}</span>
+                            </Label>
+                          </div>
+                      ))}
                     </div>
                   </RadioGroup>
                 </div>
 
-                <div className="space-y-4 mb-6">
-                  <Label>
-                    El asistente explicó bien su alcance y propósito.
+                <div className="space-y-4 mb-5">
+                  <Label className="text-base font-medium text-gray-700 block">
+                    2. El asistente explicó bien su alcance y propósito.
                   </Label>
                   <RadioGroup
-                      value={formData.assistantPurpose? ScaleEnum[formData.assistantPurpose]: undefined}
+                      value={formData.assistantPurpose ? ScaleEnum[formData.assistantPurpose] : undefined}
                       onValueChange={(value) => handleInputChange("assistantPurpose", value)}
                   >
-                    <div className="flex flex-wrap gap-4">
-                      {getEnumOptions(ScaleEnum)
-                          .map(({value, label}) => (
-                              <div key={value} className="flex items-center space-x-2">
-                                <RadioGroupItem
-                                    value={ScaleEnum[value]}
-                                    id={`assistant-purpose-${value}`}
-                                />
-                                <Label htmlFor={`assistant-purpose-${value}`}>{label}</Label>
-                              </div>
-                          ))}
+                    <div className="grid grid-cols-5 gap-2">
+                      {getEnumOptions(ScaleEnum).map(({ value, label }) => (
+                          <div key={value} className="relative">
+                            <RadioGroupItem
+                                value={ScaleEnum[value]}
+                                id={`assistant-purpose-${value}`}
+                                className="peer sr-only"
+                            />
+                            <Label
+                                htmlFor={`assistant-purpose-${value}`}
+                                className="flex items-center justify-center rounded-lg border-2 border-gray-200 bg-white p-3 hover:bg-gray-50 hover:border-gray-300 peer-data-[state=checked]:border-gray-900 peer-data-[state=checked]:bg-gray-900 peer-data-[state=checked]:text-white cursor-pointer transition-all duration-200 h-13"
+                            >
+                              <span className="text-s text-center leading-tight font-medium">{label}</span>
+                            </Label>
+                          </div>
+                      ))}
                     </div>
                   </RadioGroup>
                 </div>
 
-                <div className="space-y-4 mb-6">
-                  <Label>
-                    Las respuestas del asistente fueron útiles, adecuadas e informativas.
+                <div className="space-y-4 mb-5">
+                  <Label className="text-base font-medium text-gray-700 block">
+                    3. Las respuestas del asistente fueron útiles, adecuadas e informativas.
                   </Label>
                   <RadioGroup
-                      value={formData.assistantResponses? ScaleEnum[formData.assistantResponses] : undefined}
+                      value={formData.assistantResponses ? ScaleEnum[formData.assistantResponses] : undefined}
                       onValueChange={(value) => handleInputChange("assistantResponses", value)}
                   >
-                    <div className="flex flex-wrap gap-4">
-                      {getEnumOptions(ScaleEnum)
-                          .map(({value, label}) => (
-                              <div key={value} className="flex items-center space-x-2">
-                                <RadioGroupItem
-                                    value={ScaleEnum[value]}
-                                    id={`assistant-responses-${value}`}
-                                />
-                                <Label htmlFor={`assistant-responses-${value}`}>{label}</Label>
-                              </div>
-                          ))}
+                    <div className="grid grid-cols-5 gap-2">
+                      {getEnumOptions(ScaleEnum).map(({ value, label }) => (
+                          <div key={value} className="relative">
+                            <RadioGroupItem
+                                value={ScaleEnum[value]}
+                                id={`assistant-responses-${value}`}
+                                className="peer sr-only"
+                            />
+                            <Label
+                                htmlFor={`assistant-responses-${value}`}
+                                className="flex items-center justify-center rounded-lg border-2 border-gray-200 bg-white p-3 hover:bg-gray-50 hover:border-gray-300 peer-data-[state=checked]:border-gray-900 peer-data-[state=checked]:bg-gray-900 peer-data-[state=checked]:text-white cursor-pointer transition-all duration-200 h-13"
+                            >
+                              <span className="text-s text-center leading-tight font-medium">{label}</span>
+                            </Label>
+                          </div>
+                      ))}
                     </div>
                   </RadioGroup>
                 </div>
 
-                <div className="space-y-4 mb-6">
-                  <Label>
-                    El asistente resulta fácil de usar.
-                  </Label>
+                <div className="space-y-4 mb-5">
+                  <Label className="text-base font-medium text-gray-700 block">4. El asistente resulta fácil de usar.</Label>
                   <RadioGroup
-                      value={formData.userFriendly? ScaleEnum[formData.userFriendly] : undefined}
+                      value={formData.userFriendly ? ScaleEnum[formData.userFriendly] : undefined}
                       onValueChange={(value) => handleInputChange("userFriendly", value)}
                   >
-                    <div className="flex flex-wrap gap-4">
-                      {getEnumOptions(ScaleEnum)
-                          .map(({value, label}) => (
-                              <div key={value} className="flex items-center space-x-2">
-                                <RadioGroupItem
-                                    value={ScaleEnum[value]}
-                                    id={`user-friendly-${value}`}
-                                />
-                                <Label htmlFor={`user-friendly-${value}`}>{label}</Label>
-                              </div>
-                          ))}
+                    <div className="grid grid-cols-5 gap-2">
+                      {getEnumOptions(ScaleEnum).map(({ value, label }) => (
+                          <div key={value} className="relative">
+                            <RadioGroupItem value={ScaleEnum[value]} id={`user-friendly-${value}`} className="peer sr-only" />
+                            <Label
+                                htmlFor={`user-friendly-${value}`}
+                                className="flex items-center justify-center rounded-lg border-2 border-gray-200 bg-white p-3 hover:bg-gray-50 hover:border-gray-300 peer-data-[state=checked]:border-gray-900 peer-data-[state=checked]:bg-gray-900 peer-data-[state=checked]:text-white cursor-pointer transition-all duration-200 h-13"
+                            >
+                              <span className="text-s text-center leading-tight font-medium">{label}</span>
+                            </Label>
+                          </div>
+                      ))}
                     </div>
                   </RadioGroup>
                 </div>
 
                 <div className="space-y-4 mb-6">
-                  <Label>
-                    El asistente te fue de utilidad para comprender los riesgos asociados al
-                    uso excesivo del juego online.
+                  <Label className="text-base font-medium text-gray-700 block">
+                    5. El asistente te fue de utilidad para comprender los riesgos asociados al uso excesivo del juego online.
                   </Label>
                   <RadioGroup
-                      value={formData.usefulToUnderstandRisks? ScaleEnum[formData.usefulToUnderstandRisks] : undefined}
+                      value={formData.usefulToUnderstandRisks ? ScaleEnum[formData.usefulToUnderstandRisks] : undefined}
                       onValueChange={(value) => handleInputChange("usefulToUnderstandRisks", value)}
                   >
-                    <div className="flex flex-wrap gap-4">
-                      {getEnumOptions(ScaleEnum)
-                          .map(({value, label}) => (
-                              <div key={value} className="flex items-center space-x-2">
-                                <RadioGroupItem
-                                    value={ScaleEnum[value]}
-                                    id={`useful-risks-${value}`}
-                                />
-                                <Label htmlFor={`useful-risks-${value}`}>{label}</Label>
-                              </div>
-                          ))}
+                    <div className="grid grid-cols-5 gap-2">
+                      {getEnumOptions(ScaleEnum).map(({ value, label }) => (
+                          <div key={value} className="relative">
+                            <RadioGroupItem value={ScaleEnum[value]} id={`useful-risks-${value}`} className="peer sr-only" />
+                            <Label
+                                htmlFor={`useful-risks-${value}`}
+                                className="flex items-center justify-center rounded-lg border-2 border-gray-200 bg-white p-3 hover:bg-gray-50 hover:border-gray-300 peer-data-[state=checked]:border-gray-900 peer-data-[state=checked]:bg-gray-900 peer-data-[state=checked]:text-white cursor-pointer transition-all duration-200 h-13"
+                            >
+                              <span className="text-s text-center leading-tight font-medium">{label}</span>
+                            </Label>
+                          </div>
+                      ))}
                     </div>
                   </RadioGroup>
                 </div>

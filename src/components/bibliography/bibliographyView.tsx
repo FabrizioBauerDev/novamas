@@ -36,6 +36,24 @@ import { addDocument, fetchBibliography, removeDocument } from "@/lib/actions/ac
 import { type BibliographyItem, BIBLIOGRAPHY_CATEGORIES } from "@/types/bibliography"
 import Pagination from "@/components/bibliography/Pagination"
 
+function getBibliographyLabel(category:string){
+    switch (category) {
+        case "Estadisticas": return "ESTADISTICAS";break;
+        case "Numeros de telefono": return "NUMERO_TELEFONO";break;
+        case "Tecnicas de Control": return "TECNICAS_CONTROL";break;
+        case "Otro": return "OTRO";break;
+    }
+}
+
+function getLabelBibliography(category:string){
+    switch (category) {
+        case "ESTADISTICAS": return "Estadisticas";break;
+        case "NUMERO_TELEFONO": return "Numeros de telefono";break;
+        case "TECNICAS_CONTROL": return "Tecnicas de Control";break;
+        case "OTRO": return "Otro";break;
+    }
+}
+
 export default function BibliographyView() {
     const [resources, setResources] = useState<BibliographyItem[]>([])
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -64,7 +82,7 @@ export default function BibliographyView() {
             (resource.author && resource.author.toLowerCase().includes(searchTerm.toLowerCase())) ||
             (resource.description && resource.description.toLowerCase().includes(searchTerm.toLowerCase()))
 
-        const matchesCategory = categoryFilter === "Todas" || resource.category === categoryFilter
+        const matchesCategory = categoryFilter === "Todas" || resource.category === getBibliographyLabel(categoryFilter)
 
         return matchesSearch && matchesCategory
     })
@@ -320,7 +338,7 @@ export default function BibliographyView() {
                                                         <div className="flex items-center gap-1 mt-1">
                                                             <Tag className="h-3 w-3 text-primary" />
                                                             <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                                {resource.category}
+                                {getLabelBibliography(resource.category)}
                               </span>
                                                         </div>
                                                     )}

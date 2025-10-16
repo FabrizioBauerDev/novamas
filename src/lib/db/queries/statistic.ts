@@ -1,6 +1,97 @@
 import {db} from "@/db";
-import {chatSessions, evaluationForms, finalForm, statistics} from "@/db/schema";
+import {chatSessions, evaluationForms, finalForm, geoLocations, statistics} from "@/db/schema";
 import {desc, eq, isNotNull, isNull} from "drizzle-orm";
+import {EvaluationFormResult, GeneralStats} from "@/types/statistics";
+import {GenderType} from "@/lib/enums";
+
+const Provinces = [
+    "Buenos Aires",
+    "Catamarca",
+    "Chaco",
+    "Chubut",
+    "Córdoba",
+    "Corrientes",
+    "Entre Ríos",
+    "Formosa",
+    "Jujuy",
+    "La Pampa",
+    "La Rioja",
+    "Mendoza",
+    "Misiones",
+    "Neuquén",
+    "Río Negro",
+    "Salta",
+    "San Juan",
+    "San Luis",
+    "Santa Cruz",
+    "Santa Fe",
+    "Santiago del Estero",
+    "Tierra del Fuego",
+    "Tucumán",
+    "Islas Malvinas"
+]
+function convertAddress(evaluationForm: {
+    betType: "CASINO_PRESENCIAL" | "CASINO_ONLINE" | "DEPORTIVA" | "LOTERIA" | "VIDEOJUEGO" | "NO_ESPECIFICA" | null,
+    gender: "MASCULINO" | "FEMENINO" | "OTRO",
+    age: number,
+    score: number,
+    mostFrequentSentiment: "POS" | "NEG" | "NEU" | null,
+    usefulToUnderstandRisks: number | null,
+    address: string | null,
+    isGeoLocation: string | null}) {
+    if (!evaluationForm.address) {
+        return {
+            gender: evaluationForm.gender,
+            age: evaluationForm.age,
+            betType: evaluationForm.betType,
+            mostFrequentSentiment: evaluationForm.mostFrequentSentiment,
+            usefulToUnderstandRisks: evaluationForm.usefulToUnderstandRisks,
+            score: evaluationForm.score,
+            country: null,
+            neighbourhood: null,
+            province: null
+        };
+    }else{
+        const addressSplit = evaluationForm.address.split(",").map(part => part.trim());
+        const geoLocation = !!(evaluationForm.isGeoLocation);
+        let country = null;
+        let province = null;
+        let neighbourhood = null;
+        if(geoLocation){
+            country = addressSplit[addressSplit.length -1];
+            neighbourhood = addressSplit[0];
+            if(country == "Argentina"){
+                for(let i = addressSplit.length - 2;i>=0; i--){
+                    const result = Provinces.find((prov)=> prov == addressSplit[i]);
+                    if(result){
+                        province = result;
+                        break;
+                    }
+                }
+            }
+        }else{
+            country = addressSplit[2];
+            const result = Provinces.find((prov)=> prov == addressSplit[1]);
+            if(result){
+                province = result;
+            }
+            neighbourhood = addressSplit[0];
+        }
+        return{
+            gender: evaluationForm.gender,
+            age: evaluationForm.age,
+            betType: evaluationForm.betType,
+            mostFrequentSentiment: evaluationForm.mostFrequentSentiment,
+            score: evaluationForm.score,
+            usefulToUnderstandRisks: evaluationForm.usefulToUnderstandRisks,
+            country: country,
+            neighbourhood: neighbourhood,
+            province: province
+        }
+    }
+}
+
+
 export async function getGeneralStats(chatGroupId: string | null) {
     try {
         let condition;
@@ -24,16 +115,47 @@ export async function getGeneralStats(chatGroupId: string | null) {
                 score: evaluationForms.score,
                 mostFrequentSentiment: statistics.mostFrequentSentiment,
                 usefulToUnderstandRisks: finalForm.usefulToUnderstandRisks,
+                address: evaluationForms.address,
+                isGeoLocation: geoLocations.id
             })
             .from(statistics)
             .rightJoin(evaluationForms, eq(statistics.chatId, evaluationForms.id))
             .leftJoin(finalForm, eq(finalForm.chatId, evaluationForms.id))
+            .leftJoin(geoLocations, eq(geoLocations.evaluationFormId, evaluationForms.id))
             .where(condition);
 
-        return result;
+
+        let evaluationArray: GeneralStats[]= [];
+        for (let i=0; i<result.length; ++i) {
+            evaluationArray.push(convertAddress(result[i]))
+        }
+        return evaluationArray;
     } catch (error) {
         console.error("Error fetching general stats:", error);
         throw new Error("Failed to fetch general stats");
+    }
+}
+
+export async function getConversationInfo(chatGroupId: string) {
+    try{
+        const result = await db
+            .select({
+                id: statistics.chatId,
+                summary: statistics.summary,
+                gender: evaluationForms.gender,
+                risk: evaluationForms.score,
+                negativePercentage: statistics.negativePercentage,
+                date: evaluationForms.createdAt
+            })
+            .from(statistics)
+            .innerJoin(evaluationForms, eq(statistics.chatId, evaluationForms.id))
+            .where(eq(statistics.chatGroupId, chatGroupId))
+            .orderBy(desc(evaluationForms.createdAt));
+
+        return result
+    }catch (error) {
+        console.error("Error fetching conversation info by chat group id:", error)
+        throw new Error("Failed to fetch conversation info by chat group id")
     }
 }
 

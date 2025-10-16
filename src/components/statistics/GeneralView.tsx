@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { getGeneralStatisticsAction, getNumberStatsAction } from "@/lib/actions/actions-statistics";
 import { GeneralStats } from "@/types/statistics";
-import { TopStatistics } from "@/components/statistics/TopStatistics";
 import { EmptyStateGroupStats } from "@/components/statistics/EmptyStateGroupStats";
 import { StatisticSkeleton } from "@/components/statistics/StatisticSkeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +11,7 @@ import {getGroupNamesAction} from "@/lib/actions/actions-chatgroup";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {EmptyState} from "@/components/statistics/EmptyState";
+import {toast} from "sonner";
 
 
 export function GeneralView() {
@@ -28,8 +28,36 @@ export function GeneralView() {
         analyzedFalse: 0,
     });
     const [loading, setLoading] = useState(true);
+    const [loadingTop, setLoadingTop] = useState(true);
+    const [loadingAPI, setLoadingAPI] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const handlePostStats = async () => {
+        setLoadingAPI(true);
+        try {
+            const res = await fetch("/api/statistics", { method: "POST" });
+            const data = await res.json();
+
+            if (res.ok) {
+                toast.success("Se analizaron correctamente las estadísticas", {
+                    description: data.message || "Las estadísticas se crearon correctamente.",
+                    duration: 5000,
+                });
+            } else {
+                toast.error("Error al analizar las estadísticas", {
+                    description: data.error || "Ocurrió un error.",
+                    duration: 5000,
+                });
+            }
+        } catch (err: any) {
+            toast.error("Error al analizar las estadísticas", {
+                description: err.message || "Error de conexión",
+                duration: 5000,
+            });
+        } finally {
+            setLoadingAPI(false);
+        }
+    };
     async function handleGeneralStats(chatGroupId: string | null) {
         setLoading(true);
         try {
@@ -62,6 +90,8 @@ export function GeneralView() {
         } catch (err) {
             setError("Error al cargar estadísticas de conteo");
             console.error(err);
+        }finally {
+            setLoadingTop(false);
         }
     }
 
@@ -81,12 +111,14 @@ export function GeneralView() {
             setLoading(false);
         }
     }
-
-    // Cargar estadísticas generales y top stats al montar
     useEffect(() => {
         handleGeneralStats(null);
+    }, []);
+
+    useEffect(() => {
         handleTopStats();
     }, []);
+
 
     const handleTabChange = async (value: string) => {
         setSelectedGroup(value);
@@ -113,9 +145,45 @@ export function GeneralView() {
                 <div className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                     <h2 className="text-5xl font-bold text-slate-900">Estadísticas</h2>
 
-                    <TopStatistics analyzedTrue={topStats.analyzedTrue} analyzedFalse={topStats.analyzedFalse}/>
+                    <div className="flex flex-col items-end gap-3 sm:flex-row sm:items-center">
+                        <div className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 shadow-sm border border-slate-200">
+                            {loadingTop ? (
+                                <div className="flex space-x-1">
+                                    <span className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></span>
+                                    <span className="w-2 h-2 bg-blue-600 rounded-full animate-bounce delay-150"></span>
+                                    <span className="w-2 h-2 bg-blue-600 rounded-full animate-bounce delay-300"></span>
+                                </div>
+                            ) : (
+                                <span className="text-lg font-bold text-blue-600">{topStats.analyzedTrue}</span>
+                            )}
+                            <span className="text-sm text-slate-600">Sesiones analizadas</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 shadow-sm border border-slate-200">
+                            {loadingTop ? (
+                                <div className="flex space-x-1">
+                                    <span className="w-2 h-2 bg-amber-600 rounded-full animate-bounce"></span>
+                                    <span className="w-2 h-2 bg-amber-600 rounded-full animate-bounce delay-150"></span>
+                                    <span className="w-2 h-2 bg-amber-600 rounded-full animate-bounce delay-300"></span>
+                                </div>
+                            ) : (
+                                <span className="text-lg font-bold text-amber-600">{topStats.analyzedFalse}</span>
+                            )}
+                            <span className="text-sm text-slate-600">Sesiones por analizar</span>
+                        </div>
+
+
+                        <Button
+                            size="lg"
+                            onClick={}
+                            disabled={topStats.analyzedFalse === 0 || loadingAPI}
+                            className="h-auto rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-3 text-base font-bold text-white shadow-lg shadow-emerald-500/30 transition-all hover:from-emerald-600 hover:to-emerald-700 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                        >
+                            Analizar
+                        </Button>
+                    </div>
                 </div>
-                {!loading && generalStats.length == 0 ? (<EmptyState/>) :
+                {!loading && generalStats.length == 0 && selectedGroup=="todas" ? (<EmptyState/>) :
                     (
                         <Tabs value={selectedGroup} onValueChange={handleTabChange} className="mt-12">
                             <TabsList
@@ -142,11 +210,13 @@ export function GeneralView() {
 
                             {/* Tab: Todas */}
                             <TabsContent value="todas" className="space-y-10">
-                                {loading ? <StatisticSkeleton/> : <StatisticsCharts generalStats={generalStats}/>}
+                                {loading ? <StatisticSkeleton/> :
+                                    <StatisticsCharts generalStats={generalStats}/>}
                                 <div className="flex justify-center pt-6">
                                         <Button
                                             variant="outline"
                                             size="lg"
+                                            disabled={loadingAPI}
                                             className="border-slate-300 bg-white px-8 py-6 text-base font-medium text-slate-700 shadow-sm hover:bg-slate-50 hover:shadow-md"
                                         >
                                             Exportar las estadísticas a Excel
@@ -184,25 +254,32 @@ export function GeneralView() {
                                     <StatisticSkeleton/>
                                 ) : (
                                     <>
-                                        <StatisticsCharts generalStats={generalStats}/>
-                                        <div className="flex justify-center pt-6">
-                                            <Link href={`/statistics/${selectedChatGroup.id}`}>
-                                                <Button
-                                                    variant="outline"
-                                                    size="lg"
-                                                    className="border-slate-300 bg-white px-8 py-6 text-base font-medium text-slate-700 shadow-sm hover:bg-slate-50 hover:shadow-md"
-                                                >
-                                                    Ver todas las conversaciones del {selectedChatGroup.name}
-                                                </Button>
-                                            </Link>
-                                        </div>
+                                        {generalStats.length > 0 ? (
+                                            <><StatisticsCharts generalStats={generalStats}/>
+                                                <div className="flex justify-center pt-6">
+                                                    <Link href={`/statistics/${selectedChatGroup.id}`}>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="lg"
+                                                            disabled={loadingAPI}
+                                                            className="border-slate-300 bg-white px-8 py-6 text-base font-medium text-slate-700 shadow-sm hover:bg-slate-50 hover:shadow-md"
+                                                        >
+                                                            Ver todas las conversaciones del {selectedChatGroup.name}
+                                                        </Button>
+                                                    </Link>
+                                                </div>
+                                            </>
+                                        ): <EmptyState />
+                                        }
+
                                     </>
                                 )}
                             </TabsContent>
 
                             {/* Tab: Públicas */}
                             <TabsContent value="publicas" className="space-y-10">
-                                {loading ? <StatisticSkeleton/> : <StatisticsCharts generalStats={generalStats}/>}
+                                {loading ? <StatisticSkeleton/> : generalStats.length==0? <EmptyState /> :
+                                <StatisticsCharts generalStats={generalStats}/>}
                             </TabsContent>
                         </Tabs>)}
             </main>

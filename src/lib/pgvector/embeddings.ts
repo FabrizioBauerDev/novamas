@@ -3,8 +3,8 @@ import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 
 // splitter para dividir el texto, prefereblemente en los separadores dados "\n\n" y "."
 const generateChunks = new RecursiveCharacterTextSplitter({
-    chunkSize: 500,
-    chunkOverlap: 100,
+    chunkSize: 1000,
+    chunkOverlap: 200,
     separators: ["\n\n", "."],
 });
 

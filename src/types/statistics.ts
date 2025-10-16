@@ -1,5 +1,13 @@
-import {CouldntStopType, GenderType, PersonalIssuesType, ScaleType} from "@/lib/enums";
+import {CouldntStopType, GenderType, PersonalIssuesType} from "@/lib/enums";
 
+export interface ConversationInfo {
+    id: string
+    summary: string
+    gender: GenderType
+    risk: number
+    negativePercentage: number
+    date: Date
+}
 export interface FinalForm {
     assistantDesign: number,
     assistantPurpose: number,
@@ -17,6 +25,9 @@ export interface EvaluationFormResult {
     triedToQuit: boolean;
     score: number
     createdAt: Date;
+    country: string | null
+    province: string | null
+    neighbourhood: string | null
 }
 
 export interface GeneralStats {
@@ -26,6 +37,9 @@ export interface GeneralStats {
     score: number
     mostFrequentSentiment: SentimentType | null
     usefulToUnderstandRisks: number | null
+    country: string | null
+    province: string | null
+    neighbourhood: string | null
 }
 
 

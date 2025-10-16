@@ -43,12 +43,17 @@ export async function loadMarkdown(markdown: string, title: string, author: stri
             const embeddings = await generateEmbeddingsMd(markdown);
             console.log("Termina de generar embeddings");
 
-            await tx.insert(chunk).values(
-                embeddings.map(embedding => ({
-                    resource_id: resource.id,
-                    ...embedding
-                })),
-            );
+            const batchSize = 500;
+            for (let i = 0; i < embeddings.length; i += batchSize) {
+                console.log(`Inserting chunk ${i} to ${i + batchSize}`);
+                await tx.insert(chunk).values(
+                    embeddings.slice(i, i + batchSize).map(embedding => ({
+                        resource_id: resource.id,
+                        ...embedding
+                    }))
+                );
+            }
+
             console.log("Cargo a BD vectorial\n");
         })
     }catch (e) {

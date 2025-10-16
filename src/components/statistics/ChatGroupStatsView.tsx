@@ -4,13 +4,12 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, BarChart3, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
-import type { EvaluationFormResult, Statistics } from "@/types/statistics"
-import { getStatsbyChatGroupIdAction } from "@/lib/actions/actions-statistics"
+import type {ConversationInfo} from "@/types/statistics"
+import {getStatsConversationInfoAction} from "@/lib/actions/actions-statistics"
 import { SlugStatisticSkeleton } from "@/components/statistics/SlugStatisticSkeleton"
-import { getEvaluationFormByGroupIdAction } from "@/lib/actions/actions-evaluationform"
-import { getGroupConversationInfoAction } from "@/lib/actions/actions-chatgroup"
 import type { GenderType } from "@/lib/enums"
 import { toast } from "sonner"
+import {getGroupConversationInfoAction} from "@/lib/actions/actions-chatgroup";
 
 interface SlugViewProps {
     chatGroupId?: string
@@ -25,19 +24,8 @@ export default function ChatGroupStatsView({ chatGroupId = "" }: SlugViewProps) 
     const [filterGender, setFilterGender] = useState<string>("todos")
     const [sortBy, setSortBy] = useState<string>("fecha")
     const [currentPage, setCurrentPage] = useState(1)
-    const [stats, setStats] = useState<Statistics[]>([])
-    const [formInicials, setformInicials] = useState<EvaluationFormResult[]>([])
     const [loading, setLoading] = useState(true)
-    const [conversaciones, setConversaciones] = useState<
-        {
-            id: string
-            summary: string
-            gender: GenderType
-            risk: RiskLevel
-            negativePercentage: number
-            date: Date
-        }[]
-    >([])
+    const [conversaciones, setConversaciones] = useState<ConversationInfo[]>([])
     const [chatGroupInfo, setChatGroupInfo] = useState<{ id: string; name: string; startDate: Date }>({
         id: "",
         name: "",
@@ -48,35 +36,23 @@ export default function ChatGroupStatsView({ chatGroupId = "" }: SlugViewProps) 
         async function loadData() {
             setLoading(true)
             try {
-                const [statsResult, formsResult, infoResult] = await Promise.all([
-                    getStatsbyChatGroupIdAction(chatGroupId),
-                    getEvaluationFormByGroupIdAction(chatGroupId),
-                    getGroupConversationInfoAction(chatGroupId),
-                ])
+                const result = await getStatsConversationInfoAction(chatGroupId);
+                const groupResult = await getGroupConversationInfoAction(chatGroupId);
 
-                if (statsResult.success) {
-                    setStats(statsResult.data || [])
+                if (result.success) {
+                    setConversaciones(result.data || [])
                 } else {
                     toast.error("Error al obtener las estadísticas", {
-                        description: statsResult.error || "No se pudo obtener las estadísticas.",
+                        description: result.error || "No se pudo obtener las estadísticas.",
                         duration: 5000,
                     })
                 }
 
-                if (formsResult.success) {
-                    setformInicials(formsResult.data || [])
-                } else {
-                    toast.error("Error al obtener el formulario inicial", {
-                        description: formsResult.error || "No se pudo obtener el formulario inicial.",
-                        duration: 5000,
-                    })
-                }
-
-                if (infoResult.success && infoResult.data) {
-                    setChatGroupInfo(infoResult.data)
+                if (groupResult.success && groupResult.data) {
+                    setChatGroupInfo(groupResult.data)
                 } else {
                     toast.error("Error al obtener la información del grupo", {
-                        description: infoResult.error || "No se pudo obtener la información del grupo.",
+                        description: groupResult.error || "No se pudo obtener la información del grupo.",
                         duration: 5000,
                     })
                 }
@@ -95,24 +71,6 @@ export default function ChatGroupStatsView({ chatGroupId = "" }: SlugViewProps) 
     }, [chatGroupId])
 
     useEffect(() => {
-        if (formInicials.length > 0 && stats.length > 0) {
-            const combinado = formInicials.map((form, index) => {
-                const stat = stats.find((s) => s.chatId === form.id) || stats[index]
-                return {
-                    id: form.id,
-                    summary: stat?.summary || "Sin resumen disponible",
-                    gender: form.gender as GenderType,
-                    risk: (form.score > 5 ? "Alto" : form.score > 4 ? "Medio" : "Bajo") as RiskLevel,
-                    negativePercentage: stat?.negativePercentage ?? 0,
-                    date: new Date(stat?.createdAt || form.createdAt),
-                }
-            })
-
-            setConversaciones(combinado)
-        }
-    }, [formInicials, stats])
-
-    useEffect(() => {
         setCurrentPage(1)
     }, [filterRisk, filterGender, sortBy])
 
@@ -121,7 +79,7 @@ export default function ChatGroupStatsView({ chatGroupId = "" }: SlugViewProps) 
 
         if (filterRisk !== "todos") {
             filtered = filtered.filter((conv) => {
-                const convRisk = conv.risk.toLowerCase()
+                const convRisk = conv.risk > 5 ? "alto" : conv.risk > 4 ? "medio" : "bajo"
                 return convRisk === filterRisk.toLowerCase()
             })
         }
@@ -141,8 +99,8 @@ export default function ChatGroupStatsView({ chatGroupId = "" }: SlugViewProps) 
                         medio: 2,
                         bajo: 1,
                     }
-                    const aRisk = riskOrder[a.risk.toLowerCase()] || 0
-                    const bRisk = riskOrder[b.risk.toLowerCase()] || 0
+                    const aRisk = riskOrder[a.risk > 5 ? "alto" : a.risk > 4 ? "medio" : "bajo"] || 0
+                    const bRisk = riskOrder[b.risk > 5 ? "alto" : b.risk > 4 ? "medio" : "bajo"] || 0
                     return bRisk - aRisk
                 }
                 case "sentimiento":
@@ -266,9 +224,9 @@ export default function ChatGroupStatsView({ chatGroupId = "" }: SlugViewProps) 
                           {getGenderLabel(conversation.gender)}
                         </span>
                                                 <span
-                                                    className={`rounded-full border px-3 py-1 text-sm font-medium ${getRiskColor(conversation.risk)}`}
+                                                    className={`rounded-full border px-3 py-1 text-sm font-medium ${getRiskColor(conversation.risk > 5 ? "Alto" : conversation.risk > 4 ? "Medio" : "Bajo")}`}
                                                 >
-                          Riesgo {conversation.risk}
+                          Riesgo {conversation.risk > 5 ? "Alto" : conversation.risk > 4 ? "Medio" : "Bajo"}
                         </span>
                                             </div>
                                             <p className="text-slate-600 leading-relaxed">{conversation.summary}</p>
