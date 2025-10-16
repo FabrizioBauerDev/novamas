@@ -96,6 +96,13 @@ const ConversationDemo = ({
       if (error.message?.includes("TIEMPO_EXPIRADO") || error.message?.includes("403")) {
         setGraceMessageUsed(true);
       }
+      
+      // Log para debugging
+      console.error("❌ Error en useChat:", {
+        message: error.message,
+        name: error.name,
+        error: error
+      });
     },
     onFinish: async () => {
       // Después de cada respuesta, verificar si necesitamos recargar mensajes

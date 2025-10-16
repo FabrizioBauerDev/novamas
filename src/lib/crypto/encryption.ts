@@ -133,9 +133,25 @@ export function isMessageEncrypted(message: string): boolean {
  */
 export function safeEncryptMessage(message: string): string {
   try {
-    return encryptMessage(message);
+    // Advertir si se intenta encriptar un string vacío
+    if (message === '') {
+      console.warn('⚠️ [ENCRYPT WARNING] Intentando encriptar un string vacío');
+    }
+    
+    const encrypted = encryptMessage(message);
+    
+    // Verificar si el resultado tiene el patrón :: (indica contenido vacío)
+    if (encrypted.includes('::')) {
+      console.warn('⚠️ [ENCRYPT PATTERN] Patrón :: detectado en encriptación', {
+        originalLength: message.length,
+        encryptedLength: encrypted.length,
+        encrypted: encrypted
+      });
+    }
+    
+    return encrypted;
   } catch (error) {
-    console.error('Error en encriptación segura, guardando mensaje sin encriptar:', error);
+    console.error('❌ [ENCRYPT ERROR] Error en encriptación segura, guardando mensaje sin encriptar:', error);
     // En producción, podrías querer lanzar el error en lugar de devolver el mensaje sin encriptar
     return message;
   }
@@ -153,9 +169,20 @@ export function safeDecryptMessage(encryptedMessage: string): string {
   }
   
   try {
-    return decryptMessage(encryptedMessage);
+    const decrypted = decryptMessage(encryptedMessage);
+    
+    // Advertir si el resultado de desencriptación está vacío
+    if (decrypted === '') {
+      console.warn('⚠️ [DECRYPT WARNING] Desencriptación resultó en string vacío', {
+        encryptedMessage: encryptedMessage,
+        hasDoubleColon: encryptedMessage.includes('::')
+      });
+    }
+    
+    return decrypted;
   } catch (error) {
-    console.error('Error en desencriptación segura, devolviendo mensaje encriptado:', error);
+    console.error('❌ [DECRYPT ERROR] Error en desencriptación segura, devolviendo mensaje encriptado:', error);
+    console.error('❌ [DECRYPT ERROR] Mensaje que falló:', encryptedMessage);
     // En caso de error, devolver el mensaje encriptado para debugging
     return encryptedMessage;
   }

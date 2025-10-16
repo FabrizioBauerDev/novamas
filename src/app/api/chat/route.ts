@@ -17,10 +17,10 @@ import { createWelcomeMessage } from "@/lib/chat-utils";
 import { getRelevantInformation } from "@/lib/pgvector/utils";
 import { z } from "zod";
 import { CHAT_CONFIG, isSessionExpired } from "@/lib/chat-config";
-import { all } from "axios";
 
-// Permite respuestas de streaming hasta 30 segundos
-export const maxDuration = 30;
+// Permite respuestas de streaming hasta 60 segundos
+// Aumentado porque Gemini 2.5 Flash con thinking puede tardar más
+export const maxDuration = 60;
 
 // Definir la tool para búsqueda RAG
 const ragSearchTool = tool({
@@ -284,24 +284,27 @@ export async function POST(req: NextRequest) {
       model: google("gemini-2.5-flash"),
       messages: convertToModelMessages(allMessages),
       system: enhancedSystemPrompt,
-      temperature: 0.5,
-      maxOutputTokens: 500,
+      temperature: 0.7,
+      maxOutputTokens: 1000, // Aumentado de 500 a 1000 para evitar cortes
       // Temperatura, top_p y no se si top_k se pueden pasar aquí
       tools: {
         searchKnowledgeBase: ragSearchTool,
       },
-      stopWhen: stepCountIs(3),
+      stopWhen: stepCountIs(5),
       maxRetries: 2,
       providerOptions: {
         google: {
           thinkingConfig: {
-            thinkingBudget: 8192, // Número de tokens de pensamiento permitidos
+            // 2048 para balance entre calidad y velocidad
+            // Un número alto puede causar timeouts y latencia excesiva
+            thinkingBudget: 2048,
             includeThoughts: false, // No incluir resumen del proceso de pensamiento
           },
         },
       },
       onError: (error) => {
-        console.error('❌ Error while streaming:', JSON.stringify(error, null, 2))
+        console.error('❌ [STREAMING ERROR] Error durante el streaming para sesión:', id);
+        console.error('❌ [STREAMING ERROR] Error completo:', JSON.stringify(error, null, 2));
       },
     });
 
@@ -309,11 +312,17 @@ export async function POST(req: NextRequest) {
       originalMessages: allMessages,
       messageMetadata: ({ part }) => {
         if (part.type === "start") {
+          console.log(logString + "Stream started para sesión:", id);
           return {
             createdAt: Date.now(),
           };
         }
         if (part.type === "finish") {
+          console.log(logString + "Stream finished para sesión:", id, {
+            inputTokens: part.totalUsage.inputTokens,
+            outputTokens: part.totalUsage.outputTokens,
+            reasoningTokens: part.totalUsage.reasoningTokens || 0,
+          });
           return {
             // Para mensajes del asistente, incluir todos los tipos de tokens
             messageTokensIn: part.totalUsage.inputTokens,
@@ -324,6 +333,24 @@ export async function POST(req: NextRequest) {
       },
       onFinish: async ({ messages }) => {
         try {
+          // Verificar contenido de mensajes antes de guardar
+          messages.forEach((msg, index) => {
+            const textContent = msg.parts
+              .filter(part => part.type === 'text')
+              .map(part => part.text)
+              .join('');
+            
+            // Advertencia si el mensaje está vacío
+            if (textContent === '') {
+              console.error('✖️ [EMPTY MESSAGE ALERT] Mensaje vacío detectado antes de guardar', {
+                messageId: msg.id,
+                role: msg.role,
+                sessionId: id,
+                parts: msg.parts
+              });
+            }
+          });
+          
           // Verificar si acabamos de usar el mensaje de gracia
           const updatedSession = await getChatSessionById(id);
           let messagesToSave = messages;

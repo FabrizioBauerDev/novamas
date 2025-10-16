@@ -32,7 +32,7 @@ export async function getChat(chatSessionId: string): Promise<UIMessage[]> {
 
     return uiMessages;
   } catch (error) {
-    console.error("Error loading chat messages:", error);
+    console.error("❌ [GETCHAT ERROR] Error loading chat messages:", error);
     return []; // Retornar array vacío si hay error
   }
 }

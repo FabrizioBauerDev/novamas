@@ -167,13 +167,36 @@ export async function saveChat({
           .map(part => part.text)
           .join('');
         
+        // Verificar contenido ANTES de encriptar        
+        if (textContent === '') {
+          console.error('✖️[EMPTY CONTENT ALERT] Intentando guardar mensaje VACÍO', {
+            sessionId: chatSessionId,
+            messageId: uiMessage.id,
+            role: uiMessage.role,
+            parts: uiMessage.parts,
+            metadata: uiMessage.metadata
+          });
+        }
+        
         // Filtrar solo roles válidos (assistant, user)
         const validRole = uiMessage.role === 'system' ? 'assistant' : uiMessage.role;
+        
+        // Encriptar el contenido
+        const encryptedContent = safeEncryptMessage(textContent);
+        
+        // Advertencia si detectamos el patrón ::
+        if (encryptedContent.includes('::') && textContent === '') {
+          console.error('✖️ [ENCRYPTION ANOMALY] Patrón :: detectado con contenido vacío', {
+            sessionId: chatSessionId,
+            messageId: uiMessage.id,
+            encryptedContent: encryptedContent
+          });
+        }
         
         await tx.insert(messages).values({
           chatSessionId: chatSessionId,
           sender: validRole,
-          content: safeEncryptMessage(textContent), // Encriptar el contenido antes de guardar
+          content: encryptedContent,
           messageTokensIn: uiMessage.metadata?.messageTokensIn || null,
           messageTokensOut: uiMessage.metadata?.messageTokensOut || null,
           messageTokensReasoning: uiMessage.metadata?.messageTokensReasoning || null,
@@ -184,7 +207,7 @@ export async function saveChat({
       }
     });
   } catch (error) {
-    console.error(`Error al guardar mensajes de chat ${chatSessionId}. Error:`, error);
+    console.error(`❌ [SAVECHAT ERROR] Error al guardar mensajes de chat ${chatSessionId}. Error:`, error);
     throw error;
   }
 }
