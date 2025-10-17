@@ -333,8 +333,8 @@ export async function POST(req: NextRequest) {
       },
       onFinish: async ({ messages }) => {
         try {
-          // Verificar contenido de mensajes antes de guardar
-          messages.forEach((msg, index) => {
+          // Verificar y corregir mensajes vacíos en una sola pasada
+          messages = messages.map(msg => {
             const textContent = msg.parts
               .filter(part => part.type === 'text')
               .map(part => part.text)
@@ -348,7 +348,26 @@ export async function POST(req: NextRequest) {
                 sessionId: id,
                 parts: msg.parts
               });
+              
+              // Si es un mensaje del asistente vacío, corregirlo
+              if (msg.role === 'assistant') {
+                return {
+                  ...msg,
+                  parts: [{
+                    type: 'text' as const,
+                    text: 'Perdón, tuve un error, ¿Puedes repetirme tu mensaje anterior?'
+                  }],
+                  metadata: {
+                    ...msg.metadata,
+                    messageTokensOut: -1,
+                    messageTokensIn: msg.metadata?.messageTokensIn,
+                    messageTokensReasoning: msg.metadata?.messageTokensReasoning
+                  }
+                };
+              }
             }
+            
+            return msg;
           });
           
           // Verificar si acabamos de usar el mensaje de gracia
