@@ -1,6 +1,6 @@
 import {db} from "@/db";
 import {evaluationForms, geoLocations, statistics} from "@/db/schema";
-import {desc, eq} from "drizzle-orm";
+import {asc, desc, eq} from "drizzle-orm";
 import {EvaluationFormResult} from "@/types/statistics";
 
 const Provinces = [
@@ -156,6 +156,37 @@ export async function getEvaluationFormByGroupId(group_id: string): Promise<Eval
         if (!evaluationForm) {
             return null
         }
+        const evaluationArray: EvaluationFormResult[] = [];
+        for (let i=0; i<evaluationForm.length; ++i) {
+            evaluationArray.push(convertAddress(evaluationForm[i]))
+        }
+        return evaluationArray;
+    } catch (error) {
+        console.error("Error fetching evaluation form by ID:", error)
+        throw new Error("Failed to fetch evaluation form by ID")
+    }
+}
+
+export async function getAllEvaluationForms(): Promise<EvaluationFormResult[]> {
+    try {
+        const evaluationForm = await db
+            .select({
+                id: evaluationForms.id,
+                gender: evaluationForms.gender,
+                age: evaluationForms.age,
+                onlineGaming: evaluationForms.onlineGaming,
+                couldntStop: evaluationForms.couldntStop,
+                personalIssues: evaluationForms.personalIssues,
+                triedToQuit: evaluationForms.triedToQuit,
+                score: evaluationForms.score,
+                createdAt: evaluationForms.createdAt,
+                address: evaluationForms.address,
+                isGeoLocation: geoLocations.id
+            })
+            .from(evaluationForms)
+            .leftJoin(geoLocations, eq(geoLocations.evaluationFormId, evaluationForms.id))
+            .orderBy(asc(evaluationForms.createdAt))
+
         const evaluationArray: EvaluationFormResult[] = [];
         for (let i=0; i<evaluationForm.length; ++i) {
             evaluationArray.push(convertAddress(evaluationForm[i]))

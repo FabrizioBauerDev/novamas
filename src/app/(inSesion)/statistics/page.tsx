@@ -1,6 +1,7 @@
 import {GeneralView} from "@/components/statistics/GeneralView"
 import { auth } from "@/auth"
 import { Metadata } from "next"
+import {redirect} from "next/navigation";
 
 export const metadata: Metadata = {
   title: 'Estadísticas',
@@ -11,7 +12,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function ChatGroupPage() {
+export default async function StatisticsPage() {
+  const session = await auth()
+  const userName = session?.user?.name
 
-    return <GeneralView />
+  if (!userName) {
+    redirect("/");
+  }
+  return <GeneralView currentUser={userName}/>
 }

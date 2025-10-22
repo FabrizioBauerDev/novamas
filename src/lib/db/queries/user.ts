@@ -1,6 +1,7 @@
 import { db } from "@/db"
 import { users, chatGroupMembers } from "@/db/schema"
 import { eq, and, ilike, notExists } from "drizzle-orm"
+import {UserData} from "@/types/types";
 
 // Buscar usuarios por nombre o email
 export async function searchUsers(searchTerm: string, limit: number = 10) {
@@ -87,4 +88,55 @@ export async function getChatGroupMembers(chatGroupId: string) {
     console.error("Error fetching chat group members:", error)
     throw new Error("Failed to fetch chat group members")
   }
+}
+
+export async function getUsers() : Promise<UserData[]> {
+    try{
+        const result = await db
+            .select({
+                id: users.id,
+                name: users.name,
+                email: users.email,
+                role: users.role,
+                status: users.status,
+                image: users.image,
+                createdAt: users.createdAt,
+                updatedAt: users.updatedAt,
+            })
+            .from(users)
+            .orderBy(users.status)
+
+        return result;
+    }catch (error) {
+        console.error("Error fetching users:", error)
+        throw new Error("Failed to fetch users")
+    }
+}
+
+export async function getUserById(id: string) : Promise<UserData> {
+    try{
+        const result = await db
+            .select({
+                id: users.id,
+                name: users.name,
+                email: users.email,
+                role: users.role,
+                status: users.status,
+                image: users.image,
+                createdAt: users.createdAt,
+                updatedAt: users.updatedAt,
+            })
+            .from(users)
+            .where(eq(users.id, id))
+            .limit(1);
+
+        if(result.length === 0){
+            throw new Error("User not found");
+        }
+
+        return result[0];
+    }catch (error) {
+        console.error("Error fetching users:", error)
+        throw new Error("Failed to fetch users")
+    }
 }

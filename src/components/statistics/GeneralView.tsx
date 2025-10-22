@@ -1,6 +1,11 @@
 "use client"
-import { useEffect, useState } from "react";
-import { getGeneralStatisticsAction, getNumberStatsAction } from "@/lib/actions/actions-statistics";
+import React, { useEffect, useState } from "react";
+import {
+    callAPI,
+    convertStatsAction,
+    getGeneralStatisticsAction,
+    getNumberStatsAction
+} from "@/lib/actions/actions-statistics";
 import { GeneralStats } from "@/types/statistics";
 import { EmptyStateGroupStats } from "@/components/statistics/EmptyStateGroupStats";
 import { StatisticSkeleton } from "@/components/statistics/StatisticSkeleton";
@@ -12,9 +17,16 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {EmptyState} from "@/components/statistics/EmptyState";
 import {toast} from "sonner";
+import {createExcel} from "@/lib/actions/actions-excel";
+import { useRouter } from "next/navigation";
+import {Loader2, Download, TrendingUp, Clock} from "lucide-react";
 
+interface GeneralViewProps {
+    currentUser:string;
+}
 
-export function GeneralView() {
+export function GeneralView({currentUser}: GeneralViewProps) {
+    const router = useRouter();
     const [selectedGroup, setSelectedGroup] = useState<string>("todas");
     const [selectedChatGroup, setSelectedChatGroup] = useState<{ id: string; name: string; startDate: Date; }>({
         id: "",
@@ -29,35 +41,42 @@ export function GeneralView() {
     });
     const [loading, setLoading] = useState(true);
     const [loadingTop, setLoadingTop] = useState(true);
+    const [loadingExcel, setLoadingExcel] = useState(false);
     const [loadingAPI, setLoadingAPI] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
 
     const handlePostStats = async () => {
         setLoadingAPI(true);
         try {
-            const res = await fetch("/api/statistics", { method: "POST" });
-            const data = await res.json();
+            const res = await callAPI();
 
             if (res.ok) {
-                toast.success("Se analizaron correctamente las estadísticas", {
-                    description: data.message || "Las estadísticas se crearon correctamente.",
+                console.log(res.message)
+                toast.success(res.message, {
+                    description: "Operación de estadisticas finalizada correctamente.",
                     duration: 5000,
                 });
             } else {
+                console.log(res.message)
                 toast.error("Error al analizar las estadísticas", {
-                    description: data.error || "Ocurrió un error.",
+                    description: "Intente nuevamente.",
                     duration: 5000,
                 });
             }
+
         } catch (err) {
             toast.error("Error al analizar las estadísticas", {
-                description: "Error de conexión",
+                description: "Intente nuevamente.",
                 duration: 5000,
             });
         } finally {
+            await handleGeneralStats(null);
+            await handleTopStats()
             setLoadingAPI(false);
         }
     };
+
     async function handleGeneralStats(chatGroupId: string | null) {
         setLoading(true);
         try {
@@ -95,6 +114,20 @@ export function GeneralView() {
         }
     }
 
+    async function handleExcel() {
+        setLoadingExcel(true);
+        const excel_stats = await convertStatsAction(generalStats);
+        const buffer = await createExcel(currentUser, excel_stats, null);
+        const blob = new Blob([buffer]);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Estadisticas-NoVaMas.xlsx";
+        a.click();
+        URL.revokeObjectURL(url);
+        setLoadingExcel(false);
+    }
+
     async function handleChatGroupId() {
         setLoading(true);
         try {
@@ -111,6 +144,7 @@ export function GeneralView() {
             setLoading(false);
         }
     }
+
     useEffect(() => {
         handleGeneralStats(null);
     }, []);
@@ -140,91 +174,125 @@ export function GeneralView() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50">
-            <main className="container mx-auto max-w-7xl px-8 py-12">
-                <div className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                    <h2 className="text-5xl font-bold text-slate-900">Estadísticas</h2>
+        <div className="min-h-screen bg-white">
+            <main className="container mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-12">
+                {/* Header */}
+                <div className="mb-12">
+                    <h1 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-8">Estadísticas</h1>
 
-                    <div className="flex flex-col items-end gap-3 sm:flex-row sm:items-center">
-                        <div className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 shadow-sm border border-slate-200">
-                            {loadingTop ? (
-                                <div className="flex space-x-1">
-                                    <span className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></span>
-                                    <span className="w-2 h-2 bg-blue-600 rounded-full animate-bounce delay-150"></span>
-                                    <span className="w-2 h-2 bg-blue-600 rounded-full animate-bounce delay-300"></span>
+                    {/* Stats Summary Bar */}
+                    <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between p-6 bg-slate-50 rounded-2xl border border-slate-200">
+                        <div className="flex flex-col sm:flex-row gap-6 flex-1">
+                            {/* Analyzed Stat */}
+                            <div className="flex items-center gap-4">
+                                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-100">
+                                    <TrendingUp className="h-7 w-7 text-emerald-600" />
                                 </div>
-                            ) : (
-                                <span className="text-lg font-bold text-blue-600">{topStats.analyzedTrue}</span>
-                            )}
-                            <span className="text-sm text-slate-600">Sesiones analizadas</span>
+                                <div>
+                                    <p className="text-sm font-medium text-slate-600">Sesiones analizadas</p>
+                                    {loadingTop ? (
+                                        <div className="flex gap-1 mt-1">
+                                            <div className="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce" />
+                                            <div className="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce delay-100" />
+                                            <div className="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce delay-200" />
+                                        </div>
+                                    ) : (
+                                        <p className="text-3xl font-bold text-slate-900">{topStats.analyzedTrue}</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Pending Stat */}
+                            <div className="flex items-center gap-4">
+                                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-amber-100">
+                                    <Clock className="h-7 w-7 text-amber-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-slate-600">Sesiones por analizar</p>
+                                    {loadingTop ? (
+                                        <div className="flex gap-1 mt-1">
+                                            <div className="w-1.5 h-1.5 bg-amber-600 rounded-full animate-bounce" />
+                                            <div className="w-1.5 h-1.5 bg-amber-600 rounded-full animate-bounce delay-100" />
+                                            <div className="w-1.5 h-1.5 bg-amber-600 rounded-full animate-bounce delay-200" />
+                                        </div>
+                                    ) : (
+                                        <p className="text-3xl font-bold text-slate-900">{topStats.analyzedFalse}</p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 shadow-sm border border-slate-200">
-                            {loadingTop ? (
-                                <div className="flex space-x-1">
-                                    <span className="w-2 h-2 bg-amber-600 rounded-full animate-bounce"></span>
-                                    <span className="w-2 h-2 bg-amber-600 rounded-full animate-bounce delay-150"></span>
-                                    <span className="w-2 h-2 bg-amber-600 rounded-full animate-bounce delay-300"></span>
-                                </div>
-                            ) : (
-                                <span className="text-lg font-bold text-amber-600">{topStats.analyzedFalse}</span>
-                            )}
-                            <span className="text-sm text-slate-600">Sesiones por analizar</span>
-                        </div>
-
-
+                        {/* Action Button */}
                         <Button
                             size="lg"
+                            onClick={handlePostStats}
                             disabled={topStats.analyzedFalse === 0 || loadingAPI}
-                            className="h-auto rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-3 text-base font-bold text-white shadow-lg shadow-emerald-500/30 transition-all hover:from-emerald-600 hover:to-emerald-700 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                            className="h-14 px-8 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl shadow-sm transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed"
                         >
-                            Analizar
+                            {loadingAPI && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Analizar sesiones
                         </Button>
                     </div>
                 </div>
-                {!loading && generalStats.length == 0 && selectedGroup=="todas" ? (<EmptyState/>) :
-                    (
-                        <Tabs value={selectedGroup} onValueChange={handleTabChange} className="mt-12">
-                            <TabsList
-                                className="mx-auto mb-10 block rounded-xl bg-white p-1.5 shadow-sm gap-2.5 text-center w-auto h-12">
-                                <TabsTrigger
-                                    value="todas"
-                                    className="rounded-lg px-6 py-3 text-sm font-medium transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md"
-                                >
-                                    Todas las sesiones
-                                </TabsTrigger>
-                                <TabsTrigger
-                                    value="grupales"
-                                    className="rounded-lg px-6 py-3 text-sm font-medium transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md"
-                                >
-                                    Sesiones grupales
-                                </TabsTrigger>
-                                <TabsTrigger
-                                    value="publicas"
-                                    className="rounded-lg px-6 py-3 text-sm font-medium transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md"
-                                >
-                                    Sesiones públicas
-                                </TabsTrigger>
-                            </TabsList>
 
-                            {/* Tab: Todas */}
-                            <TabsContent value="todas" className="space-y-10">
-                                {loading ? <StatisticSkeleton/> :
-                                    <StatisticsCharts generalStats={generalStats}/>}
-                                <div className="flex justify-center pt-6">
+                {/* Main Content */}
+                {!loading && generalStats.length === 0 && selectedGroup === "todas" ? (
+                    <EmptyState/>
+                ) : (
+                    <Tabs value={selectedGroup} onValueChange={handleTabChange} className="">
+                        {/* Navigation Tabs */}
+                        <TabsList className="inline-flex w-full sm:w-auto h-12 items-center justify-start rounded-xl bg-slate-100 p-1">
+                            <TabsTrigger
+                                value="todas"
+                                className="rounded-lg px-6 py-2 text-sm font-medium text-slate-700 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                            >
+                                Todas las sesiones
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="grupales"
+                                className="rounded-lg px-6 py-2 text-sm font-medium text-slate-700 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                            >
+                                Sesiones grupales
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="publicas"
+                                className="rounded-lg px-6 py-2 text-sm font-medium text-slate-700 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                            >
+                                Sesiones públicas
+                            </TabsTrigger>
+                        </TabsList>
+
+                        {/* Tab: Todas */}
+                        <TabsContent value="todas" className="space-y-8 mt-8">
+                            {loading ? (
+                                <StatisticSkeleton/>
+                            ) : (
+                                <>
+                                    <StatisticsCharts generalStats={generalStats}/>
+                                    <div className="flex justify-center pt-6">
                                         <Button
                                             variant="outline"
                                             size="lg"
-                                            disabled={loadingAPI}
-                                            className="border-slate-300 bg-white px-8 py-6 text-base font-medium text-slate-700 shadow-sm hover:bg-slate-50 hover:shadow-md"
+                                            onClick={handleExcel}
+                                            disabled={loadingExcel}
+                                            className="h-14 px-8 py-6 text-lg border-slate-300 hover:border-slate-400 hover:bg-slate-50 font-medium rounded-2xl"
                                         >
+                                            {loadingExcel ? (
+                                                <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                                            ) : (
+                                                <Download className="mr-3 h-5 w-5" />
+                                            )}
                                             Exportar las estadísticas a Excel
                                         </Button>
-                                </div>
-                            </TabsContent>
+                                    </div>
 
-                            {/* Tab: Grupales */}
-                            <TabsContent value="grupales" className="space-y-10">
+                                </>
+                            )}
+                        </TabsContent>
+
+                        {/* Tab: Grupales */}
+                        <TabsContent value="grupales" className="space-y-8 mt-8">
+                            <div className="">
                                 <Select
                                     value={selectedChatGroup.id}
                                     onValueChange={(value) => {
@@ -234,53 +302,60 @@ export function GeneralView() {
                                         }
                                     }}
                                 >
-                                    <SelectTrigger
-                                        className="h-14 w-full rounded-xl border-slate-300 bg-white text-base shadow-sm">
-                                        <SelectValue placeholder="Elegir sesión grupal"/>
+                                    <SelectTrigger className="h-12 w-full rounded-xl border-slate-300 bg-white text-sm font-medium hover:border-slate-400">
+                                        <SelectValue placeholder="Seleccionar sesión grupal"/>
                                     </SelectTrigger>
                                     <SelectContent>
                                         {availableChatGroups.map((group) => (
                                             <SelectItem key={group.id} value={group.id}>
-                                                {group.name + " - " + group.startDate.getDate() + "/" + group.startDate.getMonth() + "/" + group.startDate.getFullYear()}
+                                                {group.name} - {group.startDate.getDate()}/{group.startDate.getMonth() + 1}/{group.startDate.getFullYear()}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
+                            </div>
 
-                                {!selectedChatGroup.id ? (
-                                    <EmptyStateGroupStats/>
-                                ) : loading ? (
-                                    <StatisticSkeleton/>
-                                ) : (
-                                    <>
-                                        {generalStats.length > 0 ? (
-                                            <><StatisticsCharts generalStats={generalStats}/>
-                                                <div className="flex justify-center pt-6">
-                                                    <Link href={`/statistics/${selectedChatGroup.id}`}>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="lg"
-                                                            disabled={loadingAPI}
-                                                            className="border-slate-300 bg-white px-8 py-6 text-base font-medium text-slate-700 shadow-sm hover:bg-slate-50 hover:shadow-md"
-                                                        >
-                                                            Ver todas las conversaciones del {selectedChatGroup.name}
-                                                        </Button>
-                                                    </Link>
-                                                </div>
-                                            </>
-                                        ): <EmptyState />
-                                        }
+                            {!selectedChatGroup.id ? (
+                                <EmptyStateGroupStats/>
+                            ) : loading ? (
+                                <StatisticSkeleton/>
+                            ) : (
+                                <>
+                                    {generalStats.length > 0 ? (
+                                        <>
+                                            <StatisticsCharts generalStats={generalStats}/>
+                                            <div className="flex justify-center pt-6">
+                                                <Link href={`/statistics/${selectedChatGroup.id}`}>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="lg"
+                                                        disabled={loadingAPI || loadingExcel}
+                                                        className="h-14 px-8 py-6 text-lg border-slate-300 hover:border-slate-400 hover:bg-slate-50 font-medium rounded-2xl"
+                                                    >
+                                                        Ver conversaciones de {selectedChatGroup.name}
+                                                    </Button>
+                                                </Link>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <EmptyState />
+                                    )}
+                                </>
+                            )}
+                        </TabsContent>
 
-                                    </>
-                                )}
-                            </TabsContent>
-
-                            {/* Tab: Públicas */}
-                            <TabsContent value="publicas" className="space-y-10">
-                                {loading ? <StatisticSkeleton/> : generalStats.length==0? <EmptyState /> :
-                                <StatisticsCharts generalStats={generalStats}/>}
-                            </TabsContent>
-                        </Tabs>)}
+                        {/* Tab: Públicas */}
+                        <TabsContent value="publicas" className="space-y-8 mt-8">
+                            {loading ? (
+                                <StatisticSkeleton/>
+                            ) : generalStats.length === 0 ? (
+                                <EmptyState />
+                            ) : (
+                                <StatisticsCharts generalStats={generalStats}/>
+                            )}
+                        </TabsContent>
+                    </Tabs>
+                )}
             </main>
         </div>
     );

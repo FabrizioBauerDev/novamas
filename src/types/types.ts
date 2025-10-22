@@ -22,6 +22,7 @@ export interface FinalFormData{
   assistantResponses: ScaleType | undefined,
   userFriendly: ScaleType | undefined,
   usefulToUnderstandRisks: ScaleType | undefined,
+  average: number | undefined,
 }
 // Define a type for the form data used in the evaluation form
 export interface EvaluationFormData {
@@ -71,4 +72,29 @@ export interface ChatGroupWithCreator {
     role: string
     joinedAt: Date
   }[]
+}
+
+export interface UserData {
+  id: string
+  name: string
+  email: string
+  role: string
+  status: string
+  createdAt: Date
+  updatedAt: Date
+  image: string | null
+}
+
+export interface UserFormData {
+  id: string
+  name: string
+  image: string | null
+}
+
+export interface FeedBack{
+  id: string
+  chatSessionId: string
+  rating: number
+  comment: string | null
+  createdAt: Date
 }

@@ -27,10 +27,10 @@ export async function createFinalFormAction(formData: FinalFormData) {
             return { success: false, error: errors.join(". ") };
         }
 
-        const { chatId, assistantDesign, assistantResponses, assistantPurpose, userFriendly, usefulToUnderstandRisks } = validatedFields.data;
+        const { chatId, assistantDesign, assistantResponses, assistantPurpose, userFriendly, usefulToUnderstandRisks, average } = validatedFields.data;
 
         // Crear el FinalForm
-        const newFinalForm = await createFinalForm(chatId, assistantDesign, assistantResponses, assistantPurpose, userFriendly, usefulToUnderstandRisks);
+        const newFinalForm = await createFinalForm(chatId, assistantDesign, assistantResponses, assistantPurpose, userFriendly, usefulToUnderstandRisks, average);
         return { success: true, data: newFinalForm };
     } catch (error) {
         console.error("Error in createFinalFormAction:", error);

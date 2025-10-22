@@ -1,0 +1,1 @@
+ALTER TABLE "FinalForm" ADD COLUMN "average" integer;

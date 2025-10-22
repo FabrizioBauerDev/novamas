@@ -1,5 +1,57 @@
 import {CouldntStopType, GenderType, PersonalIssuesType} from "@/lib/enums";
 
+export interface ExcelGeneralStats {
+    country: Record<string, number>;
+    province: Record<string, number>;
+    gender: {
+        Femenino: number;
+        Masculino: number;
+        Otro: number;
+    };
+    betType: {
+        "Casino presencial": number;
+        "Casino online": number;
+        "Videojuego": number;
+        "Lotería": number;
+        "Apuesta deportiva": number;
+        "No especifica": number;
+    };
+    sentiment: {
+        Positivo: number;
+        Negativo: number;
+        Neutral: number;
+    };
+    age: {
+        "13-16": number;
+        "17-20": number;
+        "21-25": number;
+        "26-40": number;
+        "41-99": number;
+    };
+    risk: {
+        Alto: number;
+        Medio: number;
+        Bajo: number;
+    };
+    changeTheme: {
+        Si: number;
+        No: number;
+    };
+    average:{
+        1: number;
+        2: number;
+        3: number;
+        4: number;
+        5: number;
+    }
+    rating:{
+        1: number;
+        2: number;
+        3: number;
+        4: number;
+        5: number;
+    }
+}
 export interface ConversationInfo {
     id: string
     summary: string
@@ -14,6 +66,7 @@ export interface FinalForm {
     assistantResponses: number,
     userFriendly: number,
     usefulToUnderstandRisks: number,
+    average: number,
 }
 export interface EvaluationFormResult {
     id: string
@@ -36,10 +89,12 @@ export interface GeneralStats {
     age: number
     score: number
     mostFrequentSentiment: SentimentType | null
-    usefulToUnderstandRisks: number | null
     country: string | null
     province: string | null
     neighbourhood: string | null
+    changeTheme: boolean | null
+    average: number | null
+    rating: number | null
 }
 
 

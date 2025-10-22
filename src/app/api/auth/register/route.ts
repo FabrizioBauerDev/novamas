@@ -38,10 +38,38 @@ export async function POST(request: NextRequest) {
       .then(result => result[0]);
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: "El usuario ya existe con este email" },
-        { status: 409 }
-      );
+      if(existingUser.status=='DESACTIVADO'){
+        console.log("estoy modificando el status de un usuario desactivado")
+        const [user] = await db
+            .update(users)
+            .set({
+              name: name,
+              password: password,
+              role: role,
+              status: 'ACTIVO',
+              updatedAt: new Date()
+            })
+            .where(eq(users.id, existingUser.id))
+            .returning({
+              id: users.id,
+              name: users.name,
+              email: users.email,
+              role: users.role,
+              status: users.status,
+            })
+        return NextResponse.json(
+            {
+              message: "Usuario estaba desactivo, se reactivó exitosamente.",
+              user
+            },
+            { status: 201 }
+        );
+      }else{
+        return NextResponse.json(
+            { error: "El usuario ya existe con este email" },
+            { status: 409 }
+        );
+      }
     }
 
     // Hashear la contraseña

@@ -36,6 +36,7 @@ export default function EvaluationForm({ onFormComplete, chatSessionId, onEvalua
     assistantResponses: undefined,
     userFriendly: undefined,
     usefulToUnderstandRisks: undefined,
+    average: undefined,
   });
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -52,8 +53,12 @@ export default function EvaluationForm({ onFormComplete, chatSessionId, onEvalua
   async function handleSubmit() {
     setLoading(true);
     try {
-      console.log("Submitting...");
-      const result = await createFinalFormAction(formData);
+      const average = (formData.assistantDesign! + formData.assistantPurpose! + formData.assistantResponses! + formData.userFriendly! + formData.usefulToUnderstandRisks!) / 5;
+
+      const result = await createFinalFormAction({
+        ...formData,
+        average
+      });
 
       if (result.success) {
         setCurrentStep(2);

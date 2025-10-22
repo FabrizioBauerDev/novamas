@@ -1,0 +1,1 @@
+ALTER TABLE "FinalForm" ALTER COLUMN "average" SET DATA TYPE real;

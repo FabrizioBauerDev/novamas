@@ -341,6 +341,7 @@ export const finalForm = pgTable("FinalForm", {
   assistantResponses: integer("assistantResponses").notNull(),
   userFriendly: integer("userFriendly").notNull(),
   usefulToUnderstandRisks: integer("usefulToUnderstandRisks").notNull(),
+  average: real("average").notNull(),
   createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow()
 });
 

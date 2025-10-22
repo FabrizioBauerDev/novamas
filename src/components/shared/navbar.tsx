@@ -18,6 +18,7 @@ interface NavbarProps {
   user?: {
     name?: string | null;
     email?: string | null;
+    role?: string | null;
   } | null;
 }
 
@@ -63,7 +64,7 @@ export default function Navbar({ user }: NavbarProps) {
                 <span className="text-md text-gray-700">
                   Bienvenida/o, <span className="font-medium">{user.name}</span>
                 </span>
-                <DropBoxUser />
+                <DropBoxUser user={user}/>
               </>
             ) : (
               <>
@@ -136,7 +137,7 @@ export default function Navbar({ user }: NavbarProps) {
                   {/* Botones de acción móvil */}
                   {user ? (
                     <div className="pt-4 border-t border-gray-200 space-y-2 px-3">
-                      <Link href="/perfil" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
+                      <Link href="/profile" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
                         Perfil
                       </Link>
                       <Link href="/dashboard" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
@@ -148,9 +149,9 @@ export default function Navbar({ user }: NavbarProps) {
                       <Link href="/chatgroup" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
                         Sesión Grupal
                       </Link>
-                      <Link href="/configuracion" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
-                        Configuración
-                      </Link>
+                      {(user.role === "ADMINISTRADOR" && (<Link href="/usermanagement" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
+                            Gestión de usuarios
+                          </Link>))}
                       <Link href="/chatNova" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
                         Nuevo chat
                       </Link>

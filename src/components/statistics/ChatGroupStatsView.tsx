@@ -2,35 +2,62 @@
 import { useState, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, BarChart3, ChevronLeft, ChevronRight } from "lucide-react"
+import {ArrowLeft, BarChart3, ChevronLeft, ChevronRight, Download, Loader2} from "lucide-react"
 import Link from "next/link"
 import type {ConversationInfo} from "@/types/statistics"
-import {getStatsConversationInfoAction} from "@/lib/actions/actions-statistics"
+import {
+    convertStatsAction,
+    getGeneralStatisticsAction,
+    getStatsConversationInfoAction
+} from "@/lib/actions/actions-statistics"
 import { SlugStatisticSkeleton } from "@/components/statistics/SlugStatisticSkeleton"
 import type { GenderType } from "@/lib/enums"
 import { toast } from "sonner"
 import {getGroupConversationInfoAction} from "@/lib/actions/actions-chatgroup";
+import {createExcel} from "@/lib/actions/actions-excel";
 
 interface SlugViewProps {
     chatGroupId?: string
+    currentUser: string
 }
 
 type RiskLevel = "Bajo" | "Medio" | "Alto"
 
 const CONVERSATIONS_PER_PAGE = 5
 
-export default function ChatGroupStatsView({ chatGroupId = "" }: SlugViewProps) {
+export default function ChatGroupStatsView({ chatGroupId = "", currentUser }: SlugViewProps) {
     const [filterRisk, setFilterRisk] = useState<string>("todos")
     const [filterGender, setFilterGender] = useState<string>("todos")
     const [sortBy, setSortBy] = useState<string>("fecha")
     const [currentPage, setCurrentPage] = useState(1)
     const [loading, setLoading] = useState(true)
     const [conversaciones, setConversaciones] = useState<ConversationInfo[]>([])
+    const [loadingExcel, setLoadingExcel] = useState(false)
     const [chatGroupInfo, setChatGroupInfo] = useState<{ id: string; name: string; startDate: Date }>({
         id: "",
         name: "",
         startDate: new Date(),
     })
+
+    async function handleExcel() {
+        setLoadingExcel(true)
+        const result = await getGeneralStatisticsAction(chatGroupId);
+        if(result.success && result.data) {
+            const excel_stats = await convertStatsAction(result.data);
+            const buffer = await createExcel(currentUser, excel_stats, chatGroupId);
+            const blob = new Blob([buffer]);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `Estadisticas-NoVaMas-${chatGroupInfo.name}.xlsx`;
+            a.click();
+            URL.revokeObjectURL(url);
+            setLoadingExcel(false);
+        }else{
+            toast.error("Ocurrio un error al generar el archivo", {})
+        }
+
+    }
 
     useEffect(() => {
         async function loadData() {
@@ -159,12 +186,18 @@ export default function ChatGroupStatsView({ chatGroupId = "" }: SlugViewProps) 
                         <h2 className="mb-8 text-4xl font-bold text-slate-900">
                             Conversaciones de la prueba: {chatGroupInfo.name}
                         </h2>
-
                             <Button
                                 variant="outline"
                                 size="lg"
-                                className="border-slate-300 bg-white px-8 py-6 text-base font-medium text-slate-700 shadow-sm hover:bg-slate-50 hover:shadow-md"
+                                onClick={handleExcel}
+                                disabled={loadingExcel}
+                                className="h-12 px-6 border-slate-300 hover:border-slate-400 hover:bg-slate-50 font-medium rounded-xl"
                             >
+                                {loadingExcel ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Download className="mr-2 h-4 w-4" />
+                                )}
                                 Exportar las estadísticas a Excel
                             </Button>
                         </div>
@@ -239,7 +272,9 @@ export default function ChatGroupStatsView({ chatGroupId = "" }: SlugViewProps) 
                                             </p>
                                         </div>
                                         <Link href={`/statistics/${chatGroupId}/${conversation.id}`}>
-                                            <Button className="gap-2 rounded-xl bg-blue-600 px-6 py-5 text-white shadow-md hover:bg-blue-700">
+                                            <Button
+                                                disabled={loadingExcel}
+                                                className="gap-2 rounded-xl bg-blue-600 px-6 py-5 text-white shadow-md hover:bg-blue-700">
                                                 <BarChart3 className="h-4 w-4" />
                                                 Ver estadísticas
                                             </Button>

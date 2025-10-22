@@ -46,3 +46,32 @@ export const getEnumOptions = <T extends Record<string, string>>(
     label,
   }));
 };
+
+export const getGenderLabel = (gender: GenderType) => {
+  switch (gender) {
+    case "MASCULINO":
+      return "Masculino"
+    case "FEMENINO":
+      return "Femenino"
+    case "OTRO":
+      return "Otro"
+  }
+}
+
+export const getCouldntStopLabel = (value: string) => {
+  const labels: Record<string, string> = {
+    NO: "No",
+    NO_ES_SEG: "No está seguro/a",
+    SI: "Sí",
+  }
+  return labels[value] || value
+}
+
+export const getPersonalIssuesLabel = (value: string) => {
+  const labels: Record<string, string> = {
+    NO: "No",
+    NO_AP: "No aplica",
+    SI: "Sí",
+  }
+  return labels[value] || value
+}

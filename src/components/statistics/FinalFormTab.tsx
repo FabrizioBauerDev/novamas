@@ -6,20 +6,9 @@ interface FinalFormProps {
 }
 export function FinalFormTab({ finalForm }: FinalFormProps) {
 
-    const calculateAverage = () => {
-        const sum =
-            finalForm.assistantDesign +
-            finalForm.assistantPurpose +
-            finalForm.assistantResponses +
-            finalForm.userFriendly +
-            finalForm.usefulToUnderstandRisks
-        return (sum / 5).toFixed(1)
-    }
-
     const getAverageColor = () => {
-        const avg = Number.parseFloat(calculateAverage())
-        if (avg >= 4) return "text-green-600 bg-green-100"
-        if (avg >= 3) return "text-amber-600 bg-amber-100"
+        if (finalForm.average >= 4) return "text-green-600 bg-green-100"
+        if (finalForm.average >= 3) return "text-amber-600 bg-amber-100"
         return "text-red-600 bg-red-100"
     }
 
@@ -29,7 +18,7 @@ export function FinalFormTab({ finalForm }: FinalFormProps) {
         <h3 className="text-xl font-semibold text-slate-900">Evaluación Final</h3>
         <div className={`rounded-lg px-4 py-2 ${getAverageColor()}`}>
         <span className="text-sm font-medium">Promedio: </span>
-        <span className="text-lg font-bold">{calculateAverage()}/5</span>
+        <span className="text-lg font-bold">{finalForm.average}/5</span>
         </div>
         </div>
 

@@ -6,11 +6,30 @@ const finalFormSchema = z.object({
   assistantPurpose: z.number().int().min(1).max(5),
   assistantResponses: z.number().int().min(1).max(5),
   userFriendly: z.number().int().min(1).max(5),
-  usefulToUnderstandRisks: z.number().int().min(1).max(5)
+  usefulToUnderstandRisks: z.number().int().min(1).max(5),
+  average: z.number().int().min(1).max(5),
 });
+
 const signInSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(100),
+});
+
+const updateProfileSchema = z.object({
+  id: z.string().uuid("ID inválido"),
+  image: z.string().optional(),
+  name: z.string().min(2).max(50),
+});
+
+const updateUserSchema = z.object({
+  id: z.string().uuid("ID inválido"),
+  role: z.enum(['ADMINISTRADOR', 'INVESTIGADOR', 'ESTUDIANTE']),
+  status: z.enum(['ACTIVO', 'DESACTIVADO']),
+});
+
+const deleteUserSchema = z.object({
+  id: z.string().uuid("ID inválido"),
+  status: z.enum(['ACTIVO', 'DESACTIVADO']),
 });
 
 const signUpSchema = z.object({
@@ -138,4 +157,7 @@ export {
   bibliographySchema,
   chatFeedbackSchema,
   finalFormSchema,
+  updateUserSchema,
+  deleteUserSchema,
+  updateProfileSchema,
 };

@@ -1,7 +1,7 @@
 import {db} from "@/db";
-import {chatSessions, evaluationForms, finalForm, geoLocations, statistics} from "@/db/schema";
-import {desc, eq, isNotNull, isNull} from "drizzle-orm";
-import {EvaluationFormResult, GeneralStats} from "@/types/statistics";
+import {chatFeedbacks, chatSessions, evaluationForms, finalForm, geoLocations, statistics} from "@/db/schema";
+import {asc, desc, eq, isNotNull, isNull} from "drizzle-orm";
+import {EvaluationFormResult, ExcelGeneralStats, GeneralStats} from "@/types/statistics";
 import {GenderType} from "@/lib/enums";
 
 const Provinces = [
@@ -36,20 +36,24 @@ function convertAddress(evaluationForm: {
     age: number,
     score: number,
     mostFrequentSentiment: "POS" | "NEG" | "NEU" | null,
-    usefulToUnderstandRisks: number | null,
     address: string | null,
-    isGeoLocation: string | null}) {
+    isGeoLocation: string | null,
+    average: number | null,
+    changeTheme: boolean | null,
+    rating: number | null,}) {
     if (!evaluationForm.address) {
         return {
             gender: evaluationForm.gender,
             age: evaluationForm.age,
             betType: evaluationForm.betType,
             mostFrequentSentiment: evaluationForm.mostFrequentSentiment,
-            usefulToUnderstandRisks: evaluationForm.usefulToUnderstandRisks,
+            average: evaluationForm.average,
+            changeTheme: evaluationForm.changeTheme,
             score: evaluationForm.score,
             country: null,
             neighbourhood: null,
-            province: null
+            province: null,
+            rating: evaluationForm.rating
         };
     }else{
         const addressSplit = evaluationForm.address.split(",").map(part => part.trim());
@@ -75,7 +79,6 @@ function convertAddress(evaluationForm: {
             if(result){
                 province = result;
             }
-            neighbourhood = addressSplit[0];
         }
         return{
             gender: evaluationForm.gender,
@@ -83,10 +86,12 @@ function convertAddress(evaluationForm: {
             betType: evaluationForm.betType,
             mostFrequentSentiment: evaluationForm.mostFrequentSentiment,
             score: evaluationForm.score,
-            usefulToUnderstandRisks: evaluationForm.usefulToUnderstandRisks,
+            average: evaluationForm.average,
+            changeTheme: evaluationForm.changeTheme,
             country: country,
             neighbourhood: neighbourhood,
-            province: province
+            province: province,
+            rating: evaluationForm.rating
         }
     }
 }
@@ -114,13 +119,16 @@ export async function getGeneralStats(chatGroupId: string | null) {
                 age: evaluationForms.age,
                 score: evaluationForms.score,
                 mostFrequentSentiment: statistics.mostFrequentSentiment,
-                usefulToUnderstandRisks: finalForm.usefulToUnderstandRisks,
+                average: finalForm.average,
                 address: evaluationForms.address,
-                isGeoLocation: geoLocations.id
+                isGeoLocation: geoLocations.id,
+                changeTheme: statistics.changeTheme,
+                rating: chatFeedbacks.rating,
             })
             .from(statistics)
             .rightJoin(evaluationForms, eq(statistics.chatId, evaluationForms.id))
             .leftJoin(finalForm, eq(finalForm.chatId, evaluationForms.id))
+            .leftJoin(chatFeedbacks, eq(chatFeedbacks.chatSessionId, evaluationForms.id))
             .leftJoin(geoLocations, eq(geoLocations.evaluationFormId, evaluationForms.id))
             .where(condition);
 
@@ -130,6 +138,54 @@ export async function getGeneralStats(chatGroupId: string | null) {
             evaluationArray.push(convertAddress(result[i]))
         }
         return evaluationArray;
+    } catch (error) {
+        console.error("Error fetching general stats:", error);
+        throw new Error("Failed to fetch general stats");
+    }
+}
+
+
+export async function getGeneralStatsByGroups() {
+    try {
+        const result = await db
+            .select({
+                chatGroupId: statistics.chatGroupId,
+                betType: statistics.betType,
+                gender: evaluationForms.gender,
+                age: evaluationForms.age,
+                score: evaluationForms.score,
+                mostFrequentSentiment: statistics.mostFrequentSentiment,
+                average: finalForm.average,
+                address: evaluationForms.address,
+                isGeoLocation: geoLocations.id,
+                changeTheme: statistics.changeTheme,
+                rating: chatFeedbacks.rating,
+            })
+            .from(statistics)
+            .rightJoin(evaluationForms, eq(statistics.chatId, evaluationForms.id))
+            .leftJoin(finalForm, eq(finalForm.chatId, evaluationForms.id))
+            .leftJoin(chatFeedbacks, eq(chatFeedbacks.chatSessionId, evaluationForms.id))
+            .leftJoin(geoLocations, eq(geoLocations.evaluationFormId, evaluationForms.id))
+            .where(isNotNull(statistics.chatGroupId))
+            .orderBy(desc(statistics.chatGroupId));
+
+        const generalStats: { [key: string]: GeneralStats[] } = {}
+
+        for (let i = 0; i < result.length; i++) {
+            const converted = convertAddress(result[i]);
+            const chatGroupId = result[i].chatGroupId;
+
+            if (!chatGroupId) continue;
+
+            if (!generalStats[chatGroupId]) {
+                generalStats[chatGroupId] = [converted];
+            } else {
+                generalStats[chatGroupId].push(converted);
+            }
+        }
+
+
+        return generalStats;
     } catch (error) {
         console.error("Error fetching general stats:", error);
         throw new Error("Failed to fetch general stats");
@@ -189,6 +245,30 @@ export async function getStatsByChatGroupId(id: string) {
     } catch (error) {
         console.error("Error fetching stats by chat slug:", error)
         throw new Error("Failed to fetch stats by chat slug")
+    }
+}
+
+export async function getAllStats(chatGroupId: string | null) {
+    try {
+        let condition;
+
+        if (chatGroupId === null || chatGroupId === undefined) {
+            // Busca todas las estadisticas
+            condition = undefined;
+        } else {
+            // Busca estadisticas de un grupo en particular
+            condition = eq(statistics.chatGroupId, chatGroupId);
+        }
+        const result = await db
+            .select()
+            .from(statistics)
+            .where(condition)
+            .orderBy(desc(statistics.createdAt));
+
+        return result;
+    } catch (error) {
+        console.error("Error fetching all stats:", error)
+        throw new Error("Failed to fetch all stats")
     }
 }
 

@@ -6,7 +6,8 @@ export async function createFinalForm(chatId: string,
                                       assistantPurpose: number,
                                       assistantResponses: number,
                                       userFriendly: number,
-                                      usefulToUnderstandRisks: number,) {
+                                      usefulToUnderstandRisks: number,
+                                      average: number,) {
     try {
         const newFinalForm: NewFinalForm = {
             chatId: chatId,
@@ -15,6 +16,7 @@ export async function createFinalForm(chatId: string,
             assistantResponses: assistantResponses,
             userFriendly: userFriendly,
             usefulToUnderstandRisks: usefulToUnderstandRisks,
+            average: average,
         };
 
         const result = await db

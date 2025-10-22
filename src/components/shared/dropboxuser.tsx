@@ -12,7 +12,14 @@ import { User, LogOut } from "lucide-react";
 import Link from "next/link";
 import { handleSignOut } from "@/lib/actions/actions-auth";
 
-export default function DropboxUser() {
+interface DropboxUserProps {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    role?: string | null;
+  } | null;
+}
+export default function DropboxUser({ user }: DropboxUserProps) {
   const menuItemClass = "hover:bg-gray-200 focus:bg-gray-200 data-[highlighted]:bg-gray-200";
   return (
     <>
@@ -29,14 +36,15 @@ export default function DropboxUser() {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="start">
           <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
-          <Link href="/perfil"><DropdownMenuItem className={menuItemClass}>Perfil</DropdownMenuItem></Link>
+          <Link href="/profile"><DropdownMenuItem className={menuItemClass}>Perfil</DropdownMenuItem></Link>
           <DropdownMenuSeparator />
           <DropdownMenuLabel>Acciones rápidas</DropdownMenuLabel>
           <DropdownMenuGroup>
             <Link href="/dashboard"><DropdownMenuItem className={menuItemClass}>Dashboard</DropdownMenuItem></Link>
             <Link href="/statistics"><DropdownMenuItem className={menuItemClass}>Estadísticas</DropdownMenuItem></Link>
             <Link href="/chatgroup"><DropdownMenuItem className={menuItemClass}>Sesión Grupal</DropdownMenuItem></Link>
-            <Link href="/configuracion"><DropdownMenuItem className={menuItemClass}>Configuración</DropdownMenuItem></Link>
+            {(user?.role === "ADMINISTRADOR" && (
+                <Link href="/usermanagement"><DropdownMenuItem className={menuItemClass}>Gestión de usuarios</DropdownMenuItem></Link>))}
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuLabel>ChatNova+</DropdownMenuLabel>

@@ -15,369 +15,339 @@ import {
     Bar
 } from "recharts"
 import { useEffect, useState } from "react"
+import { convertStatsAction } from "@/lib/actions/actions-statistics"
 
+const GENDER_COLORS = ["#ec4899", "#10b981", "#a855f7"]
+const AGE_COLORS = ["#06b6d4", "#3b82f6", "#6366f1", "#8b5cf6", "#f59e0b"]
+const RISK_COLORS = ["#ef4444", "#fbbf24","#10b981"]
+const SENTIMENT_COLORS = ["#10b981", "#ef4444", "#6b7280"]
+const TYPE_COLORS = ["#3b82f6", "#f59e0b", "#ef4444", "#10b981", "#8b5cf6", "#6b7280"]
+const USEFUL_COLORS = ["#ef4444", "#f97316", "#fbbf24", "#84cc16", "#10b981"]
 
-const GENDER_COLORS = ["#4f46e5", "#ec4899", "#f59e0b"]
-const AGE_COLORS = ["#3b82f6", "#6366f1", "#8b5cf6", "#f472b6", "#fbbf24"]
-const RISK_COLORS = ["#10b981", "#facc15", "#f97316"]
-const SENTIMENT_COLORS = ["#10b981", "#f97316", "#6366f1"]
-const TYPE_COLORS = ["#3b82f6", "#f59e0b", "#ef4444", "#22c55e", "#8b5cf6", "#6b7280"]
-const USEFUL_COLORS = ["#ef4444", "#f97316",  "#facc15", "#10b981", "#6b7280"]
 interface StatisticsChartsProps {
     generalStats: GeneralStats[]
 }
 
+interface TooltipProps {
+    active?: boolean
+    payload?: Array<{
+        name: string
+        value: number
+        fill: string
+    }>
+}
+
+const CustomTooltip = ({ active, payload }: TooltipProps) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-white px-4 py-2 rounded-lg shadow-lg border border-gray-100">
+                <p className="font-semibold text-gray-900">{payload[0].name}</p>
+                <p className="text-sm text-gray-600">
+                    Cantidad: <span className="font-bold text-indigo-600">{payload[0].value}</span>
+                </p>
+            </div>
+        )
+    }
+    return null
+}
+
+const EmptyState = ({ message }: { message: string }) => (
+    <div className="flex h-48 items-center justify-center">
+        <div className="text-center space-y-2">
+            <div className="text-gray-300 text-4xl">📊</div>
+            <p className="text-gray-400 text-sm font-medium">{message}</p>
+        </div>
+    </div>
+)
+
+const ChartCard = ({ title, children, gradient }: { title: string; children: React.ReactNode; gradient?: string }) => (
+    <div className={`group relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient || 'from-white to-gray-50'} p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100/50`}>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 rounded-full blur-3xl transform translate-x-16 -translate-y-16 group-hover:scale-150 transition-transform duration-500" />
+        <div className="relative">
+            <div className="flex items-center gap-3 mb-6">
+                <div className="h-1 w-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full" />
+                <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500">{title}</h3>
+            </div>
+            {children}
+        </div>
+    </div>
+)
 
 export function StatisticsCharts({ generalStats }: StatisticsChartsProps) {
     const [genderCounts, setGenderCounts] = useState<{ [key: string]: number }>({})
     const [ageCounts, setAgeCounts] = useState<{ [key: string]: number }>({})
     const [riskCounts, setRiskCounts] = useState<{ [key: string]: number }>({})
     const [sentimentCounts, setSentimentCounts] = useState<{ [key: string]: number }>({})
-    const [usefulCounts, setUsefulCounts] = useState<{ [key: string]: number }>({})
     const [betCounts, setBetCounts] = useState<{ [key: string]: number }>({})
     const [countryCounts, setCountryCounts] = useState<{ [key: string]: number }>({})
     const [provinceCounts, setProvinceCounts] = useState<{ [key: string]: number }>({})
-    const [neighbourhoodCounts, setNeighbourhoodCounts] = useState<{ [key: string]: number }>({})
-
+    const [averageCounts, setAverageCounts] = useState<{ [key: string]: number }>({})
+    const [ratingCounts, setRatingCounts] = useState<{ [key: string]: number }>({})
 
     useEffect(() => {
-        const country: { [key: string]: number } = {}
-        const province: { [key: string]: number } = {}
-        const neighbourhood: { [key: string]: number } = {}
-        const gender = { Femenino: 0, Masculino: 0, Otro: 0 }
-        const escala = { "Muy en desacuerdo": 0, "En desacuerdo": 0, "Neutral": 0, "De acuerdo":0, "Muy de acuerdo": 0 }
-        const betType = {
-            "Casino presencial": 0,
-            "Casino online": 0,
-            "Videojuego": 0,
-            "Lotería": 0,
-            "Apuesta deportiva": 0,
-            "No especifica": 0,
+        async function convertData(){
+            const stats = await convertStatsAction(generalStats)
+            setBetCounts(stats.betType)
+            setSentimentCounts(stats.sentiment)
+            setGenderCounts(stats.gender)
+            setAgeCounts(stats.age)
+            setRiskCounts(stats.risk)
+            setCountryCounts(stats.country)
+            setProvinceCounts(stats.province)
+            setAverageCounts(stats.average)
+            setRatingCounts(stats.rating)
         }
-        const sentiment = { Positivo: 0, Negativo: 0, Neutral: 0 }
-        const age = { "13-16": 0, "17-20": 0, "21-25": 0, "26-40": 0, "41-99": 0 }
-        const risk = { Alto: 0, Medio: 0, Bajo: 0 }
-
-        for (const stat of generalStats) {
-            if(stat.country){
-                if(!(stat.country in country)) {
-                    country[stat.country] = 0
-                }
-                country[stat.country]++;
-            }
-
-            if(stat.province){
-                if(!(stat.province in province)) {
-                    province[stat.province] = 0
-                }
-                province[stat.province]++;
-            }
-
-            if(stat.neighbourhood){
-                if(!(stat.neighbourhood in neighbourhood)) {
-                    neighbourhood[stat.neighbourhood] = 0
-                }
-                neighbourhood[stat.neighbourhood]++;
-            }
-
-            switch (stat.gender) {
-                case "FEMENINO": gender["Femenino"]++; break
-                case "MASCULINO": gender["Masculino"]++; break
-                case "OTRO": gender["Otro"]++; break
-            }
-
-            switch (stat.usefulToUnderstandRisks){
-                case 1: escala["Muy en desacuerdo"]++; break
-                case 2: escala["En desacuerdo"]++; break;
-                case 3: escala["Neutral"]++;break;
-                case 4: escala["De acuerdo"]++; break;
-                case 5: escala["Muy de acuerdo"]++; break;
-            }
-
-            switch (stat.betType) {
-                case "CASINO_PRESENCIAL": betType["Casino presencial"]++; break
-                case "CASINO_ONLINE": betType["Casino online"]++; break
-                case "VIDEOJUEGO": betType["Videojuego"]++; break
-                case "LOTERIA": betType["Lotería"]++; break
-                case "DEPORTIVA": betType["Apuesta deportiva"]++; break
-                case "NO_ESPECIFICA": betType["No especifica"]++; break
-            }
-
-            switch (stat.mostFrequentSentiment) {
-                case "POS": sentiment["Positivo"]++; break
-                case "NEG": sentiment["Negativo"]++; break
-                case "NEU": sentiment["Neutral"]++; break
-            }
-
-            const ageValue = stat.age
-            if (ageValue >= 13 && ageValue <= 16) age["13-16"]++
-            else if (ageValue >= 17 && ageValue <= 20) age["17-20"]++
-            else if (ageValue >= 21 && ageValue <= 25) age["21-25"]++
-            else if (ageValue >= 26 && ageValue <= 40) age["26-40"]++
-            else if (ageValue >= 41 && ageValue <= 99) age["41-99"]++
-
-            const score = stat.score
-            if ([0, 1, 2].includes(score)) risk.Bajo++
-            else if ([3, 4].includes(score)) risk.Medio++
-            else if ([5, 6].includes(score)) risk.Alto++
-        }
-        setUsefulCounts(escala)
-        setBetCounts(betType)
-        setSentimentCounts(sentiment)
-        setGenderCounts(gender)
-        setAgeCounts(age)
-        setRiskCounts(risk)
-        setCountryCounts(country)
-        setProvinceCounts(province)
-        setNeighbourhoodCounts(neighbourhood)
+        convertData()
     }, [generalStats])
-
 
     const genderData = Object.entries(genderCounts).map(([name, value]) => ({ name, value }))
     const sentimentData = Object.entries(sentimentCounts).map(([name, value]) => ({ name, value }))
     const typeData = Object.entries(betCounts).map(([name, value]) => ({ name, value }))
-    const usefulData = Object.entries(usefulCounts).map(([name, value]) => ({ name, value }))
+    const averageData = Object.entries(averageCounts).map(([name, value]) => ({ name, value }))
+    const ratingData = Object.entries(ratingCounts).map(([name, value]) => ({ name, value }))
     const ageData = Object.entries(ageCounts).map(([name, value]) => ({ name, value }))
     const riskData = Object.entries(riskCounts).map(([name, value]) => ({ name, value }))
     const countryData = Object.entries(countryCounts).map(([name, value]) => ({ name, value }))
     const provinceData = Object.entries(provinceCounts).map(([name, value]) => ({ name, value }))
-    const neighbourhoodData = Object.entries(neighbourhoodCounts).map(([name, value]) => ({ name, value }))
-
 
     return (
-        <>
-            <div className="grid gap-6 md:grid-cols-3">
-                {/* Género */}
-                <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">Género</h3>
-                    <ResponsiveContainer width="100%" height={180}>
-                        <PieChart>
-                            <Pie
-                                data={genderData}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={false}
-                                outerRadius={70}
-                                fill="#8884d8"
-                                dataKey="value"
-                            >
-                                {genderData.map((entry, index) => (
-                                    <Cell key={index} fill={GENDER_COLORS[index % GENDER_COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip />
-                            <Legend wrapperStyle={{ fontSize: "12px" }} />
-                        </PieChart>
-                    </ResponsiveContainer>
-                </div>
+        <div className="min-h-screen from-slate-50 space-y-12">
+            {/* Demographics Section */}
+            <div className="space-y-6">
+                <div className="grid gap-8 md:grid-cols-3">
+                    <ChartCard title="Género" gradient="from-pink-50 via-rose-50/50 to-white">
+                        {genderData.some(data => data.value != 0) ? (
+                            <ResponsiveContainer width="100%" height={240}>
+                                <PieChart>
+                                    <Pie
+                                        data={genderData}
+                                        cx="50%"
+                                        cy="50%"
+                                        dataKey="value"
+                                        strokeWidth={2}
+                                        stroke="#fff"
+                                    >
+                                        {genderData.map((entry, index) => (
+                                            <Cell key={index} fill={GENDER_COLORS[index % GENDER_COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Legend
+                                        wrapperStyle={{ fontSize: "12px", fontWeight: "600" }}
+                                        iconType="circle"
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <EmptyState message="Sin datos de género"/>
+                        )}
+                    </ChartCard>
 
-                {/* Edad */}
-                <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">Rangos de edad</h3>
-                    <ResponsiveContainer width="100%" height={180}>
-                        <PieChart>
-                            <Pie
-                                data={ageData}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={false}
-                                outerRadius={70}
-                                fill="#8884d8"
-                                dataKey="value"
-                            >
-                                {ageData.map((entry, index) => (
-                                    <Cell key={index} fill={AGE_COLORS[index % AGE_COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip />
-                            <Legend wrapperStyle={{ fontSize: "12px" }} />
-                        </PieChart>
-                    </ResponsiveContainer>
-                </div>
+                    <ChartCard title="Rangos de edad" gradient="from-blue-50 via-cyan-50/50 to-white">
+                        {ageData.some(data => data.value != 0) ? (
+                            <ResponsiveContainer width="100%" height={240}>
+                                <PieChart>
+                                    <Pie
+                                        data={ageData}
+                                        cx="50%"
+                                        cy="50%"
+                                        dataKey="value"
+                                        strokeWidth={2}
+                                        stroke="#fff"
+                                    >
+                                        {ageData.map((entry, index) => (
+                                            <Cell key={index} fill={AGE_COLORS[index % AGE_COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Legend
+                                        wrapperStyle={{ fontSize: "12px", fontWeight: "600" }}
+                                        iconType="circle"
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <EmptyState message="Sin datos de edad"/>
+                        )}
+                    </ChartCard>
 
-                {/* Riesgo */}
-                <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">Niveles de riesgo</h3>
-                    <ResponsiveContainer width="100%" height={180}>
-                        <PieChart>
-                            <Pie
-                                data={riskData}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={false}
-                                outerRadius={70}
-                                fill="#8884d8"
-                                dataKey="value"
-                            >
-                                {riskData.map((entry, index) => (
-                                    <Cell key={index} fill={RISK_COLORS[index % RISK_COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip />
-                            <Legend wrapperStyle={{ fontSize: "12px" }} />
-                        </PieChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
-            <div className="grid gap-6 md:grid-cols-3">
-                {/* Sentimientos */}
-                <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">Sentimientos</h3>
-                    {Object.keys(sentimentData).length > 0 ? (
-                    <ResponsiveContainer width="100%" height={180}>
-                        <BarChart data={sentimentData} layout="vertical">
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.5} />
-                            <XAxis type="number" tick={{ fontSize: 12 }} />
-                            <YAxis dataKey="name" type="category" width={70} tick={{ fontSize: 12 }} />
-                            <Tooltip />
-                            <Bar dataKey="value" radius={[0, 6, 6, 0]}>
-                                {sentimentData.map((entry, index) => (
-                                    <Cell key={index} fill={SENTIMENT_COLORS[index % SENTIMENT_COLORS.length]} />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
-                    ): (
-                        <div className="flex h-36 items-center justify-center text-gray-400 font-bold">
-                            No se pudieron determinar los sentimientos
-                        </div>
-                    )}
-                </div>
-
-                {/* Tipo de apuesta */}
-                <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">Tipo de apuesta</h3>
-                    {Object.keys(typeData).length > 0 ? (
-                    <ResponsiveContainer width="100%" height={180}>
-                        <BarChart data={typeData} layout="vertical">
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.5} />
-                            <XAxis type="number" tick={{ fontSize: 12 }} />
-                            <YAxis dataKey="name" type="category" width={90} tick={{ fontSize: 12 }} />
-                            <Tooltip />
-                            <Bar dataKey="value" radius={[0, 6, 6, 0]}>
-                                {typeData.map((entry, index) => (
-                                    <Cell key={index} fill={TYPE_COLORS[index % TYPE_COLORS.length]} />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
-                        ): (
-                        <div className="flex h-36 items-center justify-center text-gray-400 font-bold">
-                            No se pudo tipo de apuesta
-                        </div>
-                    )}
-                </div>
-
-                {/* Utilidad de comprender */}
-                <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">Asistente fue util para entender los riesgos</h3>
-                    <ResponsiveContainer width="100%" height={180}>
-                        <BarChart data={usefulData} layout="vertical">
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.5} />
-                            <XAxis type="number" tick={{ fontSize: 12 }} />
-                            <YAxis dataKey="name" type="category" width={90} tick={{ fontSize: 12 }} />
-                            <Tooltip />
-                            <Bar dataKey="value" radius={[0, 6, 6, 0]}>
-                                {usefulData.map((entry, index) => (
-                                    <Cell key={index} fill={USEFUL_COLORS[index % USEFUL_COLORS.length]} />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
+                    <ChartCard title="Niveles de riesgo" gradient="from-red-50 via-orange-50/50 to-white">
+                        {riskData.some(data => data.value != 0) ? (
+                            <ResponsiveContainer width="100%" height={240}>
+                                <PieChart>
+                                    <Pie
+                                        data={riskData}
+                                        cx="50%"
+                                        cy="50%"
+                                        dataKey="value"
+                                        strokeWidth={2}
+                                        stroke="#fff"
+                                    >
+                                        {riskData.map((entry, index) => (
+                                            <Cell key={index} fill={RISK_COLORS[index % RISK_COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Legend
+                                        wrapperStyle={{ fontSize: "12px", fontWeight: "600" }}
+                                        iconType="circle"
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <EmptyState message="Sin datos de riesgo"/>
+                        )}
+                    </ChartCard>
                 </div>
             </div>
-            <div className="grid gap-6 md:grid-cols-3">
-            {/* País */}
-            <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">País</h3>
-                {Object.keys(countryData).length > 0 ? (
-                    <ResponsiveContainer width="100%" height={180}>
-                        <PieChart>
-                            <Pie
-                                data={countryData}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={false}
-                                outerRadius={70}
-                                fill="#8884d8"
-                                dataKey="value"
-                            >
-                                {countryData.map((entry, index) => (
-                                    <Cell key={index} fill={TYPE_COLORS[index % TYPE_COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip />
-                            <Legend wrapperStyle={{ fontSize: "12px" }} />
-                        </PieChart>
-                    </ResponsiveContainer>
-                ) : (
-                    <div className="flex h-36 items-center justify-center text-gray-400 font-bold">
-                        No se pudo determinar país
-                    </div>
-                )}
+
+            {/* Behavior Section */}
+            <div className="space-y-6">
+                <div className="grid gap-8 md:grid-cols-3">
+
+                    <ChartCard title="Sentimientos" gradient="from-green-50 via-emerald-50/50 to-white">
+                        {sentimentData.some(data => data.value != 0) ? (
+                            <ResponsiveContainer width="100%" height={220}>
+                                <BarChart data={sentimentData} layout="vertical">
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.4} />
+                                    <XAxis type="number" stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                                    <YAxis dataKey="name" type="category" width={80} stroke="#94a3b8" style={{ fontSize: '12px', fontWeight: '600' }} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Bar dataKey="value" radius={[0, 12, 12, 0]}>
+                                        {sentimentData.map((entry, index) => (
+                                            <Cell key={index} fill={SENTIMENT_COLORS[index % SENTIMENT_COLORS.length]} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <EmptyState message="Sin datos de sentimientos"/>
+                        )}
+                    </ChartCard>
+
+                    <ChartCard title="Tipo de apuesta" gradient="from-blue-50 via-indigo-50/50 to-white">
+                        {typeData.some(data => data.value != 0) ? (
+                            <ResponsiveContainer width="100%" height={220}>
+                                <BarChart data={typeData} layout="vertical">
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.4} />
+                                    <XAxis type="number" stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                                    <YAxis dataKey="name" type="category" width={90} stroke="#94a3b8" style={{ fontSize: '12px', fontWeight: '600' }} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Bar dataKey="value" radius={[0, 12, 12, 0]}>
+                                        {typeData.map((entry, index) => (
+                                            <Cell key={index} fill={TYPE_COLORS[index % TYPE_COLORS.length]} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <EmptyState message="Sin datos de apuestas"/>
+                        )}
+                    </ChartCard>
+
+                    <ChartCard title="Promedio evaluación" gradient="from-amber-50 via-yellow-50/50 to-white">
+                        {averageData.some(data => data.value != 0) ? (
+                            <ResponsiveContainer width="100%" height={220}>
+                                <BarChart data={averageData} layout="vertical">
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.4} />
+                                    <XAxis type="number" stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                                    <YAxis dataKey="name" type="category" width={90} stroke="#94a3b8" style={{ fontSize: '12px', fontWeight: '600' }} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Bar dataKey="value" radius={[0, 12, 12, 0]}>
+                                        {averageData.map((entry, index) => (
+                                            <Cell key={index} fill={USEFUL_COLORS[index % USEFUL_COLORS.length]} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <EmptyState message="Sin datos de evaluación"/>
+                        )}
+                    </ChartCard>
+                </div>
             </div>
 
-            {/* Provincia */}
-            <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">Provincia</h3>
-                {Object.keys(provinceData).length > 0 ? (
-                    <ResponsiveContainer width="100%" height={180}>
-                        <PieChart>
-                            <Pie
-                                data={provinceData}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={false}
-                                outerRadius={70}
-                                fill="#8884d8"
-                                dataKey="value"
-                            >
-                                {provinceData.map((entry, index) => (
-                                    <Cell key={index} fill={TYPE_COLORS[index % TYPE_COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip />
-                            <Legend wrapperStyle={{ fontSize: "12px" }} />
-                        </PieChart>
-                    </ResponsiveContainer>
-                ) : (
-                    <div className="flex h-36 items-center justify-center text-gray-400 font-bold">
-                        No se pudo determinar provincia
-                    </div>
-                )}
-            </div>
+            {/* Location & Rating Section */}
+            <div className="space-y-6">
+                <div className="grid gap-8 md:grid-cols-3">
 
-            {/* Barrio */}
-            <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">Barrio</h3>
-                {Object.keys(neighbourhoodData).length > 0 ? (
-                    <ResponsiveContainer width="100%" height={180}>
-                        <PieChart>
-                            <Pie
-                                data={neighbourhoodData}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={false}
-                                outerRadius={70}
-                                fill="#8884d8"
-                                dataKey="value"
-                            >
-                                {neighbourhoodData.map((entry, index) => (
-                                    <Cell key={index} fill={TYPE_COLORS[index % TYPE_COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip />
-                            <Legend wrapperStyle={{ fontSize: "12px" }} />
-                        </PieChart>
-                    </ResponsiveContainer>
-                ) : (
-                    <div className="flex h-36 items-center justify-center text-gray-400 font-bold">
-                        No se pudo determinar barrio
-                    </div>
-                )}
-            </div>
-            </div>
+                    <ChartCard title="Calificación del asistente" gradient="from-rose-50 via-pink-50/50 to-white">
+                        {ratingData.some(data => data.value != 0) ? (
+                            <ResponsiveContainer width="100%" height={220}>
+                                <BarChart data={ratingData} layout="vertical">
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.4} />
+                                    <XAxis type="number" stroke="#94a3b8" style={{ fontSize: '12px' }} />
+                                    <YAxis dataKey="name" type="category" width={90} stroke="#94a3b8" style={{ fontSize: '12px', fontWeight: '600' }} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Bar dataKey="value" radius={[0, 12, 12, 0]}>
+                                        {ratingData.map((entry, index) => (
+                                            <Cell key={index} fill={USEFUL_COLORS[index % USEFUL_COLORS.length]} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <EmptyState message="Sin datos de calificación"/>
+                        )}
+                    </ChartCard>
 
-        </>
+                    <ChartCard title="País" gradient="from-cyan-50 via-sky-50/50 to-white">
+                        {countryData.some(data => data.value != 0) ? (
+                            <ResponsiveContainer width="100%" height={240}>
+                                <PieChart>
+                                    <Pie
+                                        data={countryData}
+                                        cx="50%"
+                                        cy="50%"
+                                        dataKey="value"
+                                        strokeWidth={2}
+                                        stroke="#fff"
+                                    >
+                                        {countryData.map((entry, index) => (
+                                            <Cell key={index} fill={TYPE_COLORS[index % TYPE_COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Legend
+                                        wrapperStyle={{ fontSize: "12px", fontWeight: "600" }}
+                                        iconType="circle"
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <EmptyState message="Sin datos de país"/>
+                        )}
+                    </ChartCard>
+
+                    <ChartCard title="Provincia" gradient="from-violet-50 via-purple-50/50 to-white">
+                        {provinceData.some(data => data.value != 0) ? (
+                            <ResponsiveContainer width="100%" height={240}>
+                                <PieChart>
+                                    <Pie
+                                        data={provinceData}
+                                        cx="50%"
+                                        cy="50%"
+                                        dataKey="value"
+                                        strokeWidth={2}
+                                        stroke="#fff"
+                                    >
+                                        {provinceData.map((entry, index) => (
+                                            <Cell key={index} fill={TYPE_COLORS[index % TYPE_COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Legend
+                                        wrapperStyle={{ fontSize: "12px", fontWeight: "600" }}
+                                        iconType="circle"
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <EmptyState message="Sin datos de provincia"/>
+                        )}
+                    </ChartCard>
+                </div>
+            </div>
+        </div>
     )
 }

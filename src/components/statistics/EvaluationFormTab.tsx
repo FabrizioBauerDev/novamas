@@ -1,4 +1,11 @@
-import {CouldntStopType, GenderType, PersonalIssuesType} from "@/lib/enums";
+import {
+    CouldntStopType,
+    GenderType,
+    getCouldntStopLabel,
+    getGenderLabel,
+    getPersonalIssuesLabel,
+    PersonalIssuesType
+} from "@/lib/enums";
 
 
 interface EvaluationFormData {
@@ -19,35 +26,6 @@ interface EvaluationFormTabProps {
 }
 
 export function EvaluationFormTab({ formData }: EvaluationFormTabProps) {
-    const getGenderLabel = (gender: GenderType) => {
-        switch (gender) {
-            case "MASCULINO":
-                return "Masculino"
-            case "FEMENINO":
-                return "Femenino"
-            case "OTRO":
-                return "Otro"
-        }
-    }
-
-    const getCouldntStopLabel = (value: string) => {
-        const labels: Record<string, string> = {
-            NO: "No",
-            NO_ES_SEG: "No está seguro/a",
-            SI: "Sí",
-        }
-        return labels[value] || value
-    }
-
-    const getPersonalIssuesLabel = (value: string) => {
-        const labels: Record<string, string> = {
-            NO: "No",
-            NO_AP: "No aplica",
-            SI: "Sí",
-        }
-        return labels[value] || value
-    }
-
     const getRiskScoreColor = (score: number) => {
         if (score >= 0 && score <= 3) {
             return "text-blue-600 bg-blue-100"
