@@ -4,7 +4,7 @@ import { removeStopwords, spa } from 'stopword'
 // Parametros:
 //      responses: arreglo de respuestas del contexto recuperado del RAG
 //      query: pregunta/mensaje del usuario
-export async function calculate_relevancy(responses: string[], query: string) {
+export function calculate_relevancy(responses: string[], query: string) {
     const queryWords = query.toLowerCase().split(' ');
     const queryRelevant = removeStopwords(queryWords, spa);
 
@@ -17,4 +17,14 @@ export async function calculate_relevancy(responses: string[], query: string) {
         }
     }
     return countRelevant / responses.length;
+}
+
+export function rag_usage(modelResponse: string, ragResponse: string) {
+    const ragResponseRelevant = removeStopwords(ragResponse.toLowerCase().split(' '), spa);
+
+    const containsRag = ragResponseRelevant.some((word: string) => modelResponse.includes(word));
+    if(containsRag) {
+        return true;
+    }
+    return false;
 }

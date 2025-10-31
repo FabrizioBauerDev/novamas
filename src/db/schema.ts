@@ -354,3 +354,16 @@ export const finalFormRelations = relations(finalForm, ({ one }) => ({
 
 export type FinalForm = typeof finalForm.$inferSelect;
 export type NewFinalForm = typeof finalForm.$inferInsert;
+
+// ================================================================================================
+// ========================== ESQUEMA METRICA RAG =============================
+// ================================================================================================
+
+export const ragMetric = pgTable("RAGMetric", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  query: text("query").notNull(),
+  LLMResponse: text("llmResponse").notNull(),
+  ragResponse: text("ragResponse").notNull(),
+  ragRelevance: real("ragRelevance").notNull(),
+  llmUsedRAG: boolean("llmUsedRAG").notNull(),
+});
