@@ -17,68 +17,18 @@ import { createWelcomeMessage } from "@/lib/chat-utils";
 import { getRelevantInformation } from "@/lib/pgvector/utils";
 import { z } from "zod";
 import { CHAT_CONFIG, isSessionExpired } from "@/lib/chat-config";
+import {calculate_relevancy, rag_usage} from "@/lib/pgvector/metrics";
+import {db} from "@/db";
+import {ragMetric} from "@/db/schema";
 
 // Permite respuestas de streaming hasta 60 segundos
 // Aumentado porque Gemini 2.5 Flash con thinking puede tardar más
 export const maxDuration = 60;
 
-// Definir la tool para búsqueda RAG
-const ragSearchTool = tool({
-  description: `Busca información relevante en la base de conocimiento especializada dependiendo la categoria especifica de informacion que necesites. 
-    Usa esta herramienta cuando necesites información específica sobre temas académicos, 
-    documentos o cualquier contenido que pueda estar almacenado en la base de datos de conocimiento.`,
-  inputSchema: z.object({
-    query: z.string().describe('Consulta del usuario'),
-    category: z.enum(["ESTADISTICAS", "NUMERO_TELEFONO", "TECNICAS_CONTROL", "OTRO"]),
-    location: z.string().describe('Ubicación del usuario')
-  }),
-  execute: async ({ query, category, location } ) => {
-    try {
-      // Validar que el query no esté vacío
-      if (!query || query.trim() === "") {
-        return "La consulta está vacía. Por favor, proporciona una pregunta específica para buscar en la base de conocimiento.";
-      }
-
-      if(category=="NUMERO_TELEFONO"){
-        query = query+" "+location;
-      }
-
-      console.log(query)
-      console.log(category)
-      console.log(location)
-
-
-      const ragResponse = await getRelevantInformation(query, category);
-
-
-      // Verificar si la respuesta está vacía o es null/undefined
-      if (!ragResponse || ragResponse.trim() === "") {
-        return "No se encontró información relevante en la base de conocimiento para tu consulta. Puedo ayudarte con información general si lo deseas.";
-      }
-      
-      // Limpiar la respuesta pero mantener más información
-      const cleanedRagResponse = ragResponse.replace(/[\n\r]+/g, ' ').trim();
-      
-      // Verificar después de limpiar
-      if (!cleanedRagResponse || cleanedRagResponse === "") {
-        return "La información encontrada en la base de conocimiento no pudo ser procesada correctamente.";
-      }
-      
-      // Aumentar el límite de palabras para conservar más contexto
-      const limitedRag = cleanedRagResponse.split(" ").slice(0, 300).join(" ");
-      console.log(limitedRag)
-      return `Información encontrada en la base de conocimiento: ${limitedRag}
-      Fuente: Base de conocimiento especializada`;
-    } catch (error) {
-      console.error("Error al acceder a la base de conocimiento:", error);
-      return `Error al acceder a la base de conocimiento: ${error instanceof Error ? error.message : "Error desconocido"}. Puedo ayudarte con información general si lo deseas.`;
-    }
-  },
-});
-
 export async function POST(req: NextRequest) {
   // Proteger la ruta: verificar origen y autenticación
   const protectionCheck = await protectApiRoute(req, { requireAuth: false });
+
   if (protectionCheck) return protectionCheck;
 
   try {
@@ -92,6 +42,71 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    const ragMetrics = {
+      used: false,
+      query: '',
+      response: ''
+    };
+
+    // Definir la tool para búsqueda RAG
+    const ragSearchTool = tool({
+      description: `Busca información relevante en la base de conocimiento especializada dependiendo la categoria especifica de informacion que necesites. 
+    Usa esta herramienta cuando necesites información específica sobre temas académicos, 
+    documentos o cualquier contenido que pueda estar almacenado en la base de datos de conocimiento.`,
+      inputSchema: z.object({
+        query: z.string().describe('Consulta del usuario'),
+        category: z.enum(["ESTADISTICAS", "NUMERO_TELEFONO", "TECNICAS_CONTROL", "OTRO"]),
+        location: z.string().describe('Ubicación del usuario')
+      }),
+      execute: async ({ query, category, location } ) => {
+        try {
+          // Validar que el query no esté vacío
+          if (!query || query.trim() === "") {
+            return "La consulta está vacía. Por favor, proporciona una pregunta específica para buscar en la base de conocimiento.";
+          }
+
+          if(category=="NUMERO_TELEFONO"){
+            query = query+" "+location;
+          }
+
+          console.log(query)
+          console.log(category)
+          console.log(location)
+
+
+          const ragResponse = await getRelevantInformation(query, category);
+
+
+          // Verificar si la respuesta está vacía o es null/undefined
+          if (!ragResponse || ragResponse.trim() === "") {
+            return "No se encontró información relevante en la base de conocimiento para tu consulta. Puedo ayudarte con información general si lo deseas.";
+          }
+
+          // Limpiar la respuesta pero mantener más información
+          const cleanedRagResponse = ragResponse.replace(/[\n\r]+/g, ' ').trim();
+
+          // Verificar después de limpiar
+          if (!cleanedRagResponse || cleanedRagResponse === "") {
+            return "La información encontrada en la base de conocimiento no pudo ser procesada correctamente.";
+          }
+
+          // Aumentar el límite de palabras para conservar más contexto
+          const limitedRag = cleanedRagResponse.split(" ").slice(0, 300).join(" ");
+          console.log(limitedRag)
+
+          ragMetrics.used = true;
+          ragMetrics.query = query;
+          ragMetrics.response = limitedRag;
+
+          return `Información encontrada en la base de conocimiento: ${limitedRag}
+      Fuente: Base de conocimiento especializada`;
+        } catch (error) {
+          console.error("Error al acceder a la base de conocimiento:", error);
+          return `Error al acceder a la base de conocimiento: ${error instanceof Error ? error.message : "Error desconocido"}. Puedo ayudarte con información general si lo deseas.`;
+        }
+      },
+    });
 
     // Siguiendo la guía AI SDK: recibir solo el último mensaje cuando se optimiza
     const { message, id }: { message: MyUIMessage; id: string } =
@@ -400,6 +415,49 @@ export async function POST(req: NextRequest) {
               messagesToSave = [...messages, graceMessage];
               console.log(logString + `Mensaje de gracia utilizada añadido para sesión ${id}`);
             }
+          }
+
+          // Metricas del RAG
+          if (ragMetrics.used) {
+            let lastMessage = messagesToSave[messagesToSave.length - 1];
+            if(lastMessage.role != 'assistant'){
+              lastMessage = messagesToSave[messagesToSave.length - 2];
+            }
+
+            const llmResponse = lastMessage.parts
+                .filter(part => part.type === 'text')
+                .map(part => part.text)
+                .join('');
+
+            if (llmResponse && ragMetrics.query && ragMetrics.response) {
+              const relevancy = calculate_relevancy(ragMetrics.response, ragMetrics.query);
+              const llmUsedRag = rag_usage(llmResponse, ragMetrics.response);
+
+              console.log('Relevancia:', relevancy);
+              console.log('uso RAG', llmUsedRag);
+
+              try{
+                await db.insert(ragMetric).values({
+                  query: ragMetrics.query,
+                  ragResponse: ragMetrics.response,
+                  ragRelevance: relevancy,
+                  LLMResponse: llmResponse,
+                  llmUsedRAG: llmUsedRag,
+                  chatSessionId: id,
+                });
+
+                console.log('rag metricas exitosas');
+              }catch(error){
+                console.log('Error guardando rag metricas', error);
+              }
+            } else {
+              console.log('Faltaban datos');
+              console.log(ragMetrics.query);
+              console.log(ragMetrics.response);
+              console.log(llmResponse);
+            }
+          } else {
+            console.log('RAG no se usó');
           }
 
           // Guardar mensajes

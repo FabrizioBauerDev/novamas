@@ -361,9 +361,11 @@ export type NewFinalForm = typeof finalForm.$inferInsert;
 
 export const ragMetric = pgTable("RAGMetric", {
   id: uuid("id").primaryKey().defaultRandom(),
+  chatSessionId: uuid("chatSessionId").notNull().references(() => chatSessions.id),
   query: text("query").notNull(),
-  LLMResponse: text("llmResponse").notNull(),
+  LLMResponse: text("llmResponse"),
   ragResponse: text("ragResponse").notNull(),
   ragRelevance: real("ragRelevance").notNull(),
-  llmUsedRAG: boolean("llmUsedRAG").notNull(),
+  llmUsedRAG: boolean("llmUsedRAG"),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow()
 });

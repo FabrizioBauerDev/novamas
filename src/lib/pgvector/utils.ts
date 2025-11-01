@@ -1,8 +1,8 @@
 import {db} from '@/db'
-import {bibliography, chunk, bibliographyCategoryEnum } from '@/db/schema'
-import { generateEmbeddingsQuery, generateEmbeddingsMd }from '@/lib/pgvector/embeddings'
-import {cosineDistance, eq, sql, gt, desc, and, SQL} from "drizzle-orm";
-import {BibliographyItem, BibliographyCategory} from "@/types/bibliography";
+import {bibliography, bibliographyCategoryEnum, chunk} from '@/db/schema'
+import {generateEmbeddingsMd, generateEmbeddingsQuery} from '@/lib/pgvector/embeddings'
+import {and, cosineDistance, desc, eq, gt, sql, SQL} from "drizzle-orm";
+import {BibliographyCategory, BibliographyItem} from "@/types/bibliography";
 
 
 export const getBibliography = async () : Promise<BibliographyItem[]> => {
@@ -111,5 +111,6 @@ export async function getRelevantInformation(query: string, category: string): P
 
     console.log(similarGuides);
     const result_array = similarGuides.map(item => item.content);
+
     return result_array.join("\n");
 }
