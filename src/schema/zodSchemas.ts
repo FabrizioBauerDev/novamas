@@ -7,7 +7,7 @@ const finalFormSchema = z.object({
   assistantResponses: z.number().int().min(1).max(5),
   userFriendly: z.number().int().min(1).max(5),
   usefulToUnderstandRisks: z.number().int().min(1).max(5),
-  average: z.number().float().min(1).max(5),
+  average: z.number().int().min(1).max(5),
 });
 
 const signInSchema = z.object({
