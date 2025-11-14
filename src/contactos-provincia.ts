@@ -100,8 +100,8 @@ export const provincias = [
   },
   {
     nombre: "San Luis",
-    ludopatia: "0800-666-6176",
-    suicidio: "911 o (011) 5275-1135 o el 0800 345 1450",
+    ludopatia: "CPAA 4452000 Int 4707/5160 | Hospital Salud Mental 4452000 Int 5364 | CPAA Villa Mercedes 4452000 Int 5400",
+    suicidio: "911 o 4452000 Int 5878 (24hs) o (011) 5275-1135 o el 0800 345 1450 o email a asistencia.suicidio.sl@gmail.com",
     link: "https://www.loteriadesanluis.com/juego-responsable.php",
   },
   {

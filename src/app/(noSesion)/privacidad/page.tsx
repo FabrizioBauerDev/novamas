@@ -374,8 +374,8 @@ export default function PrivacyPage() {
                 <p className="text-gray-700">
                   <strong>Universidad Nacional de San Luis</strong><br />
                   Facultad de Psicología<br />
-                  <strong>Correo electrónico:</strong> [correo a completar]<br />
-                  <strong>Responsable:</strong> [Nombre de la Directora del Proyecto]
+                  <strong>Correo electrónico:</strong> <a href="mailto:programa.adicciones.unsl1@gmail.com">programa.adicciones.unsl1@gmail.com</a><br />
+                  <strong>Responsable:</strong>  Eliana Noemí González
                 </p>
               </div>
             </section>

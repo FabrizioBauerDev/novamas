@@ -195,7 +195,7 @@ export default function AboutUsPage() {
                 Impacto
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                La idea y el proyecto de NoVa+ ha tenido su impacto formado
+                La idea y el proyecto de NoVa+ ha tenido su impacto formando
                 parte de charlas y publicaciones en congresos donde hemos
                 compartido nuestra experiencia, como en:
               </p>
@@ -324,7 +324,7 @@ export default function AboutUsPage() {
                 </p>
                 <p>Proyecto NoVa+</p>
                 <p>
-                  <strong>Email:</strong> [correo a completar]
+                  <strong>Email:</strong> <a href="mailto:programa.adicciones.unsl1@gmail.com">programa.adicciones.unsl1@gmail.com</a>
                 </p>
               </div>
             </section>
