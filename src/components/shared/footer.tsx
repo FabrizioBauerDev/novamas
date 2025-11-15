@@ -93,12 +93,13 @@ export default function Footer() {
               <div>
                 <p className="text-white font-semibold">¿Necesitas ayuda inmediata?</p>
                 <p className="text-red-200 text-sm">
-                  Línea Nacional Gratuita:{" "}
+                  • Línea Nacional Gratuita:{" "}
                   <a href="tel:141" className="underline font-semibold">
                     141
-                  </a><br />
-                  • Disponible 24/7 (orientación en adicciones).
-                  <br/>En San Luis podés consultar en el Centro de Prevención y Asistencia a las Adicciones (CPAA).
+                  </a>Disponible 24/7 (orientación en adicciones).
+                  <br/>• En San Luis podés consultar en el Centro de Prevención y Asistencia a las Adicciones (CPAA) 4452000 Int 4707/5160.
+                  <br/>• Hospital Salud Mental 4452000 Int 5364
+                  <br/>• CPAA Villa Mercedes 4452000 Int 5400
                 </p>
                 
               </div>

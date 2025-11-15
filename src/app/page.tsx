@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Inicio",
+  title: "Inicio | NoVa+ Asistente Virtual",
   description: "NoVa+ tu asistente virtual para la prevención de problemáticas con las apuestas y juegos de azar. Comienza tu conversación con NoVa+ y accede a recursos de ayuda.",
   keywords: ["adicción", "juegos de azar", "apuestas online", "ludopatía", "prevención", "asistente virtual", "IA"],
   openGraph: {

@@ -58,6 +58,7 @@ export function UserManagement({userEmail}: UserManagementProps) {
         role: "ESTUDIANTE",
     })
     const [showPassword, setShowPassword] = useState(false);
+    const [passwordErrors, setPasswordErrors] = useState<string[]>([])
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [userToDelete, setUserToDelete] = useState<string | null>(null)
     const [submitting, setSubmitting] = useState(false)
@@ -66,6 +67,32 @@ export function UserManagement({userEmail}: UserManagementProps) {
     useEffect(() => {
         fetchUsers()
     }, [])
+
+    const validatePasswordSecurity = (password: string): string[] => {
+        const errors: string[] = []
+
+        if (password.length < 12) {
+            errors.push("Debe tener al menos 12 caracteres")
+        }
+
+        if (!/[A-Z]/.test(password)) {
+            errors.push("Debe contener al menos una mayúscula")
+        }
+
+        if (!/[a-z]/.test(password)) {
+            errors.push("Debe contener al menos una minúscula")
+        }
+
+        if (!/\d/.test(password)) {
+            errors.push("Debe contener al menos un número")
+        }
+
+        if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+            errors.push("Debe contener al menos un carácter especial")
+        }
+
+        return errors
+    }
 
     const fetchUsers = async () => {
         try {
@@ -96,6 +123,7 @@ export function UserManagement({userEmail}: UserManagementProps) {
             password: "",
             role: "ESTUDIANTE",
         })
+        setPasswordErrors([])
         setIsDialogOpen(true)
     }
 
@@ -157,10 +185,12 @@ export function UserManagement({userEmail}: UserManagementProps) {
 
         try {
             if (!editingUser) {
-                // Crear usuario
-                if(!formData.password || formData.password.length < 8){
+                // Crear usuario - Validar contraseña antes de enviar
+                const errors = validatePasswordSecurity(formData.password || "")
+                if (errors.length > 0) {
+                    setPasswordErrors(errors)
                     toast.error("Error al crear al usuario.", {
-                        description: "Error de conexión",
+                        description: "La contraseña no cumple con los requisitos de seguridad",
                         duration: 5000,
                     });
                     setSubmitting(false)
@@ -484,9 +514,15 @@ export function UserManagement({userEmail}: UserManagementProps) {
                                                     name="password"
                                                     type={showPassword ? "text" : "password"}
                                                     value={formData.password}
-                                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                                    onChange={(e) => {
+                                                        const newPassword = e.target.value
+                                                        setFormData({ ...formData, password: newPassword })
+                                                        // Validar contraseña en tiempo real
+                                                        const errors = validatePasswordSecurity(newPassword)
+                                                        setPasswordErrors(errors)
+                                                    }}
                                                     required
-                                                    minLength={8}
+                                                    minLength={12}
                                                     disabled={submitting}
                                                     placeholder="••••••••"
                                                     className="h-10 pr-10"
@@ -504,7 +540,25 @@ export function UserManagement({userEmail}: UserManagementProps) {
                                                     )}
                                                 </button>
                                             </div>
-                                            <p className="text-xs text-muted-foreground">Mínimo 8 caracteres</p>
+                                            {formData.password && (
+                                                <div className="space-y-2 mt-2">
+                                                    <p className="text-sm font-medium text-gray-700">Seguridad de la contraseña:</p>
+                                                    <div className="space-y-1">
+                                                        {passwordErrors.map((error, index) => (
+                                                            <p key={index} className="text-red-500 text-xs flex items-center">
+                                                                <span className="w-1 h-1 bg-red-500 rounded-full mr-2"></span>
+                                                                {error}
+                                                            </p>
+                                                        ))}
+                                                        {passwordErrors.length === 0 && (
+                                                            <p className="text-green-600 text-xs flex items-center">
+                                                                <span className="w-1 h-1 bg-green-600 rounded-full mr-2"></span>
+                                                                Contraseña segura
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
 
                                     </div>
@@ -535,7 +589,11 @@ export function UserManagement({userEmail}: UserManagementProps) {
                                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} disabled={submitting}>
                                     Cancelar
                                 </Button>
-                                <Button type="submit" disabled={submitting} className="gap-2">
+                                <Button 
+                                    type="submit" 
+                                    disabled={submitting || (!editingUser && passwordErrors.length > 0)} 
+                                    className="gap-2"
+                                >
                                     {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
                                     {editingUser ? "Actualizar" : "Crear"}
                                 </Button>
@@ -556,7 +614,7 @@ export function UserManagement({userEmail}: UserManagementProps) {
                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
                             <AlertDialogAction
                                 onClick={confirmDelete}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                className="bg-destructive text-white hover:bg-destructive/90"
                                 disabled={submitting}
                             >
                                 {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
