@@ -16,26 +16,35 @@ interface DeleteDialogProps {
   onOpenChange: (open: boolean) => void
   groupToDelete: ChatGroupWithCreator | null
   onConfirm: () => void
+  error?: string | null
 }
 
-export default function DeleteDialog({ isOpen, onOpenChange, groupToDelete, onConfirm }: DeleteDialogProps) {
+export default function DeleteDialog({ isOpen, onOpenChange, groupToDelete, onConfirm, error }: DeleteDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Confirmar eliminación</DialogTitle>
           <DialogDescription>
-            ¿Estás seguro de que deseas eliminar la sesión grupal &quot;{groupToDelete?.name}&quot;? Esta acción no se puede
-            deshacer.
+            {error ? (
+              <span className="text-destructive font-medium">{error}</span>
+            ) : (
+              <>
+                ¿Estás seguro de que deseas eliminar la sesión grupal &quot;{groupToDelete?.name}&quot;? Esta acción no se puede
+                deshacer.
+              </>
+            )}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancelar
+            {error ? "Cerrar" : "Cancelar"}
           </Button>
-          <Button variant="destructive" onClick={onConfirm}>
-            Eliminar
-          </Button>
+          {!error && (
+            <Button variant="destructive" onClick={onConfirm}>
+              Eliminar
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

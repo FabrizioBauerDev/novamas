@@ -26,6 +26,7 @@ export default function ListView({ isStudent = false }: ListViewProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const itemsPerPage = 5;
 
   // Cargar ChatGroups al montar el componente
@@ -74,6 +75,7 @@ export default function ListView({ isStudent = false }: ListViewProps) {
 
   const handleDeleteClick = (group: ChatGroupWithCreator) => {
     setGroupToDelete(group);
+    setDeleteError(null);
     setDeleteDialogOpen(true);
   };
 
@@ -87,6 +89,7 @@ export default function ListView({ isStudent = false }: ListViewProps) {
           );
           setDeleteDialogOpen(false);
           setGroupToDelete(null);
+          setDeleteError(null);
           const newTotalPages = Math.ceil(
             (filteredGroups.length - 1) / itemsPerPage
           );
@@ -94,11 +97,12 @@ export default function ListView({ isStudent = false }: ListViewProps) {
             setCurrentPage(newTotalPages);
           }
         } else {
-          setError(result.error || "Error al eliminar la sesión grupal");
+          // Mostrar el error en el diálogo en lugar de cerrarlo
+          setDeleteError(result.error || "Error al eliminar la sesión grupal");
         }
       } catch (err) {
         console.error("Error deleting chat group:", err);
-        setError("Error al eliminar la sesión grupal");
+        setDeleteError("Error al eliminar la sesión grupal");
       }
     }
   };
@@ -201,6 +205,7 @@ export default function ListView({ isStudent = false }: ListViewProps) {
         onOpenChange={setDeleteDialogOpen}
         groupToDelete={groupToDelete}
         onConfirm={handleConfirmDelete}
+        error={deleteError}
       />
     </div>
   );

@@ -48,8 +48,7 @@ export interface CreateGroupFormData {
   password: string;
   startDate: string;
   startTime: string;
-  endDate: string;
-  endTime: string;
+  durationMinutes: number;
 }
 
 // Tipo para ChatGroup con información del creador y participantes

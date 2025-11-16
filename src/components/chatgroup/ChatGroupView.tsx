@@ -11,6 +11,7 @@ import {
   getChatGroupByIdAction,
   decryptChatGroupPasswordAction,
   updateChatGroupDescriptionAction,
+  getChatGroupSessionStatsAction,
 } from "@/lib/actions/actions-chatgroup";
 import { ChatGroupWithCreator } from "@/types/types";
 import QrGenerator from "@/components/shared/QrGenerator";
@@ -40,6 +41,14 @@ export default function ChatGroupDetailPage({ id, isStudent = false, currentUser
   const [editedDescription, setEditedDescription] = useState("");
   const [isUpdatingDescription, setIsUpdatingDescription] = useState(false);
 
+  // Estados para estadísticas de sesiones
+  const [sessionStats, setSessionStats] = useState<{
+    total: number;
+    inProgress: number;
+    finished: number;
+  } | null>(null);
+  const [loadingStats, setLoadingStats] = useState(false);
+
   const groupUrl = `${
     typeof window !== "undefined" ? window.location.origin : ""
   }/chatNova/${group?.slug}`;
@@ -62,11 +71,38 @@ export default function ChatGroupDetailPage({ id, isStudent = false, currentUser
     }
   };
 
+  const loadSessionStats = async () => {
+    try {
+      setLoadingStats(true);
+      const result = await getChatGroupSessionStatsAction(id);
+      if (result.success && result.data) {
+        setSessionStats(result.data);
+      }
+    } catch (err) {
+      console.error("Error loading session stats:", err);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
+
   useEffect(() => {
     if (id) {
       loadGroup();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (group) {
+      const now = new Date();
+      const isActive = now >= group.startDate && now <= group.endDate;
+      const isFinished = now > group.endDate;
+      
+      // Solo cargar estadísticas si el grupo está activo o finalizado
+      if (isActive || isFinished) {
+        loadSessionStats();
+      }
+    }
+  }, [group]);
 
   // Efecto para manejar la tecla Escape al editar descripción
   useEffect(() => {
@@ -596,6 +632,61 @@ export default function ChatGroupDetailPage({ id, isStudent = false, currentUser
               </CardContent>
             </Card>
           </div>
+
+          {/* Session Statistics */}
+          {(() => {
+            const now = new Date();
+            const isActive = now >= group.startDate && now <= group.endDate;
+            const isFinished = now > group.endDate;
+            const isPending = now < group.startDate;
+
+            // No mostrar estadísticas si está pendiente
+            if (isPending) {
+              return null;
+            }
+
+            return (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Estadísticas de Sesiones</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loadingStats ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                  ) : sessionStats ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {isActive && (
+                        <>
+                          <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
+                            <p className="text-sm text-muted-foreground mb-1">En curso</p>
+                            <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                              {sessionStats.inProgress}
+                            </p>
+                          </div>
+                          <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg">
+                            <p className="text-sm text-muted-foreground mb-1">Finalizadas</p>
+                            <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                              {sessionStats.finished}
+                            </p>
+                          </div>
+                        </>
+                      )}
+                      <div className={`bg-purple-50 dark:bg-purple-950 p-4 rounded-lg ${isFinished ? 'sm:col-span-3' : ''}`}>
+                        <p className="text-sm text-muted-foreground mb-1">Total</p>
+                        <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                          {sessionStats.total}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No hay estadísticas disponibles</p>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })()}
 
           {/* Creator Information */}
           <Card>

@@ -4,7 +4,8 @@ import {
   getAllChatGroups,
   getChatGroupById,
   getChatGroupBySlug, getGroupConversationByChatId, getGroupConversationInfo, getGroupNames,
-  isSlugAvailable
+  isSlugAvailable,
+  getChatGroupSessionStats
 } from "@/lib/db/queries/chatGroup"
 import { deleteChatGroupById, createChatGroup, updateChatGroupDescription } from "@/lib/db/mutations/chatGroup"
 import { revalidatePath } from "next/cache"
@@ -81,21 +82,21 @@ export async function createChatGroupAction(formData: CreateGroupFormData) {
       return { success: false, error: errors.join(". ") };
     }
 
-    const { name, slug, description, password, startDate, startTime, endDate, endTime } = validatedFields.data;
+    const { name, slug, description, password, startDate, startTime, durationMinutes } = validatedFields.data;
 
-    // Crear las fechas desde las strings ISO o desde date/time separados
-    let startDateTime: Date;
-    let endDateTime: Date;
-    
-    // Si startDate contiene una fecha ISO completa, úsala directamente
-    if (startDate.includes('T') || startDate.includes('Z')) {
-      startDateTime = new Date(startDate);
-      endDateTime = new Date(endDate);
-    } else {
-      // Fallback para el formato anterior
-      startDateTime = new Date(`${startDate}T${startTime}`);
-      endDateTime = new Date(`${endDate}T${endTime}`);
+    // Validación adicional en el servidor de la duración
+    if (durationMinutes < 15) {
+      return { success: false, error: "La sesión debe durar al menos 15 minutos" };
     }
+    if (durationMinutes > 240) {
+      return { success: false, error: "La sesión no puede durar más de 4 horas" };
+    }
+
+    // Crear la fecha de inicio
+    const startDateTime = new Date(`${startDate}T${startTime}`);
+    
+    // Calcular la fecha de fin sumando los minutos de duración
+    const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60 * 1000);
 
     // Verificar que el slug esté disponible en esa fecha y hora
     const slugAvailable = await isSlugAvailable(slug, startDateTime, endDateTime);
@@ -319,8 +320,29 @@ export async function deleteChatGroupAction(id: string) {
     // Revalidar la página para actualizar los datos
     revalidatePath("/chatgroup")
     return { success: true }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in deleteChatGroupAction:", error)
+    
+    // Error específico cuando hay sesiones individuales relacionadas
+    if (error?.message === "FOREIGN_KEY_CONSTRAINT") {
+      return { 
+        success: false, 
+        error: "No se puede eliminar esta sesión grupal porque ya tiene chats individuales asociados",
+        errorType: "FOREIGN_KEY_CONSTRAINT"
+      }
+    }
+    
     return { success: false, error: "Error al eliminar la sesión grupal" }
+  }
+}
+
+// Server Action para obtener estadísticas de sesiones de un grupo
+export async function getChatGroupSessionStatsAction(chatGroupId: string) {
+  try {
+    const stats = await getChatGroupSessionStats(chatGroupId)
+    return { success: true, data: stats }
+  } catch (error) {
+    console.error("Error in getChatGroupSessionStatsAction:", error)
+    return { success: false, error: "Error al obtener estadísticas de sesiones" }
   }
 }

@@ -257,3 +257,32 @@ export async function getGroupConversationByChatId(id: string): Promise<{id: str
         throw new Error("Failed to fetch chat group info conversation ")
     }
 }
+
+// Obtener estadísticas de sesiones de chat para un grupo específico
+export async function getChatGroupSessionStats(chatGroupId: string) {
+  try {
+    // Obtener todas las sesiones del grupo
+    const sessions = await db
+      .select({
+        id: chatSessions.id,
+        sessionEndedAt: chatSessions.sessionEndedAt,
+        createdAt: chatSessions.createdAt,
+      })
+      .from(chatSessions)
+      .where(eq(chatSessions.chatGroupId, chatGroupId))
+
+    // Calcular estadísticas
+    const total = sessions.length
+    const finished = sessions.filter(session => session.sessionEndedAt !== null).length
+    const inProgress = total - finished
+
+    return {
+      total,
+      inProgress,
+      finished
+    }
+  } catch (error) {
+    console.error("Error fetching chat group session stats:", error)
+    throw new Error("Failed to fetch chat group session stats")
+  }
+}

@@ -26,9 +26,26 @@ export default function CreateChatGroupPage() {
     password: "",
     startDate: "",
     startTime: "",
-    endDate: "",
-    endTime: "",
+    durationMinutes: 60, // Valor por defecto: 1 hora
   })
+  const [durationTime, setDurationTime] = useState("01:00") // Valor por defecto: 1 hora en formato HH:MM
+
+  // Función para convertir tiempo HH:MM a minutos
+  const timeToMinutes = (time: string): number => {
+    if (!time || !time.includes(':')) return 0;
+    const [hours, minutes] = time.split(':').map(Number);
+    return (hours * 60) + minutes;
+  }
+
+  // Función para manejar el cambio de duración en formato time
+  const handleDurationChange = (value: string) => {
+    setDurationTime(value);
+    const minutes = timeToMinutes(value);
+    setFormData((prev) => ({
+      ...prev,
+      durationMinutes: minutes,
+    }))
+  }
 
 const handleInputChange = (field: keyof CreateGroupFormData, value: string) => {
     setFormData((prev) => ({
@@ -61,30 +78,23 @@ const handleInputChange = (field: keyof CreateGroupFormData, value: string) => {
     if (!formData.password.trim()) errors.push("La contraseña es obligatoria")
     if (!formData.startDate) errors.push("La fecha de inicio es obligatoria")
     if (!formData.startTime) errors.push("La hora de inicio es obligatoria")
-    if (!formData.endDate) errors.push("La fecha de fin es obligatoria")
-    if (!formData.endTime) errors.push("La hora de fin es obligatoria")
+    if (!formData.durationMinutes || formData.durationMinutes <= 0) errors.push("La duración es obligatoria")
 
-    // Validate dates
-    if (formData.startDate && formData.endDate && formData.startTime && formData.endTime) {
-      const startDateTime = new Date(`${formData.startDate}T${formData.startTime}`)
-      const endDateTime = new Date(`${formData.endDate}T${formData.endTime}`)
+    // Validar duración
+    if (formData.durationMinutes < 15) {
+      errors.push("La sesión debe durar al menos 15 minutos")
+    }
+    if (formData.durationMinutes > 240) {
+      errors.push("La sesión no puede durar más de 4 horas")
+    }
 
-      if (startDateTime >= endDateTime) {
-        errors.push("La fecha de fin debe ser posterior a la fecha de inicio")
-      }
-
-      // Si es el mismo día, validar que haya al menos 15 minutos de diferencia
-      if (formData.startDate === formData.endDate) {
-        const timeDiffMs = endDateTime.getTime() - startDateTime.getTime()
-        const timeDiffMinutes = timeDiffMs / (1000 * 60)
-        
-        if (timeDiffMinutes < 15) {
-          errors.push("La sesión debe durar al menos 15 minutos")
-        }
-      }
-
-      // Comparar con la fecha actual en la zona horaria local (ignorando segundos y milisegundos)
+    // Validar fecha de inicio
+    if (formData.startDate && formData.startTime) {
+      const [year, month, day] = formData.startDate.split('-').map(Number)
+      const [hours, minutes] = formData.startTime.split(':').map(Number)
+      const startDateTime = new Date(year, month - 1, day, hours, minutes)
       const now = new Date()
+      
       // Truncar ambas fechas a minutos para comparar
       const startMinutes = new Date(startDateTime.getFullYear(), startDateTime.getMonth(), startDateTime.getDate(), startDateTime.getHours(), startDateTime.getMinutes())
       const nowMinutes = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes())
@@ -116,20 +126,15 @@ const handleInputChange = (field: keyof CreateGroupFormData, value: string) => {
     setIsSubmitting(true)
 
     try {
-      // Crear fechas en la zona horaria local y convertir a UTC para enviar al servidor
-      const startDateTime = new Date(`${formData.startDate}T${formData.startTime}`)
-      const endDateTime = new Date(`${formData.endDate}T${formData.endTime}`)
-
-      // Preparar datos para enviar al backend con fechas ISO (UTC)
+      // Preparar datos para enviar al backend
       const groupData: CreateGroupFormData = {
         name: formData.name.trim(),
         slug: formData.slug.trim(),
         description: formData.description.trim(),
         password: formData.password,
-        startDate: startDateTime.toISOString(),
-        startTime: '', // Ya no necesitamos time separado
-        endDate: endDateTime.toISOString(),
-        endTime: '', // Ya no necesitamos time separado
+        startDate: formData.startDate,
+        startTime: formData.startTime,
+        durationMinutes: formData.durationMinutes,
       }
 
       // Llamar a la action
@@ -165,12 +170,17 @@ const handleInputChange = (field: keyof CreateGroupFormData, value: string) => {
 
   const getTodayDate = () => {
     const today = new Date()
-    return today.toISOString().split("T")[0]
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
   }
 
   const getCurrentTime = () => {
     const now = new Date()
-    return now.toTimeString().slice(0, 5)
+    const hours = String(now.getHours()).padStart(2, '0')
+    const minutes = String(now.getMinutes()).padStart(2, '0')
+    return `${hours}:${minutes}`
   }
 
   return (
@@ -326,37 +336,27 @@ const handleInputChange = (field: keyof CreateGroupFormData, value: string) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="endDate">Fecha de fin *</Label>
-                    <div className="relative">
-                      <Input
-                        id="endDate"
-                        type="date"
-                        value={formData.endDate}
-                        onChange={(e) => handleInputChange("endDate", e.target.value)}
-                        min={formData.startDate || getTodayDate()}
-                        className="pl-10"
-                        required
-                      />
-                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    </div>
+                <div className="space-y-2">
+                  <Label htmlFor="durationTime">Duración de la sesión *</Label>
+                  <div className="relative">
+                    <Input
+                      id="durationTime"
+                      type="time"
+                      value={durationTime}
+                      onChange={(e) => handleDurationChange(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                    <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="endTime">Hora de fin *</Label>
-                    <div className="relative">
-                      <Input
-                        id="endTime"
-                        type="time"
-                        value={formData.endTime}
-                        onChange={(e) => handleInputChange("endTime", e.target.value)}
-                        className="pl-10"
-                        required
-                      />
-                      <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Mínimo: 00:15 (15 minutos) | Máximo: 04:00 (4 horas)
+                  </p>
+                  {formData.durationMinutes > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      Duración total: {formData.durationMinutes} minutos ({Math.floor(formData.durationMinutes / 60)}h {formData.durationMinutes % 60}m)
+                    </p>
+                  )}
                 </div>
 
                 <p className="text-xs text-muted-foreground">

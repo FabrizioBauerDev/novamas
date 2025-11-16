@@ -45,33 +45,13 @@ const createChatGroupSchema = z.object({
   description: z.string().max(500).optional(),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres").max(50),
   startDate: z.string().min(1, "La fecha de inicio es obligatoria"),
-  startTime: z.string().optional(), // Ahora opcional para fechas ISO
-  endDate: z.string().min(1, "La fecha de fin es obligatoria"),
-  endTime: z.string().optional(), // Ahora opcional para fechas ISO
+  startTime: z.string().min(1, "La hora de inicio es obligatoria"),
+  durationMinutes: z.number()
+    .int("La duración debe ser un número entero")
+    .min(15, "La sesión debe durar al menos 15 minutos")
+    .max(240, "La sesión no puede durar más de 4 horas"),
 }).refine((data) => {
-  // Función helper para crear fechas
-  const createDateTime = (dateStr: string, timeStr?: string) => {
-    if (dateStr.includes('T') || dateStr.includes('Z')) {
-      return new Date(dateStr);
-    }
-    return new Date(`${dateStr}T${timeStr}`);
-  };
-
-  const startDateTime = createDateTime(data.startDate, data.startTime);
-  const endDateTime = createDateTime(data.endDate, data.endTime);
-  return endDateTime > startDateTime;
-}, {
-  message: "La fecha de fin debe ser posterior a la fecha de inicio",
-  path: ["endDate"],
-}).refine((data) => {
-  const createDateTime = (dateStr: string, timeStr?: string) => {
-    if (dateStr.includes('T') || dateStr.includes('Z')) {
-      return new Date(dateStr);
-    }
-    return new Date(`${dateStr}T${timeStr}`);
-  };
-
-  const startDateTime = createDateTime(data.startDate, data.startTime);
+  const startDateTime = new Date(`${data.startDate}T${data.startTime}`);
   const now = new Date();
   
   // Truncar ambas fechas a minutos para comparar (ignorar segundos y milisegundos)
@@ -82,23 +62,6 @@ const createChatGroupSchema = z.object({
 }, {
   message: "La fecha de inicio debe ser actual o futura",
   path: ["startDate"],
-}).refine((data) => {
-  const createDateTime = (dateStr: string, timeStr?: string) => {
-    if (dateStr.includes('T') || dateStr.includes('Z')) {
-      return new Date(dateStr);
-    }
-    return new Date(`${dateStr}T${timeStr}`);
-  };
-
-  const startDateTime = createDateTime(data.startDate, data.startTime);
-  const endDateTime = createDateTime(data.endDate, data.endTime);
-  
-  const timeDiffMs = endDateTime.getTime() - startDateTime.getTime();
-  const timeDiffMinutes = timeDiffMs / (1000 * 60);
-  return timeDiffMinutes >= 15;
-}, {
-  message: "La sesión debe durar al menos 15 minutos",
-  path: ["endTime"],
 });
 
 // Esquemas para gestión de participantes
