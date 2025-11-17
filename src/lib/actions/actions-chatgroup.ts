@@ -320,11 +320,11 @@ export async function deleteChatGroupAction(id: string) {
     // Revalidar la página para actualizar los datos
     revalidatePath("/chatgroup")
     return { success: true }
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in deleteChatGroupAction:", error)
     
     // Error específico cuando hay sesiones individuales relacionadas
-    if (error?.message === "FOREIGN_KEY_CONSTRAINT") {
+    if (error instanceof Error && error.message === "FOREIGN_KEY_CONSTRAINT") {
       return { 
         success: false, 
         error: "No se puede eliminar esta sesión grupal porque ya tiene chats individuales asociados",
