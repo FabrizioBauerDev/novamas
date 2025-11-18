@@ -1,5 +1,7 @@
 import BibliographyView from "@/components/bibliography/bibliographyView"
 import { Metadata } from "next"
+import {auth} from "@/auth";
+import {redirect} from "next/navigation";
 
 export const metadata: Metadata = {
   title: 'Bibliografía',
@@ -11,6 +13,12 @@ export const metadata: Metadata = {
 };
 
 export default async function BibliographyPage() {
+    const session = await auth()
+
+    if (session?.user?.role === "ESTUDIANTE") {
+        redirect("/dashboard")
+    }
+
     return (
         <BibliographyView />
     )

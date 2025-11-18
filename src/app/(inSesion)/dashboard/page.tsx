@@ -19,6 +19,7 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
+  const notStudent = session.user.role !== "ESTUDIANTE"
   const isAdmin = session.user.role === "ADMINISTRADOR"
 
   return (
@@ -42,7 +43,8 @@ export default async function DashboardPage() {
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Módulos del Sistema</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
-            {/* Card - Estadísticas */}
+            {/* Card - Estadísticas - Solo Admin e Investigador */}
+            {notStudent && (
             <Link href="/statistics">
               <div className="group bg-white rounded-xl shadow-md border border-blue-100 p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer">
                 <div className="flex items-start justify-between mb-4">
@@ -56,6 +58,7 @@ export default async function DashboardPage() {
                 <p className="text-gray-600 text-sm">Analiza métricas y datos de las sesiones del chatbot</p>
               </div>
             </Link>
+            )}
 
             {/* Card - Grupos de Chat */}
             <Link href="/chatgroup">
@@ -72,7 +75,8 @@ export default async function DashboardPage() {
               </div>
             </Link>
 
-            {/* Card - Bibliografía */}
+            {/* Card - Bibliografía - Solo Administrador e Investigador*/}
+            {notStudent && (
             <Link href="/bibliography">
               <div className="group bg-white rounded-xl shadow-md border border-blue-100 p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer">
                 <div className="flex items-start justify-between mb-4">
@@ -86,6 +90,8 @@ export default async function DashboardPage() {
                 <p className="text-gray-600 text-sm">Administra recursos y referencias bibliográficas</p>
               </div>
             </Link>
+            )
+            }
 
             {/* Card - Perfil */}
             <Link href="/profile">

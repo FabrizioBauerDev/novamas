@@ -16,8 +16,8 @@ export default async function StatisticsPage() {
   const session = await auth()
   const userName = session?.user?.name
 
-  if (!userName) {
-    redirect("/");
+  if (session?.user?.role === "ESTUDIANTE" || !userName) {
+    redirect("/dashboard");
   }
   return <GeneralView currentUser={userName}/>
 }

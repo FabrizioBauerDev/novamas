@@ -64,7 +64,7 @@ export function UserManagement({userEmail}: UserManagementProps) {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [userToDelete, setUserToDelete] = useState<string | null>(null)
     const [submitting, setSubmitting] = useState(false)
-
+    const [filterStatus, setFilterStatus] = useState("Todos los estados")
 
     useEffect(() => {
         fetchUsers()
@@ -265,9 +265,15 @@ export function UserManagement({userEmail}: UserManagementProps) {
     }
 
     const filteredUsers = (users || []).filter(
-        (user) =>
-            user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchQuery.toLowerCase()),
+        (user) => {
+            const matchesSearch =
+                user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                user.email.toLowerCase().includes(searchQuery.toLowerCase());
+
+            const matchesStatus = filterStatus === "Todos los estados" || user.status === filterStatus;
+
+            return matchesSearch && matchesStatus;
+        }
     )
 
 
@@ -338,14 +344,32 @@ export function UserManagement({userEmail}: UserManagementProps) {
                     </Button>
                 </div>
 
-                <div className="relative w-full">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-8 text-muted-foreground" />
-                    <Input
-                        placeholder="Buscar por nombre o email..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 h-11 shadow-sm"
-                    />
+                <div className="flex gap-3 w-full">
+                    {/* Buscador */}
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Buscar por nombre o email..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 shadow-sm"
+                        />
+                    </div>
+
+                    {/* Selector de Estados */}
+                    <Select value={filterStatus} onValueChange={setFilterStatus}>
+                        <SelectTrigger className="w-[200px] shadow-sm">
+                            <SelectValue placeholder="Filtrar por estado" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Todos los estados">Todos los estados</SelectItem>
+                            {["ACTIVO", "DESACTIVADO"].map((category) => (
+                                <SelectItem key={category} value={category}>
+                                    {category}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 <div className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
@@ -371,7 +395,7 @@ export function UserManagement({userEmail}: UserManagementProps) {
                                             <div className="space-y-1">
                                                 <p className="text-sm font-medium text-foreground">No se encontraron usuarios</p>
                                                 <p className="text-sm text-muted-foreground">
-                                                    {searchQuery ? "Intenta ajustar tu búsqueda" : "Comienza agregando tu primer usuario"}
+                                                    {searchQuery || filterStatus!="Todos los estados" ? "Intenta ajustar tu búsqueda" : "Comienza agregando tu primer usuario"}
                                                 </p>
                                             </div>
                                             {!searchQuery && (
