@@ -417,6 +417,7 @@ export async function POST(req: NextRequest) {
             }
           }
 
+          /* METRICAS COMENTADAS, PRUEBAS YA REALIZADAS
           // Metricas del RAG
           if (ragMetrics.used) {
             let lastMessage = messagesToSave[messagesToSave.length - 1];
@@ -458,7 +459,7 @@ export async function POST(req: NextRequest) {
             }
           } else {
             console.log('RAG no se usó');
-          }
+          }*/
 
           // Guardar mensajes
           if (welcomeMessage) {

@@ -18,7 +18,7 @@ export default async function userManagementPage() {
     const isAdmin = userRole === "ADMINISTRADOR"
 
     if (!isAdmin) {
-        redirect("/");
+        redirect("/dashboard");
     }
 
     return <UserManagement userEmail={session?.user?.email}/>

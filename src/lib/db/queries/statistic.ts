@@ -1,6 +1,6 @@
 import {db} from "@/db";
 import {chatFeedbacks, chatSessions, evaluationForms, finalForm, geoLocations, statistics} from "@/db/schema";
-import {asc, desc, eq, isNotNull, isNull} from "drizzle-orm";
+import {asc, desc, eq, isNotNull, isNull, lt} from "drizzle-orm";
 import {EvaluationFormResult, ExcelGeneralStats, GeneralStats} from "@/types/statistics";
 import {GenderType} from "@/lib/enums";
 
@@ -126,7 +126,7 @@ export async function getGeneralStats(chatGroupId: string | null) {
                 rating: chatFeedbacks.rating,
             })
             .from(statistics)
-            .rightJoin(evaluationForms, eq(statistics.chatId, evaluationForms.id))
+            .innerJoin(evaluationForms, eq(statistics.chatId, evaluationForms.id))
             .leftJoin(finalForm, eq(finalForm.chatId, evaluationForms.id))
             .leftJoin(chatFeedbacks, eq(chatFeedbacks.chatSessionId, evaluationForms.id))
             .leftJoin(geoLocations, eq(geoLocations.evaluationFormId, evaluationForms.id))
@@ -162,7 +162,7 @@ export async function getGeneralStatsByGroups() {
                 rating: chatFeedbacks.rating,
             })
             .from(statistics)
-            .rightJoin(evaluationForms, eq(statistics.chatId, evaluationForms.id))
+            .innerJoin(evaluationForms, eq(statistics.chatId, evaluationForms.id))
             .leftJoin(finalForm, eq(finalForm.chatId, evaluationForms.id))
             .leftJoin(chatFeedbacks, eq(chatFeedbacks.chatSessionId, evaluationForms.id))
             .leftJoin(geoLocations, eq(geoLocations.evaluationFormId, evaluationForms.id))
@@ -306,12 +306,13 @@ export async function getStatsByChatId(id: string) {
 
 export async function getNumberStats() {
     try {
+        const fourHoursAgo = new Date(Date.now() - 14400000);
         const results = await db
             .select({
                 analyzed: chatSessions.analyzed
             })
             .from(chatSessions)
-            .where(isNotNull(chatSessions.sessionEndedAt))
+            .where(lt(chatSessions.updatedAt, fourHoursAgo))
 
         let analyzedTrue = 0;
         let analyzedFalse = 0;

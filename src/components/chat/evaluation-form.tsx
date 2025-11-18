@@ -54,7 +54,9 @@ export default function EvaluationForm({ onFormComplete, chatSessionId, onEvalua
     setLoading(true);
     try {
       const average = (formData.assistantDesign! + formData.assistantPurpose! + formData.assistantResponses! + formData.userFriendly! + formData.usefulToUnderstandRisks!) / 5;
-
+      if (average === null){
+        console.log("average is null");
+      }
       const result = await createFinalFormAction({
         ...formData,
         average
