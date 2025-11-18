@@ -7,6 +7,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { auth } from "@/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import SessionProviderWrapper from '@/components/providers/session-provider';
 
 export const metadata: Metadata = {
   title: {
@@ -29,10 +30,12 @@ export default async function RootLayout({
       <body
         className={`${roboto.className}`}
       >
-        <Navbar user={session?.user}/>
-        {children}
-        <Footer/>
-        <Toaster />
+        <SessionProviderWrapper>
+          <Navbar user={session?.user}/>
+          {children}
+          <Footer/>
+          <Toaster />
+        </SessionProviderWrapper>
         <Analytics />
         <SpeedInsights />
       </body>

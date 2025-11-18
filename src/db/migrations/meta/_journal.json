@@ -120,6 +120,20 @@
       "when": 1762283753469,
       "tag": "0016_daily_fabian_cortez",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1763412848420,
+      "tag": "0017_moaning_dragon_lord",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1763413628322,
+      "tag": "0018_amused_shaman",
+      "breakpoints": true
     }
   ]
 }

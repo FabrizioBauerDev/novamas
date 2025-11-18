@@ -79,14 +79,15 @@ export async function deleteChatGroupById(id: string) {
     }
 
     return result[0]
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error deleting chat group:", error)
     
     // Detectar error de foreign key constraint (hay sesiones relacionadas)
     // El error puede estar en error.code, error.cause.code o en el mensaje
-    const errorCode = error?.code || error?.cause?.code
-    const errorMessage = error?.message || ''
-    const causeMessage = error?.cause?.message || ''
+    const errorWithCode = error as { code?: string; cause?: { code?: string; message?: string } }
+    const errorCode = errorWithCode.code || errorWithCode.cause?.code
+    const errorMessage = error instanceof Error ? error.message : ''
+    const causeMessage = errorWithCode.cause?.message || ''
     
     if (errorCode === '23503' || 
         errorMessage.includes('foreign key constraint') || 

@@ -3,6 +3,7 @@
 import React, {useRef} from "react"
 
 import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,6 +20,7 @@ interface UserProfileProps {
     id: string;
 }
 export default function UserProfile({id}: UserProfileProps) {
+    const { data: session, update: updateSession } = useSession()
     const [user, setUser] = useState<UserData | null>(null)
     const [isEditing, setIsEditing] = useState(false)
     const [editedName, setEditedName] = useState("")
@@ -93,6 +95,18 @@ export default function UserProfile({id}: UserProfileProps) {
                     toast.success("Perfil actualizado correctamente", {
                         duration: 5000,
                     });
+
+                    // Actualizar la sesión con el nuevo nombre para reflejarlo en el navbar
+                    if (session?.user) {
+                        await updateSession({
+                            ...session,
+                            user: {
+                                ...session.user,
+                                name: updatedUser.name,
+                                image: updatedUser.image,
+                            },
+                        })
+                    }
                 }else{
                     toast.error("Error al actualizar al usuario", {
                         duration: 5000,

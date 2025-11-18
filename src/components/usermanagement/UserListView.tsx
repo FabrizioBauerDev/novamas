@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -46,6 +47,7 @@ type UserFormData = {
 }
 
 export function UserManagement({userEmail}: UserManagementProps) {
+    const { data: session, update: updateSession } = useSession()
     const [users, setUsers] = useState<UserData[]|undefined>([])
     const [loading, setLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState("")
@@ -230,6 +232,24 @@ export function UserManagement({userEmail}: UserManagementProps) {
                     description: data.message,
                     duration: 5000,
                 });
+
+                // Si el usuario editado es el mismo que está logueado, actualizar la sesión
+                if (editingUser.email === userEmail && session?.user) {
+                    // Si se desactivó al usuario actual, forzar actualización para invalidar sesión
+                    if (formData.status === "DESACTIVADO") {
+                        // Forzar revalidación de la sesión para que el callback JWT detecte el cambio
+                        await updateSession()
+                    } else {
+                        // Solo actualizar el rol si sigue activo
+                        await updateSession({
+                            ...session,
+                            user: {
+                                ...session.user,
+                                role: formData.role,
+                            },
+                        })
+                    }
+                }
             }
 
             setIsDialogOpen(false)

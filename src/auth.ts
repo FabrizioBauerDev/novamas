@@ -59,21 +59,67 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      // En el primer login, guardar el id del usuario en el token
       if (user) {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
         token.role = user.role;
       }
+
+      // Si se llama a update() desde el cliente, actualizar el token con los nuevos datos
+      if (trigger === "update" && session) {
+        token.name = session.user.name;
+        token.email = session.user.email;
+        token.role = session.user.role;
+        token.picture = session.user.image;
+      }
+
+      // En cada request subsiguiente, validar con la BD
+      if (token.id) {
+        const dbUser = await db
+          .select({
+            id: users.id,
+            name: users.name,
+            email: users.email,
+            role: users.role,
+            status: users.status,
+          })
+          .from(users)
+          .where(eq(users.id, token.id as string))
+          .limit(1)
+          .then((result) => result[0]);
+
+        // Si el usuario no existe o está inactivo, invalidar el token
+        if (!dbUser || dbUser.status !== "ACTIVO") {
+          return null; // Esto forzará el logout
+        }
+
+        // Actualizar el token con los datos frescos de la BD
+        token.name = dbUser.name;
+        token.email = dbUser.email;
+        token.role = dbUser.role;
+      }
+
       return token;
     },
-    session({ session, token }) {
+    async session({ session, token }) {
+      // Si el token es null o inválido, retornar una sesión vacía
+      if (!token || !token.id) {
+        return {
+          ...session,
+          user: undefined,
+          expires: new Date(0).toISOString(), // Marcar como expirada
+        };
+      }
+
       if (token) {
         session.user.id = token.id as string;
         session.user.name = token.name;
         session.user.email = token.email as string;
         session.user.role = token.role as string;
+        session.user.image = token.picture as string | null;
       }
       return session;
     },

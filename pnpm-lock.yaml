@@ -27,9 +27,6 @@ importers:
       '@ai-sdk/react':
         specifier: ^2.0.72
         version: 2.0.72(react@19.1.0)(zod@3.25.76)
-      '@auth/prisma-adapter':
-        specifier: ^2.11.0
-        version: 2.11.0(@prisma/client@6.15.0(typescript@5.9.3))
       '@google/generative-ai':
         specifier: ^0.24.1
         version: 0.24.1
@@ -314,25 +311,6 @@ packages:
         optional: true
       nodemailer:
         optional: true
-
-  '@auth/core@0.41.0':
-    resolution: {integrity: sha512-Wd7mHPQ/8zy6Qj7f4T46vg3aoor8fskJm6g2Zyj064oQ3+p0xNZXAV60ww0hY+MbTesfu29kK14Zk5d5JTazXQ==}
-    peerDependencies:
-      '@simplewebauthn/browser': ^9.0.1
-      '@simplewebauthn/server': ^9.0.2
-      nodemailer: ^6.8.0
-    peerDependenciesMeta:
-      '@simplewebauthn/browser':
-        optional: true
-      '@simplewebauthn/server':
-        optional: true
-      nodemailer:
-        optional: true
-
-  '@auth/prisma-adapter@2.11.0':
-    resolution: {integrity: sha512-gp1vpO7R7HxqQIDVFG4FXpjd9WsXg+vZsaqXOYyNCWugcx0scU2XNfhEiw3FnGyIaqRD4fexBf40LMJH8HmZ8A==}
-    peerDependencies:
-      '@prisma/client': '>=2.26.0 || >=3 || >=4 || >=5 || >=6'
 
   '@babel/runtime@7.28.4':
     resolution: {integrity: sha512-Q/N6JNWvIvPnLDvjlE1OUBLPQHH6l3CltCEsHIujp45zQUSSh8K+gHnaEX45yAT1nyngnINhvWtzN+Nb9D8RAQ==}
@@ -5826,23 +5804,6 @@ snapshots:
       preact: 10.24.3
       preact-render-to-string: 6.5.11(preact@10.24.3)
 
-  '@auth/core@0.41.0':
-    dependencies:
-      '@panva/hkdf': 1.2.1
-      jose: 6.1.0
-      oauth4webapi: 3.8.2
-      preact: 10.24.3
-      preact-render-to-string: 6.5.11(preact@10.24.3)
-
-  '@auth/prisma-adapter@2.11.0(@prisma/client@6.15.0(typescript@5.9.3))':
-    dependencies:
-      '@auth/core': 0.41.0
-      '@prisma/client': 6.15.0(typescript@5.9.3)
-    transitivePeerDependencies:
-      - '@simplewebauthn/browser'
-      - '@simplewebauthn/server'
-      - nodemailer
-
   '@babel/runtime@7.28.4': {}
 
   '@browserbasehq/sdk@2.6.0':
@@ -6551,6 +6512,7 @@ snapshots:
   '@prisma/client@6.15.0(typescript@5.9.3)':
     optionalDependencies:
       typescript: 5.9.3
+    optional: true
 
   '@protobufjs/aspromise@1.1.2': {}
 

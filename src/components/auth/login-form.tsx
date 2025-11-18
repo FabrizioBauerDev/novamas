@@ -2,24 +2,50 @@
 
 import type React from "react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, User, Lock, Loader2 } from "lucide-react";
-import { useActionState } from "react";
-import { authenticate } from "@/lib/actions/actions-auth";
+import { signIn } from "next-auth/react";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
 
-  const [errorMessage, formAction, isPending] = useActionState(
-    authenticate,
-    undefined
-  );
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsPending(true);
+    setErrorMessage(undefined);
+
+    const formData = new FormData(event.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setErrorMessage('Correo electrónico o contraseña incorrectos.');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      setErrorMessage('Algo salió mal... Intenta de nuevo.');
+    } finally {
+      setIsPending(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <form action={formAction} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Campo Usuario */}
         <div className="space-y-2">
           <Label htmlFor="email" className="text-sm font-medium text-gray-700">

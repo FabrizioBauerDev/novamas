@@ -7,24 +7,30 @@ export const authConfig = {
   },
   session: {
     strategy: 'jwt',
-    maxAge: 60 * 30, // 60 segundos * 30 = 30 minutos
+    maxAge: 60 * 10, // 60 segundos * 10 = 10 minutos
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const pathname = nextUrl.pathname;
       
-      // Rutas protegidas que requieren autenticación
+      // Rutas protegidas que requieren autenticación (rutas en inSesion)
       // (pueden ser exactas o prefijos)
-      const protectedRoutes = ['/dashboard', '/register','/chatgroup','/bibliography', '/statistics'];
+      const protectedRoutes = [
+        '/bibliography',
+        '/chatgroup',
+        '/dashboard',
+        '/profile',
+        '/statistics',
+        '/usermanagement'
+      ];
       const isProtectedRoute = protectedRoutes.some(route =>
         route.endsWith('/') ? pathname.startsWith(route) : pathname === route || pathname.startsWith(route + '/')
       );
       
       // Rutas a las que no debe acceder si está autenticado
       const isOnLogin = pathname === '/login';
-      const isOnRestore = pathname === '/restore';
-      const isRestrictedForAuth = isOnLogin || isOnRestore;
+      const isRestrictedForAuth = isOnLogin;
       
       // Si está en una ruta protegida
       if (isProtectedRoute) {
