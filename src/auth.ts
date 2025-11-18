@@ -109,7 +109,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (!token || !token.id) {
         return {
           ...session,
-          user: undefined as any,
+          user: undefined,
           expires: new Date(0).toISOString(), // Marcar como expirada
         };
       }
