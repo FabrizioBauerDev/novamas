@@ -92,8 +92,8 @@ export async function createChatGroupAction(formData: CreateGroupFormData) {
       return { success: false, error: "La sesión no puede durar más de 4 horas" };
     }
 
-    // Crear la fecha de inicio
-    const startDateTime = new Date(`${startDate}T${startTime}`);
+    // Crear la fecha de inicio en UTC
+    const startDateTime = new Date(`${startDate}T${startTime}Z`);
     
     // Calcular la fecha de fin sumando los minutos de duración
     const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60 * 1000);

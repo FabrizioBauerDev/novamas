@@ -88,18 +88,17 @@ const handleInputChange = (field: keyof CreateGroupFormData, value: string) => {
       errors.push("La sesión no puede durar más de 4 horas")
     }
 
-    // Validar fecha de inicio
+    // Validar fecha de inicio en UTC
     if (formData.startDate && formData.startTime) {
-      const [year, month, day] = formData.startDate.split('-').map(Number)
-      const [hours, minutes] = formData.startTime.split(':').map(Number)
-      const startDateTime = new Date(year, month - 1, day, hours, minutes)
-      const now = new Date()
+      const localDateTime = new Date(`${formData.startDate}T${formData.startTime}`)
+      const utcDateTime = new Date(localDateTime.getTime() - localDateTime.getTimezoneOffset() * 60000)
+      const nowUTC = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
       
       // Truncar ambas fechas a minutos para comparar
-      const startMinutes = new Date(startDateTime.getFullYear(), startDateTime.getMonth(), startDateTime.getDate(), startDateTime.getHours(), startDateTime.getMinutes())
-      const nowMinutes = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes())
+      const startTruncated = new Date(utcDateTime.getFullYear(), utcDateTime.getMonth(), utcDateTime.getDate(), utcDateTime.getHours(), utcDateTime.getMinutes())
+      const nowTruncated = new Date(nowUTC.getFullYear(), nowUTC.getMonth(), nowUTC.getDate(), nowUTC.getHours(), nowUTC.getMinutes())
       
-      if (startMinutes < nowMinutes) {
+      if (startTruncated < nowTruncated) {
         errors.push("La fecha de inicio debe ser actual o futura")
       }
     }
@@ -126,14 +125,19 @@ const handleInputChange = (field: keyof CreateGroupFormData, value: string) => {
     setIsSubmitting(true)
 
     try {
+      // Convertir fecha local a UTC
+      const localDateTime = new Date(`${formData.startDate}T${formData.startTime}`)
+      const utcDate = localDateTime.toISOString().split('T')[0]
+      const utcTime = localDateTime.toISOString().split('T')[1].substring(0, 5)
+
       // Preparar datos para enviar al backend
       const groupData: CreateGroupFormData = {
         name: formData.name.trim(),
         slug: formData.slug.trim(),
         description: formData.description.trim(),
         password: formData.password,
-        startDate: formData.startDate,
-        startTime: formData.startTime,
+        startDate: utcDate,
+        startTime: utcTime,
         durationMinutes: formData.durationMinutes,
       }
 
