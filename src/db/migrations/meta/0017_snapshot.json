@@ -1,0 +1,1422 @@
+{
+  "id": "60f8e231-2a16-4871-9639-a2765973438e",
+  "prevId": "ff04174f-be47-4b7e-8fa3-d3d37f05b1f2",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.Account": {
+      "name": "Account",
+      "schema": "",
+      "columns": {
+        "userId": {
+          "name": "userId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "providerAccountId": {
+          "name": "providerAccountId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "refresh_token": {
+          "name": "refresh_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "access_token": {
+          "name": "access_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "token_type": {
+          "name": "token_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_token": {
+          "name": "id_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "session_state": {
+          "name": "session_state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "Account_userId_User_id_fk": {
+          "name": "Account_userId_User_id_fk",
+          "tableFrom": "Account",
+          "tableTo": "User",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "Account_provider_providerAccountId_pk": {
+          "name": "Account_provider_providerAccountId_pk",
+          "columns": [
+            "provider",
+            "providerAccountId"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.bibliography": {
+      "name": "bibliography",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "author": {
+          "name": "author",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "category": {
+          "name": "category",
+          "type": "BibliographyCategory",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'OTRO'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bibliography_title_unique": {
+          "name": "bibliography_title_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "title"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ChatFeedback": {
+      "name": "ChatFeedback",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "chatSessionId": {
+          "name": "chatSessionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rating": {
+          "name": "rating",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "comment": {
+          "name": "comment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ChatFeedback_chatSessionId_ChatSession_id_fk": {
+          "name": "ChatFeedback_chatSessionId_ChatSession_id_fk",
+          "tableFrom": "ChatFeedback",
+          "tableTo": "ChatSession",
+          "columnsFrom": [
+            "chatSessionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ChatFeedback_chatSessionId_unique": {
+          "name": "ChatFeedback_chatSessionId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "chatSessionId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ChatGroupMember": {
+      "name": "ChatGroupMember",
+      "schema": "",
+      "columns": {
+        "userId": {
+          "name": "userId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "chatGroupId": {
+          "name": "chatGroupId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ChatGroupMember_userId_User_id_fk": {
+          "name": "ChatGroupMember_userId_User_id_fk",
+          "tableFrom": "ChatGroupMember",
+          "tableTo": "User",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "ChatGroupMember_chatGroupId_ChatGroup_id_fk": {
+          "name": "ChatGroupMember_chatGroupId_ChatGroup_id_fk",
+          "tableFrom": "ChatGroupMember",
+          "tableTo": "ChatGroup",
+          "columnsFrom": [
+            "chatGroupId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "ChatGroupMember_userId_chatGroupId_pk": {
+          "name": "ChatGroupMember_userId_chatGroupId_pk",
+          "columns": [
+            "userId",
+            "chatGroupId"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ChatGroup": {
+      "name": "ChatGroup",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "creatorId": {
+          "name": "creatorId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "startDate": {
+          "name": "startDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "endDate": {
+          "name": "endDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ChatGroup_creatorId_User_id_fk": {
+          "name": "ChatGroup_creatorId_User_id_fk",
+          "tableFrom": "ChatGroup",
+          "tableTo": "User",
+          "columnsFrom": [
+            "creatorId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ChatSession": {
+      "name": "ChatSession",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "chatGroupId": {
+          "name": "chatGroupId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "numOfTokensIn": {
+          "name": "numOfTokensIn",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "numOfTokensOut": {
+          "name": "numOfTokensOut",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "usedGraceMessage": {
+          "name": "usedGraceMessage",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "sessionEndedAt": {
+          "name": "sessionEndedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "maxDurationMs": {
+          "name": "maxDurationMs",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1200000
+        },
+        "analyzed": {
+          "name": "analyzed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ChatSession_chatGroupId_ChatGroup_id_fk": {
+          "name": "ChatSession_chatGroupId_ChatGroup_id_fk",
+          "tableFrom": "ChatSession",
+          "tableTo": "ChatGroup",
+          "columnsFrom": [
+            "chatGroupId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.chunk": {
+      "name": "chunk",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "resource_id": {
+          "name": "resource_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "embedding": {
+          "name": "embedding",
+          "type": "vector(768)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "embeddingIndex": {
+          "name": "embeddingIndex",
+          "columns": [
+            {
+              "expression": "embedding",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last",
+              "opclass": "vector_cosine_ops"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "hnsw",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "chunk_resource_id_bibliography_id_fk": {
+          "name": "chunk_resource_id_bibliography_id_fk",
+          "tableFrom": "chunk",
+          "tableTo": "bibliography",
+          "columnsFrom": [
+            "resource_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.EvaluationForm": {
+      "name": "EvaluationForm",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "gender": {
+          "name": "gender",
+          "type": "GenderType",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "age": {
+          "name": "age",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "onlineGaming": {
+          "name": "onlineGaming",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "couldntStop": {
+          "name": "couldntStop",
+          "type": "CouldntStopType",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "personalIssues": {
+          "name": "personalIssues",
+          "type": "PersonalIssuesType",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "triedToQuit": {
+          "name": "triedToQuit",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "score": {
+          "name": "score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ip": {
+          "name": "ip",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "address": {
+          "name": "address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "EvaluationForm_id_ChatSession_id_fk": {
+          "name": "EvaluationForm_id_ChatSession_id_fk",
+          "tableFrom": "EvaluationForm",
+          "tableTo": "ChatSession",
+          "columnsFrom": [
+            "id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.FinalForm": {
+      "name": "FinalForm",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "chatId": {
+          "name": "chatId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "assistantDesign": {
+          "name": "assistantDesign",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "assistantPurpose": {
+          "name": "assistantPurpose",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "assistantResponses": {
+          "name": "assistantResponses",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "userFriendly": {
+          "name": "userFriendly",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "usefulToUnderstandRisks": {
+          "name": "usefulToUnderstandRisks",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "average": {
+          "name": "average",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "FinalForm_chatId_ChatSession_id_fk": {
+          "name": "FinalForm_chatId_ChatSession_id_fk",
+          "tableFrom": "FinalForm",
+          "tableTo": "ChatSession",
+          "columnsFrom": [
+            "chatId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.GeoLocation": {
+      "name": "GeoLocation",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "evaluationFormId": {
+          "name": "evaluationFormId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "latitude": {
+          "name": "latitude",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "longitude": {
+          "name": "longitude",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "accuracy": {
+          "name": "accuracy",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "GeoLocation_evaluationFormId_EvaluationForm_id_fk": {
+          "name": "GeoLocation_evaluationFormId_EvaluationForm_id_fk",
+          "tableFrom": "GeoLocation",
+          "tableTo": "EvaluationForm",
+          "columnsFrom": [
+            "evaluationFormId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "GeoLocation_evaluationFormId_unique": {
+          "name": "GeoLocation_evaluationFormId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "evaluationFormId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.Message": {
+      "name": "Message",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "chatSessionId": {
+          "name": "chatSessionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sender": {
+          "name": "sender",
+          "type": "SenderType",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "messageTokensIn": {
+          "name": "messageTokensIn",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "messageTokensOut": {
+          "name": "messageTokensOut",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "messageTokensReasoning": {
+          "name": "messageTokensReasoning",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sentimentLabel": {
+          "name": "sentimentLabel",
+          "type": "sentimentLabelType",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_messages_session_created": {
+          "name": "idx_messages_session_created",
+          "columns": [
+            {
+              "expression": "chatSessionId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "createdAt",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_messages_session_id": {
+          "name": "idx_messages_session_id",
+          "columns": [
+            {
+              "expression": "chatSessionId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "Message_chatSessionId_ChatSession_id_fk": {
+          "name": "Message_chatSessionId_ChatSession_id_fk",
+          "tableFrom": "Message",
+          "tableTo": "ChatSession",
+          "columnsFrom": [
+            "chatSessionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.RAGMetric": {
+      "name": "RAGMetric",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "chatSessionId": {
+          "name": "chatSessionId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "query": {
+          "name": "query",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "llmResponse": {
+          "name": "llmResponse",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ragResponse": {
+          "name": "ragResponse",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ragRelevance": {
+          "name": "ragRelevance",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "llmUsedRAG": {
+          "name": "llmUsedRAG",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "RAGMetric_chatSessionId_ChatSession_id_fk": {
+          "name": "RAGMetric_chatSessionId_ChatSession_id_fk",
+          "tableFrom": "RAGMetric",
+          "tableTo": "ChatSession",
+          "columnsFrom": [
+            "chatSessionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.Session": {
+      "name": "Session",
+      "schema": "",
+      "columns": {
+        "sessionToken": {
+          "name": "sessionToken",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires": {
+          "name": "expires",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "Session_userId_User_id_fk": {
+          "name": "Session_userId_User_id_fk",
+          "tableFrom": "Session",
+          "tableTo": "User",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.statistics": {
+      "name": "statistics",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "summary": {
+          "name": "summary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "chat_id": {
+          "name": "chat_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "chat_group_id": {
+          "name": "chat_group_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "amount_messages": {
+          "name": "amount_messages",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "min_words_per_message": {
+          "name": "min_words_per_message",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "max_words_per_message": {
+          "name": "max_words_per_message",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hate_speech": {
+          "name": "hate_speech",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ironic": {
+          "name": "ironic",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "positive_percentage": {
+          "name": "positive_percentage",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "negative_percentage": {
+          "name": "negative_percentage",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "neutral_percentage": {
+          "name": "neutral_percentage",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "most_frequent_sentiment": {
+          "name": "most_frequent_sentiment",
+          "type": "sentimentLabelType",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "change_theme": {
+          "name": "change_theme",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bet_type": {
+          "name": "bet_type",
+          "type": "BetType",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'NO_ESPECIFICA'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "statistics_chat_id_ChatSession_id_fk": {
+          "name": "statistics_chat_id_ChatSession_id_fk",
+          "tableFrom": "statistics",
+          "tableTo": "ChatSession",
+          "columnsFrom": [
+            "chat_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "statistics_chat_group_id_ChatGroup_id_fk": {
+          "name": "statistics_chat_group_id_ChatGroup_id_fk",
+          "tableFrom": "statistics",
+          "tableTo": "ChatGroup",
+          "columnsFrom": [
+            "chat_group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.User": {
+      "name": "User",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "UserRole",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "UserStatus",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ACTIVO'"
+        },
+        "emailVerified": {
+          "name": "emailVerified",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "User_email_unique": {
+          "name": "User_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.VerificationToken": {
+      "name": "VerificationToken",
+      "schema": "",
+      "columns": {
+        "identifier": {
+          "name": "identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token": {
+          "name": "token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires": {
+          "name": "expires",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "VerificationToken_identifier_token_pk": {
+          "name": "VerificationToken_identifier_token_pk",
+          "columns": [
+            "identifier",
+            "token"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.BetType": {
+      "name": "BetType",
+      "schema": "public",
+      "values": [
+        "CASINO_PRESENCIAL",
+        "CASINO_ONLINE",
+        "DEPORTIVA",
+        "LOTERIA",
+        "VIDEOJUEGO",
+        "NO_ESPECIFICA"
+      ]
+    },
+    "public.BibliographyCategory": {
+      "name": "BibliographyCategory",
+      "schema": "public",
+      "values": [
+        "ESTADISTICAS",
+        "NUMERO_TELEFONO",
+        "TECNICAS_CONTROL",
+        "OTRO"
+      ]
+    },
+    "public.CouldntStopType": {
+      "name": "CouldntStopType",
+      "schema": "public",
+      "values": [
+        "NO",
+        "NO_ES_SEG",
+        "SI"
+      ]
+    },
+    "public.GenderType": {
+      "name": "GenderType",
+      "schema": "public",
+      "values": [
+        "MASCULINO",
+        "FEMENINO",
+        "OTRO"
+      ]
+    },
+    "public.PersonalIssuesType": {
+      "name": "PersonalIssuesType",
+      "schema": "public",
+      "values": [
+        "NO",
+        "NO_AP",
+        "SI"
+      ]
+    },
+    "public.SenderType": {
+      "name": "SenderType",
+      "schema": "public",
+      "values": [
+        "assistant",
+        "user"
+      ]
+    },
+    "public.sentimentLabelType": {
+      "name": "sentimentLabelType",
+      "schema": "public",
+      "values": [
+        "POS",
+        "NEG",
+        "NEU"
+      ]
+    },
+    "public.UserRole": {
+      "name": "UserRole",
+      "schema": "public",
+      "values": [
+        "ADMINISTRADOR",
+        "INVESTIGADOR",
+        "ESTUDIANTE"
+      ]
+    },
+    "public.UserStatus": {
+      "name": "UserStatus",
+      "schema": "public",
+      "values": [
+        "ACTIVO",
+        "DESACTIVADO"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

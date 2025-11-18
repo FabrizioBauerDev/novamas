@@ -1,3 +1,6 @@
+"use client";
+
+import { useSession } from "next-auth/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { User, LogOut } from "lucide-react";
 import Link from "next/link";
-import { handleSignOut } from "@/lib/actions/actions-auth";
+import { signOut } from "next-auth/react";
 
 interface DropboxUserProps {
   user?: {
@@ -19,8 +22,20 @@ interface DropboxUserProps {
     role?: string | null;
   } | null;
 }
-export default function DropboxUser({ user }: DropboxUserProps) {
+export default function DropboxUser({ user: initialUser }: DropboxUserProps) {
+  const { data: session, status } = useSession();
+  
+  // Si la sesión está cargando, usar los datos iniciales del servidor
+  // Si la sesión está autenticada, usar los datos de la sesión
+  // Si la sesión no está autenticada o expiró, no mostrar usuario
+  const user = status === "loading" 
+    ? initialUser 
+    : (session?.user && status === "authenticated" ? session.user : null);
+  
   const menuItemClass = "hover:bg-gray-200 focus:bg-gray-200 data-[highlighted]:bg-gray-200";
+  
+  // Si no hay usuario, no renderizar el componente
+  if (!user) return null;
   return (
     <>
       <DropdownMenu>
@@ -50,7 +65,7 @@ export default function DropboxUser({ user }: DropboxUserProps) {
           <DropdownMenuLabel>ChatNova+</DropdownMenuLabel>
           <Link href="/chatNova"><DropdownMenuItem className={menuItemClass}>Nuevo chat</DropdownMenuItem></Link>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className={menuItemClass} onClick={handleSignOut}><LogOut className="w-5 h-5" />Cerrar sesión</DropdownMenuItem>
+          <DropdownMenuItem className={menuItemClass} onClick={() => signOut({ callbackUrl: "/" })}><LogOut className="w-5 h-5" />Cerrar sesión</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </>

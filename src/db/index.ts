@@ -16,10 +16,10 @@ let db: ReturnType<typeof drizzle>;
 if (process.env.NODE_ENV === "production") {
   db = drizzle(client, { schema });
 } else {
-  if (!global.__drizzle) {
-    global.__drizzle = drizzle(client, { schema });
+  if (!globalThis.__drizzle) {
+    globalThis.__drizzle = drizzle(client, { schema });
   }
-  db = global.__drizzle;
+  db = globalThis.__drizzle;
 }
 
 export { db };

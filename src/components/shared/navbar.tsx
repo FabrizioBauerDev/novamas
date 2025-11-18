@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Menu, MessageCircle, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import {
   SheetHeader,
 } from "@/components/ui/sheet";
 import DropBoxUser from "@/components/shared/dropboxuser";
-import { handleSignOut } from "@/lib/actions/actions-auth";
+import { signOut } from "next-auth/react";
 
 interface NavbarProps {
   user?: {
@@ -22,8 +23,16 @@ interface NavbarProps {
   } | null;
 }
 
-export default function Navbar({ user }: NavbarProps) {
+export default function Navbar({ user: initialUser }: NavbarProps) {
+  const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  
+  // Si la sesión está cargando, usar los datos iniciales del servidor
+  // Si la sesión está autenticada, usar los datos de la sesión
+  // Si la sesión no está autenticada o expiró, no mostrar usuario
+  const user = status === "loading" 
+    ? initialUser 
+    : (session?.user && status === "authenticated" ? session.user : null);
 
   const navigationLinks = [
     { href: "/", label: "Inicio" },
@@ -155,7 +164,7 @@ export default function Navbar({ user }: NavbarProps) {
                       <Link href="/chatNova" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
                         Nuevo chat
                       </Link>
-                      <button onClick={() => { setIsOpen(false); handleSignOut(); }} className="w-full text-left text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
+                      <button onClick={() => { setIsOpen(false); signOut({ callbackUrl: "/" }); }} className="w-full text-left text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
                         Cerrar sesión
                       </button>
                     </div>
