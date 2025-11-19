@@ -1,6 +1,6 @@
 import {db} from "@/db";
 import {chatFeedbacks, chatSessions, evaluationForms, finalForm, geoLocations, statistics} from "@/db/schema";
-import {asc, desc, eq, isNotNull, isNull, lt} from "drizzle-orm";
+import {asc, desc, eq, isNotNull, isNull, lt, or} from "drizzle-orm";
 import {EvaluationFormResult, ExcelGeneralStats, GeneralStats} from "@/types/statistics";
 import {GenderType} from "@/lib/enums";
 
@@ -312,7 +312,10 @@ export async function getNumberStats() {
                 analyzed: chatSessions.analyzed
             })
             .from(chatSessions)
-            .where(lt(chatSessions.updatedAt, fourHoursAgo))
+            .where(or(
+                lt(chatSessions.updatedAt, fourHoursAgo),
+                isNotNull(chatSessions.sessionEndedAt))
+            )
 
         let analyzedTrue = 0;
         let analyzedFalse = 0;

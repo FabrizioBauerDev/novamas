@@ -35,6 +35,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { addDocument, fetchBibliography, removeDocument } from "@/lib/actions/actions-bibliography"
 import { type BibliographyItem, BIBLIOGRAPHY_CATEGORIES } from "@/types/bibliography"
 import Pagination from "@/components/bibliography/Pagination"
+import {toast} from "sonner";
 
 function getBibliographyLabel(category:string){
     switch (category) {
@@ -70,10 +71,18 @@ export default function BibliographyView() {
     const itemsPerPage = 5
 
     useEffect(() => {
-        fetchBibliography().then((data) => {
-            setResources(data)
-            setIsLoading(false)
-        })
+        try{
+            fetchBibliography().then((data) => {
+                setResources(data)
+                setIsLoading(false)
+            })
+        }catch (e) {
+            toast.error("Error al obtener los PDFs cargados", {
+                description: "Ocurrió un error inesperado.",
+                duration: 5000,
+            })
+        }
+
     }, [])
 
     const filteredResources = resources.filter((resource) => {
@@ -116,7 +125,10 @@ export default function BibliographyView() {
             const fileInput = document.getElementById("file-upload") as HTMLInputElement
             if (fileInput) fileInput.value = ""
         } catch (error) {
-            console.error("Error procesando PDF:", error)
+            toast.error("Error al cargar el PDF", {
+                description: "Intente nuevamente o ingrese otro archivo.",
+                duration: 5000,
+            })
         } finally {
             setIsLoading(false)
         }
@@ -128,7 +140,10 @@ export default function BibliographyView() {
             const updatedBibliography = await removeDocument(id)
             setResources(updatedBibliography)
         } catch (error) {
-            console.error("Error eliminando documento:", error)
+            toast.error("Error al eliminar el PDF.", {
+                description: "Ocurrió un error inesperado.",
+                duration: 5000,
+            })
         } finally {
             setDeletingResource(null)
         }
@@ -147,10 +162,10 @@ export default function BibliographyView() {
             <div className="max-w-7xl mx-auto">
                 <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                     <div className="px-6 py-3">
-                        <Link href="/">
+                        <Link href="/dashboard">
                             <Button variant="ghost" size="sm" className="mb-4">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
-                                Volver al inicio
+                                Volver al dashboard
                             </Button>
                         </Link>
 

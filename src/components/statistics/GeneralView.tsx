@@ -19,7 +19,7 @@ import {EmptyState} from "@/components/statistics/EmptyState";
 import {toast} from "sonner";
 import {createExcel} from "@/lib/actions/actions-excel";
 import { useRouter } from "next/navigation";
-import {Loader2, Download, TrendingUp, Clock} from "lucide-react";
+import {Loader2, Download, TrendingUp, Clock, ArrowLeft} from "lucide-react";
 
 interface GeneralViewProps {
     currentUser:string;
@@ -175,9 +175,16 @@ export function GeneralView({currentUser}: GeneralViewProps) {
 
     return (
         <div className="min-h-screen bg-white">
-            <main className="container mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-12">
+            <main className="container mx-auto max-w-7xl px-4 py-4 lg:px-8 lg:py-8">
                 {/* Header */}
                 <div className="mb-12">
+                    <Link href="/dashboard">
+                        <Button variant="ghost" size="sm" className="mb-4">
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Volver al dashboard
+                        </Button>
+                    </Link>
+
                     <h1 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-8">Estadísticas</h1>
 
                     {/* Stats Summary Bar */}

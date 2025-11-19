@@ -220,7 +220,7 @@ export default function ChatGroupStatsView({ chatGroupId = "", currentUser }: Sl
                                     <SelectValue placeholder="Filtrar por sexo" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="todos">Todos los sexos</SelectItem>
+                                    <SelectItem value="todos">Todos los géneros</SelectItem>
                                     <SelectItem value="masculino">Masculino</SelectItem>
                                     <SelectItem value="femenino">Femenino</SelectItem>
                                     <SelectItem value="otro">Otro</SelectItem>
