@@ -60,14 +60,14 @@ export function GeneralView({currentUser}: GeneralViewProps) {
             } else {
                 console.log(res.message)
                 toast.error("Error al analizar las estadísticas", {
-                    description: "Intente nuevamente.",
+                    description: "Intente nuevamente en unos minutos, si el problema persiste cargue nuevamente la página o contacte con el desarrollador del sistema.",
                     duration: 5000,
                 });
             }
 
         } catch (err) {
             toast.error("Error al analizar las estadísticas", {
-                description: "Intente nuevamente.",
+                description: "Intente nuevamente en unos minutos, si el problema persiste cargue nuevamente la página o contacte con el desarrollador del sistema.",
                 duration: 5000,
             });
         } finally {
@@ -84,10 +84,16 @@ export function GeneralView({currentUser}: GeneralViewProps) {
             if (result.success) {
                 setGeneralStats(result.data || []);
             } else {
-                setError(result.error || "Error desconocido");
+                toast.error("Error desconocido.", {
+                    description: "Cargue nuevamente la página.",
+                    duration: 5000,
+                });
             }
         } catch (err) {
-            setError("Error al cargar las estadísticas");
+            toast.error("Error desconocido.", {
+                description: "Cargue nuevamente la página.",
+                duration: 5000,
+            });
             console.error(err);
         } finally {
             setLoading(false);
@@ -101,13 +107,24 @@ export function GeneralView({currentUser}: GeneralViewProps) {
                 if(analyzedResult.data){
                     setTopStats(analyzedResult?.data);
                 }else{
-                    setError("Ocurrió un problema al calcular la cantidad de sesiones")
+                    toast.error("Error desconocido.", {
+                        description: "Cargue nuevamente la página.",
+                        duration: 5000,
+                    });
+                    console.log(analyzedResult.error)
                 }
             } else {
-                setError(analyzedResult.error || "Error desconocido");
+                toast.error("Error desconocido.", {
+                    description: "Cargue nuevamente la página.",
+                    duration: 5000,
+                });
+                console.log(analyzedResult.error)
             }
         } catch (err) {
-            setError("Error al cargar estadísticas de conteo");
+            toast.error("Error desconocido.", {
+                description: "Cargue nuevamente la página.",
+                duration: 5000,
+            });
             console.error(err);
         }finally {
             setLoadingTop(false);
@@ -116,15 +133,23 @@ export function GeneralView({currentUser}: GeneralViewProps) {
 
     async function handleExcel() {
         setLoadingExcel(true);
-        const excel_stats = await convertStatsAction(generalStats);
-        const buffer = await createExcel(currentUser, excel_stats, null);
-        const blob = new Blob([buffer]);
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "Estadisticas-NoVaMas.xlsx";
-        a.click();
-        URL.revokeObjectURL(url);
+        try{
+            const excel_stats = await convertStatsAction(generalStats);
+            const buffer = await createExcel(currentUser, excel_stats, null);
+            const blob = new Blob([buffer]);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "Estadisticas-NoVaMas.xlsx";
+            a.click();
+            URL.revokeObjectURL(url);
+        }catch (e) {
+            toast.error("Error desconocido al crear el excel.", {
+                description: "Intente nuevamente.",
+                duration: 5000,
+            });
+        }
+
         setLoadingExcel(false);
     }
 
@@ -135,10 +160,16 @@ export function GeneralView({currentUser}: GeneralViewProps) {
             if (result.success) {
                 setAvailableChatGroups(result.data || []);
             } else {
-                setError(result.error || "Error desconocido");
+                toast.error("Error desconocido al obtener los grupos.", {
+                    description: "Intente nuevamente.",
+                    duration: 5000,
+                });
             }
         } catch (err) {
-            setError("Error al cargar los group name");
+            toast.error("Error desconocido al obtener los grupos.", {
+                description: "Intente nuevamente.",
+                duration: 5000,
+            });
             console.error(err);
         } finally {
             setLoading(false);

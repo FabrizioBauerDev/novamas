@@ -1,8 +1,8 @@
 import {db} from "@/db";
-import {chatFeedbacks, chatSessions, evaluationForms, finalForm, geoLocations, statistics} from "@/db/schema";
-import {asc, desc, eq, isNotNull, isNull, lt, or} from "drizzle-orm";
-import {EvaluationFormResult, ExcelGeneralStats, GeneralStats} from "@/types/statistics";
-import {GenderType} from "@/lib/enums";
+import {chatFeedbacks, chatSessions, evaluationForms, finalForm, geoLocations, messages, statistics} from "@/db/schema";
+import {exists, desc, eq, isNotNull, isNull, lt, or, and} from "drizzle-orm";
+import {GeneralStats} from "@/types/statistics";
+
 
 const Provinces = [
     "Buenos Aires",
@@ -126,7 +126,7 @@ export async function getGeneralStats(chatGroupId: string | null) {
                 rating: chatFeedbacks.rating,
             })
             .from(statistics)
-            .innerJoin(evaluationForms, eq(statistics.chatId, evaluationForms.id))
+            .rightJoin(evaluationForms, eq(statistics.chatId, evaluationForms.id))
             .leftJoin(finalForm, eq(finalForm.chatId, evaluationForms.id))
             .leftJoin(chatFeedbacks, eq(chatFeedbacks.chatSessionId, evaluationForms.id))
             .leftJoin(geoLocations, eq(geoLocations.evaluationFormId, evaluationForms.id))
@@ -162,7 +162,7 @@ export async function getGeneralStatsByGroups() {
                 rating: chatFeedbacks.rating,
             })
             .from(statistics)
-            .innerJoin(evaluationForms, eq(statistics.chatId, evaluationForms.id))
+            .rightJoin(evaluationForms, eq(statistics.chatId, evaluationForms.id))
             .leftJoin(finalForm, eq(finalForm.chatId, evaluationForms.id))
             .leftJoin(chatFeedbacks, eq(chatFeedbacks.chatSessionId, evaluationForms.id))
             .leftJoin(geoLocations, eq(geoLocations.evaluationFormId, evaluationForms.id))
@@ -312,9 +312,17 @@ export async function getNumberStats() {
                 analyzed: chatSessions.analyzed
             })
             .from(chatSessions)
-            .where(or(
-                lt(chatSessions.updatedAt, fourHoursAgo),
-                isNotNull(chatSessions.sessionEndedAt))
+            .where(and(
+                    or(
+                        lt(chatSessions.updatedAt, fourHoursAgo),
+                        isNotNull(chatSessions.sessionEndedAt)
+                    ),
+                    exists(
+                        db.select()
+                            .from(messages)
+                            .where(eq(messages.chatSessionId, chatSessions.id))
+                    )
+                )
             )
 
         let analyzedTrue = 0;

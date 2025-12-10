@@ -50,8 +50,8 @@ export async function createExcel(currentUser: string, generalStats: ExcelGenera
 function handleGeneral(sheet: Worksheet, generalStats: ExcelGeneralStats) {
     sheet.columns = [
         {header: 'Cantidad de sesiones', key: 'cant', width: 15}, // A
-        {header: 'Sexo', key: 'sex', width: 12}, // B
-        {header: '', key: 'sexCant'}, // C
+        {header: 'Género', key: 'gender', width: 12}, // B
+        {header: '', key: 'genderCant'}, // C
         {header: 'Rango de edad', key: 'age'}, // D
         {header: '', key: 'ageCant'}, // E
         {header: 'Nivel de riesgo', key: 'risk'}, // F
@@ -72,7 +72,7 @@ function handleGeneral(sheet: Worksheet, generalStats: ExcelGeneralStats) {
         {header: '', key: 'feedBackCant'}, // U
     ]
 
-    sheet.mergeCells('B1:C1'); // Merge de Sexo
+    sheet.mergeCells('B1:C1'); // Merge de Género
     sheet.mergeCells('D1:E1'); // Merge de Rango de edad
     sheet.mergeCells('F1:G1'); // Merge de Nivel de riesgo
     sheet.mergeCells('H1:I1'); // Merge de Sentimiento mas frecuente
@@ -110,8 +110,8 @@ function handleGeneral(sheet: Worksheet, generalStats: ExcelGeneralStats) {
 
         sheet.addRow({
             cant: i === 0 ? cant : '',
-            sex: gendersEntries[i]?.[0] ?? '',
-            sexCant: gendersEntries[i]?.[1] ?? '',
+            gender: gendersEntries[i]?.[0] ?? '',
+            genderCant: gendersEntries[i]?.[1] ?? '',
             age: agesEntries[i]?.[0] ?? '',
             ageCant: agesEntries[i]?.[1] ?? '',
             risk: risksEntries[i]?.[0] ?? '',
@@ -180,8 +180,8 @@ async function handleGroupStats(sheet: Worksheet) {
         {header: 'Nombre del grupo', key: 'groupName', width: 11}, // A
         {header: 'Fecha de prueba', key: 'date', width: 12}, // B
         {header: 'Cantidad de sesiones', key: 'cant', width: 12}, // C
-        {header: 'Sexo', key: 'sex', width: 12}, // D
-        {header: '', key: 'sexCant'}, // E
+        {header: 'Género', key: 'gender', width: 12}, // D
+        {header: '', key: 'genderCant'}, // E
         {header: 'Rango de edad', key: 'age'}, // F
         {header: '', key: 'ageCant'}, // G
         {header: 'Nivel de riesgo', key: 'risk'}, // H
@@ -202,7 +202,7 @@ async function handleGroupStats(sheet: Worksheet) {
         {header: '', key: 'feedBackCant'}, // w
     ]
 
-    sheet.mergeCells('D1:E1'); // Merge de Sexo
+    sheet.mergeCells('D1:E1'); // Merge de Género
     sheet.mergeCells('F1:G1'); // Merge de Rango de edad
     sheet.mergeCells('H1:I1'); // Merge de Nivel de riesgo
     sheet.mergeCells('J1:K1'); // Merge de Sentimiento mas frecuente
@@ -249,8 +249,8 @@ async function handleGroupStats(sheet: Worksheet) {
                 groupName: i === 0 ? groupData.data.name : '',
                 date: i === 0 ? groupData.data.startDate.getDate()+'/'+(groupData.data.startDate.getMonth()+1)+'/'+groupData.data.startDate.getFullYear() : '',
                 cant: i === 0 ? cant : '',
-                sex: gendersEntries[i]?.[0] ?? '',
-                sexCant: gendersEntries[i]?.[1] ?? '',
+                gender: gendersEntries[i]?.[0] ?? '',
+                genderCant: gendersEntries[i]?.[1] ?? '',
                 age: agesEntries[i]?.[0] ?? '',
                 ageCant: agesEntries[i]?.[1] ?? '',
                 risk: risksEntries[i]?.[0] ?? '',
@@ -301,7 +301,7 @@ async function handleIndividualStats(sheet: Worksheet, chatGrupId: string|null) 
         {header: 'Fecha', key: 'date', width: 15},
         {header: 'Nivel de Riesgo', key: 'risk', width: 15},
         {header: 'Resumen', key: 'resume', width: 20},
-        {header: 'Sexo', key: 'sex', width: 15},
+        {header: 'Género', key: 'gender', width: 15},
         {header: 'Edad', key: 'age', width: 12},
         {header: 'Cantidad de mensajes', key: 'cantMessages', width: 12},
         {header: 'Participa en juegos en línea', key: 'onlineGaming', width: 20},
@@ -372,7 +372,7 @@ async function handleIndividualStats(sheet: Worksheet, chatGrupId: string|null) 
             date: evaluationForm.createdAt.getDate()+'/'+(evaluationForm.createdAt.getMonth()+1)+'/'+evaluationForm.createdAt.getFullYear(),
             risk: evaluationForm.score > 5 ? "Alto" : evaluationForm.score > 4 ? "Medio" : "Bajo",
             resume: stat.summary,
-            sex: getGenderLabel(evaluationForm.gender),
+            gender: getGenderLabel(evaluationForm.gender),
             age: evaluationForm.age,
             cantMessages: stat.amountMessages,
             onlineGaming: evaluationForm.onlineGaming? "Si" : "No",

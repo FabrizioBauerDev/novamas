@@ -74,9 +74,9 @@ export async function convertStatsAction(generalStats: GeneralStats[]): Promise<
             neighbourhood[stat.neighbourhood]++;
         }
 
-        if(stat.changeTheme){
+        if(stat.changeTheme === true){
             changeTheme["Si"]++;
-        }else{
+        }else if(stat.changeTheme === false){
             changeTheme["No"]++;
         }
 
