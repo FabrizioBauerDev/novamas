@@ -1,4 +1,4 @@
-# 🎯 No va más - NoVa+
+# 🎯 NoVa+
 
 **Tu asistente virtual para abordar la temática de la adicción a las apuestas y juegos de azar online.**
 
@@ -6,7 +6,7 @@
 
 ## 📋 Descripción del Proyecto
 
-**No va más** es una aplicación web desarrollada como **Proyecto Integrador Final (PIF)** que tiene como objetivo brindar apoyo, información y recursos a personas que enfrentan problemas relacionados con la adicción a las apuestas y juegos de azar online.
+**NoVa+** es una aplicación web desarrollada como **Proyecto Integrador Final (PIF)** que tiene como objetivo brindar apoyo, información y recursos a personas que enfrentan problemas relacionados con la adicción a las apuestas y juegos de azar online.
 
 La aplicación cuenta con **NoVa+**, un chatbot inteligente que proporciona asistencia personalizada, recursos educativos y conexión con líneas de ayuda especializadas.
 
@@ -152,8 +152,6 @@ novamas/
 ## 🔗 Enlaces Importantes
 
 - **Prevención UNSL**: [http://www.prevencionenadicciones.unsl.edu.ar/](http://www.prevencionenadicciones.unsl.edu.ar/)
-- **Línea de Ayuda**: 1-800-AYUDA (disponible 24/7) -->
-
 ---
 
 ## 🤝 Contribución

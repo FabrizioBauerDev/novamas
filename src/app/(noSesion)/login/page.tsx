@@ -27,7 +27,7 @@ export default async function LoginPage() {
     <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex flex-col justify-center py-6 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">No va más</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">NoVa+</h1>
           <h2 className="text-xl text-gray-600 font-medium">Acceso para Especialistas</h2>
         </div>
       </div>

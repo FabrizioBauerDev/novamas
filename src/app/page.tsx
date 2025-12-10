@@ -20,7 +20,7 @@ export default function Home() {
       <div className="flex-1 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-6">Bienvenido a No va más</h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-6">Bienvenido a NoVa+</h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
               Tu asistente virtual para abordar la temática de la adicción a las apuestas y juegos de azar online.
               Estamos aquí para ayudarte en cada paso.

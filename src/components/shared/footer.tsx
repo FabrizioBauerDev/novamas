@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2">
-            <h3 className="text-2xl font-bold mb-4">No va más</h3>
+            <h3 className="text-2xl font-bold mb-4">NoVa+</h3>
             <p className="text-gray-300 mb-4 max-w-md">
               Tu asistente virtual para abordar la temática de la adicción a las apuestas y juegos de azar online.
               Estamos aquí para ayudarte en cada paso.
@@ -96,7 +96,7 @@ export default function Footer() {
                   • Línea Nacional Gratuita:{" "}
                   <a href="tel:141" className="underline font-semibold">
                     141
-                  </a>Disponible 24/7 (orientación en adicciones).
+                  </a> Disponible 24/7 (orientación en adicciones).
                   <br/>• En San Luis podés consultar en el Centro de Prevención y Asistencia a las Adicciones (CPAA) 4452000 Int 4707/5160.
                   <br/>• Hospital Salud Mental 4452000 Int 5364
                   <br/>• CPAA Villa Mercedes 4452000 Int 5400
@@ -111,7 +111,7 @@ export default function Footer() {
         <div className="border-t border-gray-700 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">Desarrollado por Luciana Loyola y Fabrizio Riera.</p>
-            <p className="text-gray-400 text-sm md:absolute md:left-1/2 md:transform md:-translate-x-1/2">© 2025 No va más.</p>
+            <p className="text-gray-400 text-sm md:absolute md:left-1/2 md:transform md:-translate-x-1/2">© 2025 NoVa+.</p>
             <div className="flex space-x-6 md:mt-0">
               <Link href="/terminos" className="text-gray-400 hover:text-white text-sm transition-colors">
                 Términos y Condiciones
