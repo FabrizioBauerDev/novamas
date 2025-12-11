@@ -306,7 +306,19 @@ export async function POST(req: NextRequest) {
         searchKnowledgeBase: ragSearchTool,
       },
       stopWhen: stepCountIs(5),
-      maxRetries: 2,
+      maxRetries: 5, // Aumentado de 2 a 5 para manejar mejor errores 503
+      onError: (error) => {
+        console.error('❌ [STREAMING ERROR] Error durante el streaming para sesión:', id);
+        console.error('❌ [STREAMING ERROR] Error completo:', JSON.stringify(error, null, 2));
+        
+        // Log específico para errores 503
+        if (error && typeof error === 'object' && 'responseBody' in error) {
+          const responseBody = error.responseBody as string;
+          if (responseBody?.includes('503') || responseBody?.includes('overloaded')) {
+            console.error('⚠️ [API OVERLOAD] El modelo de Gemini está sobrecargado. Reintentando...');
+          }
+        }
+      },
       providerOptions: {
         google: {
           thinkingConfig: {
@@ -316,10 +328,6 @@ export async function POST(req: NextRequest) {
             includeThoughts: false, // No incluir resumen del proceso de pensamiento
           },
         },
-      },
-      onError: (error) => {
-        console.error('❌ [STREAMING ERROR] Error durante el streaming para sesión:', id);
-        console.error('❌ [STREAMING ERROR] Error completo:', JSON.stringify(error, null, 2));
       },
     });
 
