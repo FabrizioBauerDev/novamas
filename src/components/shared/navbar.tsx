@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useState } from "react";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, MessageCircle, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +14,6 @@ import {
   SheetHeader,
 } from "@/components/ui/sheet";
 import DropBoxUser from "@/components/shared/dropboxuser";
-import { signOut } from "next-auth/react";
 
 interface NavbarProps {
   user?: {
@@ -38,161 +38,183 @@ export default function Navbar({ user: initialUser }: NavbarProps) {
     { href: "/", label: "Inicio" },
     { href: "/recursos", label: "Recursos" },
     { href: "/emergencia", label: "Líneas de Emergencia" },
-    { href: "/nosotros", label: "Quienes somos" },
+    { href: "/nosotros", label: "Quiénes somos" },
   ];
 
   return (
-    <nav className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo y navegación principal */}
-          <div className="flex items-center space-x-8">
-            {/* Logo */}
-            <Link href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-gray-900">NoVa+</span>
-            </Link>
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* 🔹 Contenedor principal */}
+          <div className="relative flex h-16 items-center justify-between">
 
-            {/* Navegación desktop */}
-            <div className="hidden md:flex space-x-6">
+            {/* 🔹 Izquierda (placeholder para balancear en mobile) */}
+            <div className="md:hidden w-10" />
+
+            {/* 🔹 Logo centrado en mobile */}
+            <div className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0">
+              <Link href="/" className="flex items-center gap-3">
+                <Image
+                    src="/logo_novita.png"
+                    alt="NoVa+"
+                    width={40}
+                    height={40}
+                    className="w-9 h-9 object-contain"
+                    priority
+                />
+                <span className="text-xl font-semibold text-gray-900 tracking-tight">
+                NoVa+
+              </span>
+              </Link>
+            </div>
+
+            {/* 🔹 Navegación desktop */}
+            <div className="hidden md:flex items-center space-x-6 ml-8">
               {navigationLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 hover:bg-gray-50 rounded-md"
-                >
-                  {link.label}
-                </Link>
+                  <Link
+                      key={link.href}
+                      href={link.href}
+                      className="px-3 py-2 text-sm font-medium text-gray-700 rounded-md transition-colors hover:bg-gray-100 hover:text-gray-900"
+                  >
+                    {link.label}
+                  </Link>
               ))}
             </div>
-          </div>
 
-          {/* Botones de acción - Desktop */}
-          <div className="hidden md:flex items-center space-x-4">
-            {user ? (
-              <>
-                <span className="text-md text-gray-700">
-                  Bienvenida/o, <span className="font-medium">{user.name}</span>
+            {/* 🔹 Acciones desktop */}
+            <div className="hidden md:flex items-center space-x-4">
+              {user ? (
+                  <>
+                <span className="text-sm text-gray-700">
+                  Bienvenida/o,{" "}
+                  <span className="font-medium">{user.name}</span>
                 </span>
-                <DropBoxUser user={user}/>
-              </>
-            ) : (
-              <>
-                <Link href="/chatNova">
-                  <Button
-                    variant="outline"
-                    className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent cursor-pointer"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    <span>Chatea con NoVa+</span>
-                  </Button>
-                </Link>
-                <Link href="/login">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-gray-700 hover:bg-gray-50"
-                    aria-label="Iniciar sesión"
-                  >
-                    <User className="w-5 h-5" />
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
-
-          {/* Menú móvil */}
-          <div className="md:hidden">
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-gray-700">
-                  <Menu className="w-6 h-6" />
-                  <span className="sr-only">Abrir menú</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-full h-full overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle className="text-left">
-                    Menú de navegación
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col space-y-4">
-                  {/* Logo en móvil */}
-                  <div className="pb-4 border-b border-gray-200 flex justify-center">
-                    <span className="text-xl font-bold text-gray-900">
-                      NoVa+
-                    </span>
-                  </div>
-                  {/* Bienvenida móvil */}
-                  {user && (
-                    <div className="text-center text-md text-gray-700 mt-2">
-                      Bienvenida/o, <span className="font-medium">{user.name}</span>
-                    </div>
-                  )}
-
-                  {/* Enlaces de navegación móvil */}
-                  <div className="flex flex-col space-y-2">
-                    {navigationLinks.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className="text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium transition-colors duration-200 hover:bg-gray-50 rounded-md"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        {link.label}
-                      </Link>
-                    ))}
-                  </div>
-
-                  {/* Botones de acción móvil */}
-                  {user ? (
-                    <div className="pt-4 border-t border-gray-200 space-y-2 px-3">
-                      <Link href="/profile" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
-                        Perfil
-                      </Link>
-                      <Link href="/dashboard" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
-                        Dashboard
-                      </Link>
-                      <Link href="/statistics" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
-                        Estadísticas
-                      </Link>
-                      <Link href="/chatgroup" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
-                        Sesión Grupal
-                      </Link>
-                      {(user.role === "ADMINISTRADOR" && (<Link href="/usermanagement" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
-                            Gestión de usuarios
-                          </Link>))}
-                      <Link href="/chatNova" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
-                        Nuevo chat
-                      </Link>
-                      <button onClick={() => { setIsOpen(false); signOut({ callbackUrl: "/" }); }} className="w-full text-left text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium rounded-md hover:bg-gray-50">
-                        Cerrar sesión
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="pt-4 border-t border-gray-200 space-y-3">
-                      <Link href="/chatNova" onClick={() => setIsOpen(false)}>
-                        <Button className="w-full flex items-center justify-center space-x-2 bg-gray-900 hover:bg-gray-800 cursor-pointer">
-                          <MessageCircle className="w-4 h-4" />
-                          <span>Chatea con NoVa+</span>
-                        </Button>
-                      </Link>
-                      <Link href="/login" onClick={() => setIsOpen(false)}>
-                        <Button
+                    <DropBoxUser user={user} />
+                  </>
+              ) : (
+                  <>
+                    <Link href="/chatNova">
+                      <Button
                           variant="outline"
-                          className="w-full flex items-center justify-center space-x-2 border-gray-300 bg-transparent"
-                        >
-                          <User className="w-4 h-4" />
-                          <span>Iniciar Sesión</span>
-                        </Button>
-                      </Link>
+                          className="flex items-center gap-2 border-gray-300 text-gray-700 bg-transparent hover:bg-gray-100"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        Chatea con NoVa+
+                      </Button>
+                    </Link>
+                    <Link href="/login">
+                      <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-gray-700 hover:bg-gray-100"
+                          aria-label="Iniciar sesión"
+                      >
+                        <User className="w-5 h-5" />
+                      </Button>
+                    </Link>
+                  </>
+              )}
+            </div>
+
+            {/* 🔹 Menú mobile */}
+            <div className="md:hidden">
+              <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-gray-700">
+                    <Menu className="w-6 h-6" />
+                  </Button>
+                </SheetTrigger>
+
+                <SheetContent side="right" className="w-full h-full overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle className="text-left">
+                      Menú de navegación
+                    </SheetTitle>
+                  </SheetHeader>
+
+                  <div className="flex flex-col space-y-4 mt-4">
+                    {/* Logo mobile */}
+                    <div className="flex justify-center border-b border-gray-200 pb-4">
+                      <div className="flex items-center gap-3">
+                        <Image
+                            src="/logo_novita.png"
+                            alt="NoVa+"
+                            width={36}
+                            height={36}
+                            className="w-8 h-8 object-contain"
+                        />
+                        <span className="text-lg font-semibold text-gray-900">
+                        NoVa+
+                      </span>
+                      </div>
                     </div>
-                  )}
-                </div>
-              </SheetContent>
-            </Sheet>
+
+                    {user && (
+                        <div className="text-center text-sm text-gray-700">
+                          Bienvenida/o,{" "}
+                          <span className="font-medium">{user.name}</span>
+                        </div>
+                    )}
+
+                    <div className="flex flex-col space-y-2">
+                      {navigationLinks.map((link) => (
+                          <Link
+                              key={link.href}
+                              href={link.href}
+                              onClick={() => setIsOpen(false)}
+                              className="px-3 py-2 text-base font-medium text-gray-700 rounded-md hover:bg-gray-100"
+                          >
+                            {link.label}
+                          </Link>
+                      ))}
+                    </div>
+
+                    {user ? (
+                        <div className="pt-4 border-t border-gray-200 space-y-2">
+                          <Link href="/chatNova" onClick={() => setIsOpen(false)}>
+                            Nuevo chat
+                          </Link>
+
+                          {user.role === "ADMINISTRADOR" && (
+                              <Link
+                                  href="/usermanagement"
+                                  onClick={() => setIsOpen(false)}
+                              >
+                                Gestión de usuarios
+                              </Link>
+                          )}
+
+                          <button
+                              onClick={() => {
+                                setIsOpen(false);
+                                signOut({ callbackUrl: "/" });
+                              }}
+                              className="text-left"
+                          >
+                            Cerrar sesión
+                          </button>
+                        </div>
+                    ) : (
+                        <div className="pt-4 border-t border-gray-200 space-y-3">
+                          <Link href="/chatNova" onClick={() => setIsOpen(false)}>
+                            <Button className="w-full flex gap-2">
+                              <MessageCircle className="w-4 h-4" />
+                              Chatea con NoVa+
+                            </Button>
+                          </Link>
+                          <Link href="/login" onClick={() => setIsOpen(false)}>
+                            <Button variant="outline" className="w-full flex gap-2">
+                              <User className="w-4 h-4" />
+                              Iniciar sesión
+                            </Button>
+                          </Link>
+                        </div>
+                    )}
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
   );
 }

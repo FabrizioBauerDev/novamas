@@ -197,6 +197,7 @@ export async function getGroupNames(){
                 startDate: chatGroups.startDate,
             })
             .from(chatGroups)
+            .orderBy(desc(chatGroups.startDate));
 
         return result;
     }catch (error) {

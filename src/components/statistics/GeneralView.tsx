@@ -343,7 +343,7 @@ export function GeneralView({currentUser}: GeneralViewProps) {
                                     <SelectTrigger className="h-12 w-full rounded-xl border-slate-300 bg-white text-sm font-medium hover:border-slate-400">
                                         <SelectValue placeholder="Seleccionar sesión grupal"/>
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent className="max-h-[150px] overflow-y-auto">
                                         {availableChatGroups.map((group) => (
                                             <SelectItem key={group.id} value={group.id}>
                                                 {group.name} - {group.startDate.getDate()}/{group.startDate.getMonth() + 1}/{group.startDate.getFullYear()}

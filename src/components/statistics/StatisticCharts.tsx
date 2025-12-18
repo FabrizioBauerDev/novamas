@@ -34,22 +34,35 @@ interface TooltipProps {
         name: string
         value: number
         fill: string
+        payload: {
+            name: string
+            value: number
+        }
     }>
 }
 
 const CustomTooltip = ({ active, payload }: TooltipProps) => {
     if (active && payload && payload.length) {
+        const data = payload[0].payload
+
         return (
-            <div className="bg-white px-4 py-2 rounded-lg shadow-lg border border-gray-100">
-                <p className="font-semibold text-gray-900">{payload[0].name}</p>
-                <p className="text-sm text-gray-600">
-                    Cantidad: <span className="font-bold text-indigo-600">{payload[0].value}</span>
+            <div className="rounded-lg border bg-white px-4 py-2 shadow-lg">
+                <p className="text-sm font-semibold text-gray-800">
+                    {data.name}
+                </p>
+                <p className="text-xs text-gray-600">
+                    Cantidad:
+                    <span className="ml-1 font-bold text-indigo-600">
+                        {data.value}
+                    </span>
                 </p>
             </div>
         )
     }
+
     return null
 }
+
 
 const EmptyState = ({ message }: { message: string }) => (
     <div className="flex h-48 items-center justify-center">

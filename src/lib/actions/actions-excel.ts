@@ -171,7 +171,7 @@ function applyStyles(sheet: Worksheet) {
 }
 
 const formatPercentage = (value?: number) =>
-    value !== undefined ? (value * 100).toFixed(1) + '%' : '';
+    value !== undefined ? (value).toFixed(1) + '%' : '';
 
 
 async function handleGroupStats(sheet: Worksheet) {
