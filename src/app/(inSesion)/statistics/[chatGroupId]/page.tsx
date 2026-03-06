@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ chatGroup
   
   return {
     title: `Estadísticas - Grupo ${chatGroupId}`,
-    description: 'Estadísticas detalladas y análisis de conversaciones del grupo de chat con NoVa+.',
+    description: 'Estadísticas detalladas y análisis de conversaciones de un grupo particular.',
     robots: {
       index: false,
       follow: false,

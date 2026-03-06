@@ -62,7 +62,7 @@ export default function DropboxUser({ user: initialUser }: DropboxUserProps) {
                 <Link href="/usermanagement"><DropdownMenuItem className={menuItemClass}>Gestión de usuarios</DropdownMenuItem></Link>))}
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuLabel>ChatNova+</DropdownMenuLabel>
+          <DropdownMenuLabel>Chat Asistente</DropdownMenuLabel>
           <Link href="/chatNova"><DropdownMenuItem className={menuItemClass}>Nuevo chat</DropdownMenuItem></Link>
           <DropdownMenuSeparator />
           <DropdownMenuItem className={menuItemClass} onClick={() => signOut({ callbackUrl: "/" })}><LogOut className="w-5 h-5" />Cerrar sesión</DropdownMenuItem>

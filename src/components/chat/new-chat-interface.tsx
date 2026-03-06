@@ -307,7 +307,7 @@ const ConversationDemo = ({
   return (
     <div className="w-full py-4 px-4">
       <h1 className="text-2xl font-bold text-gray-900 text-center mb-4">
-        Bienvenido al chat con NoVa+
+        Bienvenido al chat con tu asistente virtual
       </h1>
 
       {/* Grid layout para desktop: 10 columnas (chat) + 2 columnas (feedback) */}
@@ -333,10 +333,10 @@ const ConversationDemo = ({
                                 ? "/icon-chat-user.png"
                                 : "/icon-chat-nova+.jpeg"
                             }
-                            name={message.role === "user" ? "Tú" : "NoVa+"}
+                            name={message.role === "user" ? "Tú" : "Asistente"}
                           />
                           <div className="text-xs text-gray-600 font-medium">
-                            {message.role === "user" ? "Tú" : "NoVa+"}
+                            {message.role === "user" ? "Tú" : "Asistente"}
                           </div>
                         </div>
 
@@ -363,7 +363,7 @@ const ConversationDemo = ({
                                 status === "streaming") && (
                                 <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
                                   <Loader />
-                                  <span>NoVa+ está pensando...</span>
+                                  <span>El asistente está pensando...</span>
                                 </div>
                               )}
                           </MessageContent>
@@ -492,10 +492,10 @@ const ConversationDemo = ({
                                 ? "/icon-chat-user.png"
                                 : "/icon-chat-nova+.jpeg"
                             }
-                            name={message.role === "user" ? "Tú" : "NoVa+"}
+                            name={message.role === "user" ? "Tú" : "Asistente"}
                           />
                           <div className="text-xs text-gray-600 font-medium">
-                            {message.role === "user" ? "Tú" : "NoVa+"}
+                            {message.role === "user" ? "Tú" : "Asistente"}
                           </div>
                         </div>
 
@@ -522,7 +522,7 @@ const ConversationDemo = ({
                                 status === "streaming") && (
                                 <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
                                   <Loader />
-                                  <span>NoVa+ está pensando...</span>
+                                  <span>El asistente está pensando...</span>
                                 </div>
                               )}
                           </MessageContent>
@@ -642,7 +642,7 @@ const ConversationDemo = ({
             <div className="space-y-3">
               <div className="text-sm">
               Quedan <strong>menos de 2 minutos</strong> de conversación. Veo que has usado casi todo tu tiempo. Considera contactarte con un profesional o persona física si necesitas más ayuda. <br /><br />
-              Al finalizar podrás completar un formulario para ayudar al equipo detrás de NoVa+ en su investigación, sería de mucha ayuda. <br /><br />
+              Al finalizar podrás completar un formulario para ayudar al equipo detrás del asistente en su investigación, sería de mucha ayuda. <br /><br />
               <strong>Recuerda:</strong> visita las {" "}
               <a href="/emergencia" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
                 líneas de emergencia
@@ -663,7 +663,7 @@ const ConversationDemo = ({
           <AlertDialogDescription asChild>
             <div className="space-y-3">
               <div className="text-sm text-gray-600">
-                Muchas gracias por usar NoVa+. Puedes leer el último mensaje de NoVa+ en el chat para saber cuales son tus opciones:
+                Muchas gracias por usar al asistente. Puedes leer el último mensaje del asistente en el chat para saber cuales son tus opciones:
               </div>
               <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
                 <li>

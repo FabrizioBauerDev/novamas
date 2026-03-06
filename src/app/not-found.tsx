@@ -6,7 +6,7 @@ import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: '404 - Página no encontrada',
-  description: 'La página que buscas no existe o está en construcción. Vuelve al inicio de NoVa+.',
+  description: 'La página que buscas no existe o está en construcción. Vuelve al inicio.',
   robots: {
     index: false,
     follow: false,

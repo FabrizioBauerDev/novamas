@@ -5,7 +5,7 @@ import {redirect} from "next/navigation";
 
 export const metadata: Metadata = {
   title: 'Bibliografía',
-  description: 'Gestión de documentos y bibliografía de referencia utilizada por NoVa+ para generar respuestas basadas en fuentes confiables.',
+  description: 'Gestión de documentos y bibliografía de referencia utilizada por el asistente virtual para generar respuestas basadas en fuentes confiables.',
   robots: {
     index: false,
     follow: false,

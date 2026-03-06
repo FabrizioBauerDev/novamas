@@ -11,10 +11,10 @@ import SessionProviderWrapper from '@/components/providers/session-provider';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | NoVa+ Asistente Virtual',
-    default: 'NoVa+',
+    template: '%s | Asistente Virtual',
+    default: 'Asistente Virtual',
   },
-  description: "NoVa+ tu asistente virtual para la adicción a las apuestas y juegos de azar.",
+  description: "Tu asistente virtual para la adicción a las apuestas y juegos de azar.",
   metadataBase: new URL('https://novamas.vercel.app/'),
 };
 

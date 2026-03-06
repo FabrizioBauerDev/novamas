@@ -4,7 +4,7 @@ import {UserManagement} from "@/components/usermanagement/UserListView";
 import {redirect} from "next/navigation";
 
 export const metadata: Metadata = {
-    title: 'Gestión de usuarios - NoVa+',
+    title: 'Gestión de usuarios - Asistente Virtual',
     description: 'Panel de gestión de usuarios, donde se pueden crear, modificar o eliminar. Acceso unicamente para administrador.',
     robots: {
         index: false,

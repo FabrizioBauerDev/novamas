@@ -8,7 +8,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   
   return {
     title: `Conversación - ${id}`,
-    description: 'Visualización detallada de una conversación individual con NoVa+ para análisis de investigación.',
+    description: 'Visualización detallada de una conversación individual para análisis de investigación.',
     robots: {
       index: false,
       follow: false,

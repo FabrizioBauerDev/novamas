@@ -3,12 +3,12 @@ import type { Metadata } from "next"
 import Image from "next/image"
 
 export const metadata: Metadata = {
-  title: "Inicio | NoVa+ Asistente Virtual",
+  title: "Inicio | Asistente Virtual",
   description:
-      "NoVa+ tu asistente virtual para la prevención de problemáticas con las apuestas y juegos de azar. Comienza tu conversación con NoVa+ y accede a recursos de ayuda.",
+      "Tu asistente virtual para la prevención de problemáticas con las apuestas y juegos de azar. Comienza tu conversación y accede a recursos de ayuda.",
   keywords: ["adicción", "juegos de azar", "apuestas online", "ludopatía", "prevención", "asistente virtual", "IA"],
   openGraph: {
-    title: "NoVa+ | Tu asistente virtual para el juego responsable",
+    title: "Tu asistente virtual para el juego responsable",
     description:
         "Tu asistente virtual para abordar la temática de la prevención de problemáticas con las apuestas y juegos de azar online.",
     type: "website",
@@ -32,7 +32,7 @@ export default function Home() {
               </span>
                 <br />
                 <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                NoVa+
+                tu Asistente Virtual
               </span>
               </h1>
 
@@ -57,7 +57,7 @@ export default function Home() {
                         d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                     />
                   </svg>
-                  Comenzar chat con NoVa+
+                  Comenzar chat
                 </span>
                 </Link>
 
@@ -123,7 +123,7 @@ export default function Home() {
               {/* Main intro card */}
               <div className="text-center bg-white/60 backdrop-blur-sm rounded-2xl p-8 border border-indigo-100 shadow-md">
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                  ¿Qué es NoVa+?
+                  ¿Qué es este proyecto?
                 </h2>
                 <p className="text-gray-700 leading-relaxed mb-3">
                   Somos un proyecto de la <strong>Universidad Nacional de San Luis</strong> que une tecnología y

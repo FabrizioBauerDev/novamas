@@ -6,7 +6,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   
   return {
     title: `Chat - Sesión Grupal ${slug}`,
-    description: 'Conversa con NoVa+ en tu sesión grupal, el asistente virtual para prevención y orientación sobre problematicas asociadas al juego online y apuestas. Obtén información, apoyo y recursos de ayuda.',
+    description: 'Conversa con el asistente virtual en tu sesión grupal, para prevención y orientación sobre problematicas asociadas al juego online y apuestas. Obtén información, apoyo y recursos de ayuda.',
     robots: {
       index: false,
       follow: false,

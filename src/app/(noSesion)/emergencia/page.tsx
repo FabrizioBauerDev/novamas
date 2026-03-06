@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: 'Líneas de ayuda y asistencia para adicción al juego y prevención del suicidio en Argentina. Contactos nacionales y provinciales.',
   keywords: ['emergencia', 'línea de ayuda', 'ludopatía', 'prevención suicidio', 'contactos provinciales', 'argentina', 'ayuda inmediata'],
   openGraph: {
-    title: 'Contactos de Emergencia | NoVa+',
+    title: 'Contactos de Emergencia | Asistente Virtual',
     description: 'Líneas de ayuda y asistencia en cada provincia de Argentina para adicción al juego y prevención del suicidio.',
     type: 'website',
   }

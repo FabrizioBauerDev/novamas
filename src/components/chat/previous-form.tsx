@@ -416,7 +416,7 @@ export default function FormularioEvaluacion({
                     </p>
                   ) : (
                     <p className="text-gray-700">
-                      Hemos registrado tus respuestas. Nuestro equipo de NoVa+
+                      Hemos registrado tus respuestas. Nuestro equipo
                       puede ayudarte a analizar tus hábitos de juego y brindarte
                       el apoyo que necesites.
                     </p>
@@ -428,7 +428,7 @@ export default function FormularioEvaluacion({
                     className="w-full bg-gray-900 hover:bg-gray-800 text-white"
                     onClick={onFormComplete}
                   >
-                    Ir al chat con NoVa+
+                    Ir al chat con el asistente virtual
                   </Button>
                 </div>
               </div>

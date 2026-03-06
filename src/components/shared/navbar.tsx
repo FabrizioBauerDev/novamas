@@ -55,14 +55,13 @@ export default function Navbar({ user: initialUser }: NavbarProps) {
               <Link href="/" className="flex items-center gap-3">
                 <Image
                     src="/logo_novita.png"
-                    alt="NoVa+"
+                    alt="Asistente Virtual"
                     width={40}
                     height={40}
                     className="w-9 h-9 object-contain"
                     priority
                 />
                 <span className="text-xl font-semibold text-gray-900 tracking-tight">
-                NoVa+
               </span>
               </Link>
             </div>
@@ -98,7 +97,7 @@ export default function Navbar({ user: initialUser }: NavbarProps) {
                           className="flex items-center gap-2 border-gray-300 text-gray-700 bg-transparent hover:bg-gray-100"
                       >
                         <MessageCircle className="w-4 h-4" />
-                        Chatea con NoVa+
+                        Chatea con el asistente
                       </Button>
                     </Link>
                     <Link href="/login">
@@ -137,13 +136,12 @@ export default function Navbar({ user: initialUser }: NavbarProps) {
                       <div className="flex items-center gap-3">
                         <Image
                             src="/logo_novita.png"
-                            alt="NoVa+"
+                            alt="Asistente"
                             width={36}
                             height={36}
                             className="w-8 h-8 object-contain"
                         />
                         <span className="text-lg font-semibold text-gray-900">
-                        NoVa+
                       </span>
                       </div>
                     </div>
@@ -198,7 +196,7 @@ export default function Navbar({ user: initialUser }: NavbarProps) {
                           <Link href="/chatNova" onClick={() => setIsOpen(false)}>
                             <Button className="w-full flex gap-2">
                               <MessageCircle className="w-4 h-4" />
-                              Chatea con NoVa+
+                              Chatea con el asistente
                             </Button>
                           </Link>
                           <Link href="/login" onClick={() => setIsOpen(false)}>

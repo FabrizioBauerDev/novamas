@@ -98,7 +98,7 @@ export default function EvaluationForm({ onFormComplete, chatSessionId, onEvalua
                     </svg>
                   </div>
                   <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                    Evaluación de NoVa+
+                    Evaluación del asistente virtual
                   </h2>
                   <p className="text-gray-600 text-lg mx-auto">
                     Tu opinión es valiosa. Esta evaluación nos ayudará a mejorar la experiencia del asistente.
@@ -262,7 +262,7 @@ export default function EvaluationForm({ onFormComplete, chatSessionId, onEvalua
                   ¡Muchas gracias!
                 </h3>
                 <p className="text-gray-700 text-lg mx-auto mb-0">
-                  Hemos registrado tus respuestas. Gracias por usar NoVa+ y ser parte del proyecto.
+                  Hemos registrado tus respuestas. Gracias por usar el asistente virtual y ser parte del proyecto.
                 </p>
                 <Link href="/">
                   <Button

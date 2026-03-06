@@ -91,7 +91,7 @@ export function FeedbackCard({ chatSessionId, isVisible: externalIsVisible, onHi
         {/* Título */}
         <div className="text-center mb-2">
           <h4 className="text-lg font-bold text-gray-800">
-            ¿Qué te parece la idea de NoVa+?
+            ¿Qué te parece la idea del asistente virtual?
           </h4>
         </div>
         {/* Valoración con estrellas */}

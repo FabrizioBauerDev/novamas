@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "¿Quiénes Somos?",
-  description: "Conocé al equipo multidisciplinario detrás de NoVa+",
+  description: "Conocé al equipo multidisciplinario detrás del Asistente Virtual",
 };
 
 export default function AboutUsPage() {
@@ -26,8 +26,8 @@ export default function AboutUsPage() {
             {/* Introducción */}
             <section>
               <p className="text-gray-700 leading-relaxed mb-4">
-                Somos <strong>NoVa+</strong>, un proyecto nacido de la
-                colaboración entre dos mundos: la tecnología y la psicología. Un
+                Somos un proyecto nacido de la colaboración entre dos mundos: 
+                la tecnología y la psicología. Un
                 equipo multidisciplinario de la{" "}
                 <strong>Universidad Nacional de San Luis</strong> que cree
                 firmemente en el poder de la inteligencia artificial para
@@ -44,7 +44,7 @@ export default function AboutUsPage() {
                 Trabajamos para abordar una problemática que afecta cada vez más
                 a jóvenes y adolescentes:{" "}
                 <strong>las apuestas online y el juego patológico</strong>. A
-                través de NoVa+, nuestro asistente conversacional basado en
+                través de nuestro asistente conversacional basado en
                 inteligencia artificial, buscamos:
               </p>
               <div className="space-y-3 ml-4">
@@ -90,7 +90,7 @@ export default function AboutUsPage() {
                 Un Proyecto de 2 Facultades
               </h2>
               <p className="text-gray-700 leading-relaxed mb-6">
-                NoVa+ es el resultado del trabajo entre dos facultades de la
+                Este Asistente Virtual es el resultado del trabajo entre dos facultades de la
                 UNSL, para crear una herramienta técnicamente correcta con
                 solidez de área de psicología:
               </p>
@@ -159,7 +159,7 @@ export default function AboutUsPage() {
                 El Origen del Proyecto
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                NoVa+ tiene un doble valor académico:
+                Tiene un doble valor académico:
               </p>
               <div className="space-y-4 ml-4">
                 <div className="flex items-start gap-3">
@@ -195,7 +195,7 @@ export default function AboutUsPage() {
                 Impacto
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                La idea y el proyecto de NoVa+ ha tenido su impacto formando
+                La idea y el proyecto ha tenido su impacto formando
                 parte de charlas y publicaciones en congresos donde hemos
                 compartido nuestra experiencia, como en:
               </p>
@@ -234,10 +234,10 @@ export default function AboutUsPage() {
               </p>
             </section>
 
-            {/* ¿Por Qué NoVa+? */}
+            {/* ¿Por Qué? */}
             <section>
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-                ¿Por Qué NoVa+?
+                ¿Por Qué?
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
                 Las apuestas online representan una problemática en constante
@@ -247,7 +247,7 @@ export default function AboutUsPage() {
                 adolescentes.
               </p>
               <p className="text-gray-700 leading-relaxed mb-4">
-                NoVa+ nace como una respuesta accesible, inmediata y sin juicio,
+                Este Asistente Virtual nace como una respuesta accesible, inmediata y sin juicio,
                 pensada especialmente para quienes:
               </p>
               <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
@@ -307,7 +307,7 @@ export default function AboutUsPage() {
                 solo te ayuda a ti, sino que contribuye a una investigación social de la universidad.
               </p>
               <p className="text-blue-800 leading-relaxed">
-                Esperamos que NoVa+ sea una herramienta útil y que podamos
+                Esperamos que este Asistente Virtual sea una herramienta útil y que podamos
                 aportar para enfrentar esta problemática social tan importante.
               </p>
             </section>
@@ -322,7 +322,7 @@ export default function AboutUsPage() {
                 <p>
                   <strong>Universidad Nacional de San Luis</strong>
                 </p>
-                <p>Proyecto NoVa+</p>
+                <p>Proyecto</p>
                 <p>
                   <strong>Email:</strong> <a href="mailto:programa.adicciones.unsl1@gmail.com">programa.adicciones.unsl1@gmail.com</a>
                 </p>

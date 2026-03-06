@@ -7,7 +7,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   
   return {
     title: `Grupo de Chat - ${id}`,
-    description: 'Detalles y gestión del grupo de chat para investigación con NoVa+.',
+    description: 'Detalles y gestión del grupo de chat para investigación.',
     robots: {
       index: false,
       follow: false,

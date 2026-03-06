@@ -4,7 +4,7 @@ import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: 'Grupos de Chat',
-  description: 'Gestión de grupos de chat para investigación. Crea, administra y monitorea grupos de conversaciones con NoVa+.',
+  description: 'Gestión de grupos de chat para investigación. Crea, administra y monitorea grupos de conversaciones',
   robots: {
     index: false,
     follow: false,

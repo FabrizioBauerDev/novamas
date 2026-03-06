@@ -12,7 +12,7 @@ export default function Footer() {
             {/* Brand Section */}
             <div>
               <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                NoVa+
+                Asistente Virtual
               </h3>
               <p className="text-gray-300 mb-4">
                 Tu asistente virtual para abordar la temática de la adicción a las apuestas y juegos de azar online.
@@ -52,7 +52,7 @@ export default function Footer() {
                 </li>
                 <li>
                   <Link href="/chatNova" className="text-gray-300 hover:text-white transition-colors">
-                    Chat con NoVa+
+                    Chat con el asistente
                   </Link>
                 </li>
                 <li>
@@ -136,7 +136,6 @@ export default function Footer() {
           <div className="border-t border-white/10 py-6">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
               <p className="text-gray-400">Desarrollado por Luciana Loyola y Fabrizio Riera.</p>
-              <p className="text-gray-400">© 2025 NoVa+. Todos los derechos reservados.</p>
             </div>
           </div>
         </div>

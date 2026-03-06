@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: 'Política de Privacidad',
-  description: 'Política de privacidad y protección de datos de NoVa+',
+  description: 'Política de privacidad y protección de datos',
 };
 
 export default function PrivacyPage() {
@@ -13,7 +13,7 @@ export default function PrivacyPage() {
           {/* Encabezado */}
           <div className="text-center">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Políticas de Privacidad - NoVa+
+              Políticas de Privacidad
             </h1>
             <p className="text-lg text-gray-600">
               Última actualización: 14 de Octubre de 2025
@@ -28,7 +28,7 @@ export default function PrivacyPage() {
                 1. Información General
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                NoVa+ es una plataforma de investigación científica desarrollada en la <strong>Universidad Nacional de San Luis</strong>, por un equipo multidisciplinario de la <strong>Facultad de Ciencias Físico Matemáticas y Naturales</strong> y la <strong>Facultad de Psicología</strong>, como proyecto final integrador de ingeniería en informática enmarcado como herramienta para el proyecto de investigación:
+                Este Asistente Virtual es una plataforma de investigación científica desarrollada en la <strong>Universidad Nacional de San Luis</strong>, por un equipo multidisciplinario de la <strong>Facultad de Ciencias Físico Matemáticas y Naturales</strong> y la <strong>Facultad de Psicología</strong>, como proyecto final integrador de ingeniería en informática enmarcado como herramienta para el proyecto de investigación:
               </p>
               <p className="text-gray-700 leading-relaxed mb-4 italic">
                 &quot;Evaluación de la Efectividad y Aceptación de un Asistente Virtual Basado en Inteligencia Artificial para la Prevención de la Adicción al Juego Online en Adolescentes&quot;
@@ -52,7 +52,7 @@ export default function PrivacyPage() {
                 2. Compromiso con la Privacidad
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                En NoVa+ adoptamos los principios de <strong>Privacidad por Diseño y por Defecto</strong>, lo que significa que:
+                Adoptamos los principios de <strong>Privacidad por Diseño y por Defecto</strong>, lo que significa que:
               </p>
               <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
                 <li>Solo recopilamos y procesamos datos personales <strong>estrictamente necesarios</strong> para los fines de investigación científica.</li>
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
                 3. Consentimiento Informado
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                El uso de NoVa+ requiere tu <strong>consentimiento explícito</strong>, el cual será solicitado <strong>antes de acceder al asistente conversacional</strong>, mediante la aceptación de un checkbox en el formulario de <strong>Evaluación de Hábitos de Juego</strong> que indica:
+                El uso del Asistente Virtual requiere tu <strong>consentimiento explícito</strong>, el cual será solicitado <strong>antes de acceder al asistente conversacional</strong>, mediante la aceptación de un checkbox en el formulario de <strong>Evaluación de Hábitos de Juego</strong> que indica:
               </p>
               <p className="text-gray-700 leading-relaxed mb-4 italic">
                 &quot;Acepto los Términos y Condiciones y las Políticas de Privacidad&quot;
@@ -292,7 +292,7 @@ export default function PrivacyPage() {
                 10. Tus Derechos
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                Como usuario de NoVa+, tienes los siguientes derechos sobre tus datos personales:
+                Como usuario del asistente virtual, tienes los siguientes derechos sobre tus datos personales:
               </p>
               <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
                 <li><strong>Derecho de Acceso:</strong> Puedes solicitar información sobre los datos que conservamos sobre ti.</li>
@@ -307,7 +307,7 @@ export default function PrivacyPage() {
               </p>
               <div className="mt-4 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                 <p className="text-gray-700 leading-relaxed">
-                  <strong>Importante:</strong> Dado que NoVa+ funciona de manera anónima y no requiere registro de usuario, una vez que los datos han sido anonimizados y agregados a las estadísticas de investigación, <strong>no será posible identificarlos ni eliminarlos de forma individualizada</strong>.
+                  <strong>Importante:</strong> Dado que el asistente virtual funciona de manera anónima y no requiere registro de usuario, una vez que los datos han sido anonimizados y agregados a las estadísticas de investigación, <strong>no será posible identificarlos ni eliminarlos de forma individualizada</strong>.
                 </p>
               </div>
             </section>
@@ -318,7 +318,7 @@ export default function PrivacyPage() {
                 11. Uso Anónimo de la Plataforma
               </h2>
               <p className="text-gray-700 leading-relaxed">
-                NoVa+ <strong>NO requiere registro de usuario</strong> ni creación de cuentas. Tu participación es completamente anónima, y no almacenamos información que permita tu identificación personal continua en el sistema.
+                <strong>NO se requiere registro de usuario</strong> ni creación de cuentas. Tu participación es completamente anónima, y no almacenamos información que permita tu identificación personal continua en el sistema.
               </p>
             </section>
 
@@ -386,7 +386,7 @@ export default function PrivacyPage() {
                 Aceptación de las Políticas
               </h2>
               <p className="text-blue-800 leading-relaxed">
-                <strong>Al utilizar NoVa+, confirmas que has leído, comprendido y aceptado estas Políticas de Privacidad.</strong>
+                <strong>Al utilizar el asistente virtual, confirmas que has leído, comprendido y aceptado estas Políticas de Privacidad.</strong>
               </p>
               <p className="text-blue-800 leading-relaxed mt-2">
                 El uso del asistente conversacional implica tu consentimiento expreso a los términos aquí establecidos, particularmente en lo que respecta a la recolección, almacenamiento, procesamiento y uso de tus datos personales con fines exclusivos de investigación científica y académica.

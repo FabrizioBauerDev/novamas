@@ -26,7 +26,7 @@ const getBetTypeLabel = (type: string) => {
 export async function createExcel(currentUser: string, generalStats: ExcelGeneralStats, chatGrupId: string|null) {
     const workbook = new ExcelJS.Workbook();
 
-    workbook.creator = 'Creado por: NoVa+, Solicitado por: ' + currentUser;
+    workbook.creator = 'Creado por: NoVaMas, Solicitado por: ' + currentUser;
     workbook.created = new Date();
 
     // Hoja de estadísticas generales

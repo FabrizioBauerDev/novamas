@@ -155,7 +155,7 @@ export default function ListView({ isStudent = false }: ListViewProps) {
       {/* Header */}
       <div className="container mx-auto p-4">
         <h1 className="text-3xl font-bold text-foreground">
-          Sesiones Grupales - NoVa+
+          Sesiones Grupales - Asistente Virtual
         </h1>
       </div>
 

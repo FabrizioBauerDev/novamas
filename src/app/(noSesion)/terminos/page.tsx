@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: 'Términos y Condiciones',
-  description: 'Términos y condiciones de uso de NoVa+',
+  description: 'Términos y condiciones de uso',
 };
 
 export default function TermsPage() {
@@ -13,7 +13,7 @@ export default function TermsPage() {
           {/* Encabezado */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Términos y Condiciones - NoVa+
+              Términos y Condiciones
             </h1>
             <p className="text-lg text-gray-600">
               Última actualización: 14 de Octubre del 2025
@@ -28,13 +28,13 @@ export default function TermsPage() {
                 1. Aceptación de los Términos
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                Bienvenido/a a <strong>NoVa+</strong>, un asistente virtual con Inteligencia Artificial para la prevención e investigación del juego online en jóvenes y adolescentes, desarrollado por un equipo multidisciplinario de la <strong>Universidad Nacional de San Luis</strong>, perteneciente a la <strong>Facultad de Ciencias Físico Matemáticas y Naturales</strong> y la <strong>Facultad de Psicología</strong>.
+                Bienvenido/a al asistente virtual con Inteligencia Artificial para la prevención e investigación del juego online en jóvenes y adolescentes, desarrollado por un equipo multidisciplinario de la <strong>Universidad Nacional de San Luis</strong>, perteneciente a la <strong>Facultad de Ciencias Físico Matemáticas y Naturales</strong> y la <strong>Facultad de Psicología</strong>.
               </p>
               <p className="text-gray-700 leading-relaxed mb-4">
                 Al acceder y utilizar esta plataforma, aceptas quedar vinculado/a por estos Términos y Condiciones, así como por nuestras Políticas de Privacidad.
               </p>
               <p className="text-gray-700 leading-relaxed font-semibold">
-                Si no estás de acuerdo con estos términos, no debes utilizar NoVa+.
+                Si no estás de acuerdo con estos términos, no debes utilizar este Asistente Virtual.
               </p>
             </section>
 
@@ -49,7 +49,7 @@ export default function TermsPage() {
                     2.1 Proyecto de Investigación
                   </h3>
                   <p className="text-gray-700 leading-relaxed mb-4">
-                    NoVa+ es un <strong>proyecto de investigación académica</strong> desarrollado por alumnos avanzados de ingeniería en informática para su proyecto final integrador, en el marco del estudio <em>&quot;Evaluación de la Efectividad y Aceptación de un Asistente Virtual Basado en Inteligencia Artificial para la Prevención de la Adicción al Juego Online en Adolescentes&quot;</em>.
+                    Este asistente virtual es parte de un <strong>proyecto de investigación académica</strong> desarrollado por alumnos avanzados de ingeniería en informática para su proyecto final integrador, en el marco del estudio <em>&quot;Evaluación de la Efectividad y Aceptación de un Asistente Virtual Basado en Inteligencia Artificial para la Prevención de la Adicción al Juego Online en Adolescentes&quot;</em>.
                   </p>
                   <p className="text-gray-700 leading-relaxed mb-4">
                     Este sistema tiene carácter <strong>experimental y de investigación científica</strong>. Su objetivo es:
@@ -60,7 +60,7 @@ export default function TermsPage() {
                     <li>Brindar información, orientación y apoyo preventivo sobre la adicción al juego online y el uso responsable de las apuestas digitales</li>
                   </ul>
                   <p className="text-gray-700 leading-relaxed mt-4">
-                    Como proyecto en desarrollo, NoVa+ puede presentar limitaciones propias de sistemas experimentales, y su disponibilidad no está garantizada de forma indefinida.
+                    Como proyecto en desarrollo, este asistente virtual puede presentar limitaciones propias de sistemas experimentales, y su disponibilidad no está garantizada de forma indefinida.
                   </p>
                 </div>
                 <div>
@@ -91,7 +91,7 @@ export default function TermsPage() {
                     Funcionamiento y Explicabilidad del Sistema
                   </h4>
                   <p className="text-gray-700 leading-relaxed mb-2">
-                    El asistente conversacional de NoVa+ funciona mediante:
+                    El asistente conversacional funciona mediante:
                   </p>
                   <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
                     <li>
@@ -128,7 +128,7 @@ export default function TermsPage() {
                     3.1 No es un Sustituto Profesional
                   </h3>
                   <p className="text-gray-700 leading-relaxed mb-4 font-semibold">
-                    NoVa+ NO reemplaza la atención de un profesional de la salud mental, ni constituye terapia psicológica, asesoramiento médico o diagnóstico clínico.
+                    Este asistente virtual NO reemplaza la atención de un profesional de la salud mental, ni constituye terapia psicológica, asesoramiento médico o diagnóstico clínico.
                   </p>
                   <p className="text-gray-700 leading-relaxed mb-4">
                     El asistente virtual es una herramienta de apoyo, información y prevención, pero:
@@ -148,7 +148,7 @@ export default function TermsPage() {
                     3.2 Alcance Temático
                   </h3>
                   <p className="text-gray-700 leading-relaxed mb-4">
-                    El asistente de NoVa+ está específicamente diseñado para tratar temas relacionados con la prevención de adicción al juego online y apuestas digitales.
+                    El asistente está específicamente diseñado para tratar temas relacionados con la prevención de adicción al juego online y apuestas digitales.
                   </p>
                   <p className="text-gray-700 leading-relaxed">
                     <strong>El sistema NO puede ni debe ser utilizado para consultas sobre otros temas.</strong> Si introduces consultas fuera de este alcance, el asistente te redirigirá al tema central o indicará que no puede ayudarte con ese tipo de solicitudes.
@@ -159,7 +159,7 @@ export default function TermsPage() {
                     3.3 Situaciones de Emergencia
                   </h3>
                   <p className="text-gray-700 leading-relaxed mb-4 font-semibold">
-                    NoVa+ NO está diseñado para gestionar crisis o emergencias.
+                    Este asistente virtual NO está diseñado para gestionar crisis o emergencias.
                   </p>
                   <p className="text-gray-700 leading-relaxed mb-4">
                     Si te encuentras en una situación de emergencia, crisis emocional, riesgo de autolesión o cualquier situación que requiera atención inmediata:
@@ -177,7 +177,7 @@ export default function TermsPage() {
                     3.4 Posibilidad de Errores
                   </h3>
                   <p className="text-gray-700 leading-relaxed mb-4">
-                    Aunque NoVa+ ha sido desarrollado con rigor académico y supervisión profesional, <strong>el asistente puede cometer errores, proporcionar información inexacta o incompleta, o no comprender correctamente tu consulta.</strong>
+                    Aunque este asistente virtual ha sido desarrollado con rigor académico y supervisión profesional, <strong>el asistente puede cometer errores, proporcionar información inexacta o incompleta, o no comprender correctamente tu consulta.</strong>
                   </p>
                   <p className="text-gray-700 leading-relaxed mb-4">
                     Los sistemas de inteligencia artificial tienen limitaciones inherentes y no son infalibles. El funcionamiento del sistema depende de modelos de lenguaje probabilísticos que pueden presentar <strong>errores, omisiones o interpretaciones inexactas</strong>. Por ello:
@@ -202,7 +202,7 @@ export default function TermsPage() {
                     4.1 Edad Mínima
                   </h3>
                   <p className="text-gray-700 leading-relaxed mb-4">
-                    Para utilizar NoVa+ debes tener <strong>al menos 13 años de edad</strong>.
+                    Para utilizar este asistente virtual debes tener <strong>al menos 13 años de edad</strong>.
                   </p>
                   <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
                     <li><strong>Usuarios entre 13 y 17 años:</strong> Deben contar con la <strong>autorización expresa de un padre, madre o tutor legal</strong> para participar en este estudio de investigación</li>
@@ -217,7 +217,7 @@ export default function TermsPage() {
                     4.2 Consentimiento Informado
                   </h3>
                   <p className="text-gray-700 leading-relaxed mb-4">
-                    El uso de NoVa+ requiere tu consentimiento libre, informado y expreso. Este consentimiento se otorga al marcar la casilla de aceptación en el formulario de Evaluación de Hábitos de Juego antes de acceder al asistente conversacional.
+                    El uso del asistente requiere tu consentimiento libre, informado y expreso. Este consentimiento se otorga al marcar la casilla de aceptación en el formulario de Evaluación de Hábitos de Juego antes de acceder al asistente conversacional.
                   </p>
                   <p className="text-gray-700 leading-relaxed mb-4">
                     Al otorgar tu consentimiento, confirmas que:
@@ -239,7 +239,7 @@ export default function TermsPage() {
                 5. Conductas Prohibidas
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                Para garantizar el correcto funcionamiento de NoVa+ y proteger la integridad de la investigación, quedan <strong>expresamente prohibidas</strong> las siguientes conductas:
+                Para garantizar el correcto funcionamiento y proteger la integridad de la investigación, quedan <strong>expresamente prohibidas</strong> las siguientes conductas:
               </p>
               <div className="space-y-4">
                 <div>
@@ -291,7 +291,7 @@ export default function TermsPage() {
                 6. Derechos de Propiedad Intelectual
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                Todos los contenidos de NoVa+, incluyendo pero no limitado a:
+                Todos los contenidos del asistente virtual, incluyendo pero no limitado a:
               </p>
               <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
                 <li>Software y código fuente</li>
@@ -307,7 +307,7 @@ export default function TermsPage() {
                 Los componentes tecnológicos provistos por terceros (como Google Gemini o Vercel) mantienen sus respectivos derechos de propiedad.
               </p>
               <p className="text-gray-700 leading-relaxed mt-4">
-                Queda prohibida la reproducción, distribución, modificación o cualquier forma de explotación del contenido de NoVa+ sin autorización expresa y por escrito del equipo de investigación y desarrollo. El contenido generado no puede ser reproducido ni reutilizado fuera del ámbito educativo o de investigación sin autorización.
+                Queda prohibida la reproducción, distribución, modificación o cualquier forma de explotación del contenido sin autorización expresa y por escrito del equipo de investigación y desarrollo. El contenido generado no puede ser reproducido ni reutilizado fuera del ámbito educativo o de investigación sin autorización.
               </p>
             </section>
 
@@ -322,13 +322,13 @@ export default function TermsPage() {
                     7.1 Uso Bajo Tu Propia Responsabilidad
                   </h3>
                   <p className="text-gray-700 leading-relaxed mb-4">
-                    El uso de NoVa+ es <strong>completamente voluntario y bajo tu propia responsabilidad</strong>. El sistema se ofrece <strong>&quot;tal cual está&quot;</strong>, con fines académicos y de investigación, sin garantía de disponibilidad permanente ni resultados específicos.
+                    El uso del asistente virtual es <strong>completamente voluntario y bajo tu propia responsabilidad</strong>. El sistema se ofrece <strong>&quot;tal cual está&quot;</strong>, con fines académicos y de investigación, sin garantía de disponibilidad permanente ni resultados específicos.
                   </p>
                   <p className="text-gray-700 leading-relaxed mb-4">
-                    Al utilizar este servicio, reconoces y aceptas que el equipo de NoVa+, su personal, investigadores, colaboradores y la Universidad Nacional de San Luis <strong>no serán responsables</strong> por cualquier daño, perjuicio, pérdida o inconveniente derivado de:
+                    Al utilizar este servicio, reconoces y aceptas que el equipo de desarrollo, su personal, investigadores, colaboradores y la Universidad Nacional de San Luis <strong>no serán responsables</strong> por cualquier daño, perjuicio, pérdida o inconveniente derivado de:
                   </p>
                   <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
-                    <li>El uso o la imposibilidad de uso de NoVa+</li>
+                    <li>El uso o la imposibilidad de uso del asistente virtual</li>
                     <li>Las decisiones o acciones que adoptes en base a la información brindada por el Asistente</li>
                     <li>Errores, inexactitudes, omisiones o interpretaciones inexactas en las respuestas del asistente</li>
                     <li>Decisiones tomadas basándose en la información proporcionada por el sistema</li>
@@ -343,7 +343,7 @@ export default function TermsPage() {
                     7.2 Servicios de Terceros
                   </h3>
                   <p className="text-gray-700 leading-relaxed">
-                    NoVa+ utiliza servicios de terceros (Vercel para hosting, Neon para base de datos, API de Gemini para el asistente conversacional). El equipo no se hace responsable por interrupciones, errores o problemas de privacidad derivados de estos servicios externos, aunque se han seleccionado proveedores confiables y se implementan medidas de seguridad adecuadas.
+                    Se utilizan servicios de terceros (Vercel para hosting, Neon para base de datos, API de Gemini para el asistente conversacional). El equipo no se hace responsable por interrupciones, errores o problemas de privacidad derivados de estos servicios externos, aunque se han seleccionado proveedores confiables y se implementan medidas de seguridad adecuadas.
                   </p>
                 </div>
                 <div>
@@ -371,7 +371,7 @@ export default function TermsPage() {
                 8. Disponibilidad del Servicio
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                NoVa+ se proporciona &quot;tal cual está&quot; sin garantías de disponibilidad continua. El Proyecto no garantiza la <strong>disponibilidad continua</strong> del servicio ni la ausencia de interrupciones, fallas técnicas o demoras.
+                Este asistente virtual se proporciona &quot;tal cual está&quot; sin garantías de disponibilidad continua. El Proyecto no garantiza la <strong>disponibilidad continua</strong> del servicio ni la ausencia de interrupciones, fallas técnicas o demoras.
               </p>
               <p className="text-gray-700 leading-relaxed mb-4">
                 Nos reservamos el derecho de:
@@ -392,7 +392,7 @@ export default function TermsPage() {
                 9. Modificaciones a los Términos y Condiciones
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                Estos Términos y Condiciones <strong>no serán modificados durante la duración del proyecto de investigación</strong>. La versión actual es la que permanecerá vigente durante toda la operación de NoVa+.
+                Estos Términos y Condiciones <strong>no serán modificados durante la duración del proyecto de investigación</strong>. La versión actual es la que permanecerá vigente durante toda la operación del asistente virtual.
               </p>
               <p className="text-gray-700 leading-relaxed">
                 Si por razones excepcionales fuera necesario realizar modificaciones, se notificarán claramente en la plataforma y se solicitará la aceptación de los nuevos términos antes de continuar utilizando la aplicación.
@@ -408,7 +408,7 @@ export default function TermsPage() {
                 Estos Términos y Condiciones se rigen por las leyes de la <strong>República Argentina</strong>.
               </p>
               <p className="text-gray-700 leading-relaxed">
-                Cualquier controversia, conflicto o reclamación derivada de estos Términos y Condiciones o del uso de NoVa+ será sometida a la jurisdicción exclusiva de los <strong>tribunales ordinarios de la ciudad de San Luis, Provincia de San Luis, Argentina</strong>, renunciando las partes a cualquier otro fuero o jurisdicción que pudiera corresponder.
+                Cualquier controversia, conflicto o reclamación derivada de estos Términos y Condiciones o del uso del asistente virtual será sometida a la jurisdicción exclusiva de los <strong>tribunales ordinarios de la ciudad de San Luis, Provincia de San Luis, Argentina</strong>, renunciando las partes a cualquier otro fuero o jurisdicción que pudiera corresponder.
               </p>
             </section>
 
@@ -456,7 +456,7 @@ export default function TermsPage() {
             {/* Aceptación */}
             <section className="bg-blue-50 p-6 rounded-lg border border-blue-200">
               <p className="text-blue-800 leading-relaxed text-center italic">
-                Al utilizar NoVa+, confirmas que has leído, comprendido y aceptado estos Términos y Condiciones en su totalidad.
+                Al utilizar este asistente virtual, confirmas que has leído, comprendido y aceptado estos Términos y Condiciones en su totalidad.
               </p>
             </section>
           </div>

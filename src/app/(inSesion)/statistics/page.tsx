@@ -5,7 +5,7 @@ import {redirect} from "next/navigation";
 
 export const metadata: Metadata = {
   title: 'Estadísticas',
-  description: 'Panel de estadísticas y análisis de conversaciones con NoVa+. Visualiza métricas, patrones de uso y resultados de la investigación.',
+  description: 'Panel de estadísticas y análisis de conversaciones. Visualiza métricas, patrones de uso y resultados de la investigación.',
   robots: {
     index: false,
     follow: false,

@@ -5,7 +5,7 @@ import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: 'Dashboard',
-  description: 'Panel de control para especialistas de NoVa+. Accede a estadísticas, gestión de sesiones y gestión de bibliografía.',
+  description: 'Panel de control para especialista. Accede a estadísticas, gestión de sesiones y gestión de bibliografía.',
   robots: {
     index: false,
     follow: false,
@@ -31,7 +31,7 @@ export default async function DashboardPage() {
             Bienvenido, {session.user.name}
           </h1>
           <p className="text-blue-100 text-lg">
-            Panel de Control NoVa+ - {session.user.role}
+            Panel de Control - {session.user.role}
           </p>
         </div>
       </div>
@@ -146,7 +146,7 @@ export default async function DashboardPage() {
                   </svg>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900">Chat NoVa+</h4>
+                  <h4 className="font-semibold text-gray-900">Chat asistente virtual</h4>
                   <p className="text-sm text-gray-600">Iniciar conversación</p>
                 </div>
               </Link>
