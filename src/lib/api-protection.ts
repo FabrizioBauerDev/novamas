@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export function verifyOrigin(request: NextRequest): NextResponse | null {
   const allowedOrigins = [
     'https://novamas.vercel.app',
+    'https://asistenteprevencion.vercel.app',
     'http://localhost:3000',
     'https://localhost:3000',
   ];
